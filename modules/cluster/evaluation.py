@@ -58,9 +58,9 @@ def clustering(
     models = cluster_models_to_evaluate(models=models_to_be_evaluated)
     for name, model in models:
         for n_cluster in range(n_cluster_min, n_cluster_max + 1):
-            if model in MODELS_WITH_N_COMPONENTS:
+            if name in MODELS_WITH_N_COMPONENTS:
                 model.set_params(**{"n_components": n_cluster})
-            elif model in MODELS_WITH_N_CLUSTER:
+            elif name in MODELS_WITH_N_CLUSTER:
                 model.set_params(**{"n_clusters": n_cluster})
             cluster_labels = model.fit_predict(data_prep)  # (n_cluster)
             list_sil.append(silhouette_score(data_prep, cluster_labels))
