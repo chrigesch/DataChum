@@ -2,7 +2,13 @@
 from assets.strings import in_cluster as string
 
 # Import the required libraries
-from sklearn.cluster import Birch, AgglomerativeClustering, DBSCAN, KMeans
+from sklearn.cluster import (
+    Birch,
+    AgglomerativeClustering,
+    DBSCAN,
+    KMeans,
+    SpectralClustering,
+)
 from sklearn.mixture import BayesianGaussianMixture, GaussianMixture
 
 # Import libraries for debugging
@@ -24,7 +30,8 @@ AVAILABLE_MODELS_CLUSTER = [
     "GaussianMixture_spherical",
     "GaussianMixture_tied",
     "KMeans",
-    "SpectralClustering",
+    "SpectralClustering_nearest_neighbors",
+    "SpectralClustering_rbf",
 ]
 
 MODELS_WITH_N_CLUSTER = [
@@ -187,6 +194,30 @@ def cluster_models_to_evaluate(models: list):
                     KMeans(
                         random_state=123,
                         n_init="auto",
+                    ),
+                )
+            )
+        if model == "SpectralClustering_nearest_neighbors":
+            models_to_evaluate.append(
+                (
+                    "SpectralClustering_nearest_neighbors",
+                    SpectralClustering(
+                        affinity="nearest_neighbors",
+                        random_state=123,
+                        n_jobs=-1,
+                        verbose=False,
+                    ),
+                )
+            )
+        if model == "SpectralClustering_rbf":
+            models_to_evaluate.append(
+                (
+                    "SpectralClustering_rbf",
+                    SpectralClustering(
+                        affinity="rbf",
+                        random_state=123,
+                        n_jobs=-1,
+                        verbose=False,
                     ),
                 )
             )
