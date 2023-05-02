@@ -2,7 +2,7 @@
 from assets.strings import in_cluster as string
 
 # Import the required libraries
-from sklearn.cluster import Birch, AgglomerativeClustering
+from sklearn.cluster import Birch, AgglomerativeClustering, DBSCAN
 from sklearn.mixture import BayesianGaussianMixture
 
 # Import libraries for debugging
@@ -122,4 +122,6 @@ def cluster_models_to_evaluate(models: list):
             )
         if model == "BIRCH":
             models_to_evaluate.append(("BIRCH", Birch()))
+        if model == "DBSCAN":
+            models_to_evaluate.append(("DBSCAN", DBSCAN()))
     return models_to_evaluate
