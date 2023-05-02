@@ -2,7 +2,7 @@
 from assets.strings import in_cluster as string
 
 # Import the required libraries
-from sklearn.cluster import Birch, AgglomerativeClustering, DBSCAN
+from sklearn.cluster import Birch, AgglomerativeClustering, DBSCAN, KMeans
 from sklearn.mixture import BayesianGaussianMixture, GaussianMixture
 
 # Import libraries for debugging
@@ -178,6 +178,16 @@ def cluster_models_to_evaluate(models: list):
                     GaussianMixture(
                         covariance_type="tied",
                         random_state=123,
+                    ),
+                )
+            )
+        if model == "KMeans":
+            models_to_evaluate.append(
+                (
+                    "KMeans",
+                    KMeans(
+                        random_state=123,
+                        n_init="auto",
                     ),
                 )
             )
