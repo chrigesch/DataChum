@@ -144,7 +144,7 @@ def cluster_models_to_evaluate(models: list):
             models_to_evaluate.append(
                 (
                     "DBSCAN",
-                    DBSCAN(),
+                    DBSCAN(n_jobs=-1),
                 )
             )
         if model == "GaussianMixture_diag":
