@@ -45,7 +45,6 @@ MODELS_WITH_N_COMPONENTS = [
     "GaussianMixture_full",
     "GaussianMixture_spherical",
     "GaussianMixture_tied",
-    "KMeans",
 ]
 
 
