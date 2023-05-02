@@ -193,7 +193,6 @@ def cluster_models_to_evaluate(models: list):
                     "KMeans",
                     KMeans(
                         random_state=123,
-                        n_init="auto",
                     ),
                 )
             )
