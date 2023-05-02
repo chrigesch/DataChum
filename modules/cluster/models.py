@@ -3,7 +3,7 @@ from assets.strings import in_cluster as string
 
 # Import the required libraries
 from sklearn.cluster import Birch, AgglomerativeClustering, DBSCAN
-from sklearn.mixture import BayesianGaussianMixture
+from sklearn.mixture import BayesianGaussianMixture, GaussianMixture
 
 # Import libraries for debugging
 
@@ -19,7 +19,10 @@ AVAILABLE_MODELS_CLUSTER = [
     "BayesianGaussianMixture_tied",
     "BIRCH",
     "DBSCAN",
-    "GaussianMixtureModels",
+    "GaussianMixture_diag",
+    "GaussianMixture_full",
+    "GaussianMixture_spherical",
+    "GaussianMixture_tied",
     "KMeans",
     "SpectralClustering",
 ]
@@ -38,7 +41,11 @@ MODELS_WITH_N_COMPONENTS = [
     "BayesianGaussianMixture_full",
     "BayesianGaussianMixture_spherical",
     "BayesianGaussianMixture_tied",
-    "GaussianMixtureModels",
+    "GaussianMixture_diag",
+    "GaussianMixture_full",
+    "GaussianMixture_spherical",
+    "GaussianMixture_tied",
+    "KMeans",
 ]
 
 
@@ -121,7 +128,57 @@ def cluster_models_to_evaluate(models: list):
                 )
             )
         if model == "BIRCH":
-            models_to_evaluate.append(("BIRCH", Birch()))
+            models_to_evaluate.append(
+                (
+                    "BIRCH",
+                    Birch(),
+                )
+            )
         if model == "DBSCAN":
-            models_to_evaluate.append(("DBSCAN", DBSCAN()))
+            models_to_evaluate.append(
+                (
+                    "DBSCAN",
+                    DBSCAN(),
+                )
+            )
+        if model == "GaussianMixture_diag":
+            models_to_evaluate.append(
+                (
+                    "GaussianMixture_diag",
+                    GaussianMixture(
+                        covariance_type="diag",
+                        random_state=123,
+                    ),
+                )
+            )
+        if model == "GaussianMixture_full":
+            models_to_evaluate.append(
+                (
+                    "GaussianMixture_full",
+                    GaussianMixture(
+                        covariance_type="full",
+                        random_state=123,
+                    ),
+                )
+            )
+        if model == "GaussianMixture_spherical":
+            models_to_evaluate.append(
+                (
+                    "GaussianMixture_spherical",
+                    GaussianMixture(
+                        covariance_type="spherical",
+                        random_state=123,
+                    ),
+                )
+            )
+        if model == "GaussianMixture_tied":
+            models_to_evaluate.append(
+                (
+                    "GaussianMixture_tied",
+                    GaussianMixture(
+                        covariance_type="tied",
+                        random_state=123,
+                    ),
+                )
+            )
     return models_to_evaluate
