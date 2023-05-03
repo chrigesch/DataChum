@@ -28,7 +28,7 @@ from modules.utils.preprocessing import (
 # 'boruta': (Kumar & Shaikh, 2017; Speiser et al.,2019)
 # 'lasso', 'l1_svm': (Sun et al., 2019)
 
-AVAILABLE_FEATURE_SELECTION_METHODS = ["boruta", "lasso_cv", "l1_svm", None]
+AVAILABLE_FEATURE_SELECTION_METHODS = ("boruta", "lasso_cv", "l1_svm", None)
 
 
 def add_feature_selection_to_pipeline(pipeline, operation, method):
