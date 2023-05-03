@@ -12,14 +12,14 @@ import streamlit as st
 # Import libraries for debugging
 from modules.utils.load_and_save_data import read_csv
 
-AVAILABLE_TEMPLATES = [
+AVAILABLE_TEMPLATES = (
     "gridon",
     "plotly",
     "plotly_dark",
     "plotly_white",
     "xgridoff",
     "ygridoff",
-]
+)
 
 
 # Univariate analysis
