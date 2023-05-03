@@ -28,17 +28,17 @@ from sklearn.preprocessing import (
 )
 from sklearn.compose import ColumnTransformer
 
-AVAILABLE_IMPUTATION_NUMERIC = [
+AVAILABLE_IMPUTATION_NUMERIC = (
     "mean",
     "median",
     "most_frequent",
     "mice_forest",
     "miss_forest",
     None,
-]
-AVAILABLE_SCALER = ["maxabs", "minmax", "robust", "yeo_johnson", "zscore", None]
-AVAILABLE_IMPUTATION_CATEGORICAL = ["most_frequent", "mice_forest", "miss_forest", None]
-AVAILABLE_ONE_HOT_ENCODER = [True, False]
+)
+AVAILABLE_SCALER = ("maxabs", "minmax", "robust", "yeo_johnson", "zscore", None)
+AVAILABLE_IMPUTATION_CATEGORICAL = ("most_frequent", "mice_forest", "miss_forest", None)
+AVAILABLE_ONE_HOT_ENCODER = (True, False)
 
 
 def data_preprocessing(
