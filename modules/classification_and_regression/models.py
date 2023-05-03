@@ -59,7 +59,7 @@ from optuna.distributions import (  # noqa: E402
     CategoricalDistribution,
 )
 
-AVAILABLE_MODELS_CLASSIFICATION = [
+AVAILABLE_MODELS_CLASSIFICATION = (
     "GaussianNaiveBayes",
     "LogisticRegression",
     "Ridge",
@@ -74,8 +74,8 @@ AVAILABLE_MODELS_CLASSIFICATION = [
     "LightGBM",
     "XGB",
     "TensorFlow",
-]
-AVAILABLE_MODELS_REGRESSION = [
+)
+AVAILABLE_MODELS_REGRESSION = (
     "Bayesian_Ridge",
     "Linear_Regression",
     "SVM_L",
@@ -88,7 +88,7 @@ AVAILABLE_MODELS_REGRESSION = [
     "LightGBM",
     "XGB",
     "TensorFlow",
-]
+)
 
 
 def classification_models_to_tune(

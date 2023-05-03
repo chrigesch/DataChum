@@ -14,7 +14,7 @@ from sklearn.mixture import BayesianGaussianMixture, GaussianMixture
 # Import libraries for debugging
 
 
-AVAILABLE_MODELS_CLUSTER = [
+AVAILABLE_MODELS_CLUSTER = (
     "AgglomerativeClustering_average",
     "AgglomerativeClustering_complete",
     "AgglomerativeClustering_single",
@@ -32,9 +32,9 @@ AVAILABLE_MODELS_CLUSTER = [
     "KMeans",
     "SpectralClustering_nearest_neighbors",
     "SpectralClustering_rbf",
-]
+)
 
-MODELS_WITH_N_CLUSTER = [
+MODELS_WITH_N_CLUSTER = (
     "AgglomerativeClustering_average",
     "AgglomerativeClustering_complete",
     "AgglomerativeClustering_single",
@@ -42,8 +42,8 @@ MODELS_WITH_N_CLUSTER = [
     "BIRCH",
     "KMeans",
     "SpectralClustering",
-]
-MODELS_WITH_N_COMPONENTS = [
+)
+MODELS_WITH_N_COMPONENTS = (
     "BayesianGaussianMixture_diag",
     "BayesianGaussianMixture_full",
     "BayesianGaussianMixture_spherical",
@@ -52,7 +52,7 @@ MODELS_WITH_N_COMPONENTS = [
     "GaussianMixture_full",
     "GaussianMixture_spherical",
     "GaussianMixture_tied",
-]
+)
 
 
 def cluster_models_to_evaluate(models: list):
