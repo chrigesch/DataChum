@@ -21,7 +21,7 @@ AVAILABLE_COLORS_DIVERGING = {
     "PurpleYellowLight": ["rebeccapurple", "slateblue", "white", "khaki", "yellow"],
 }
 
-AVAILABLE_COLORS_SEQUENTIAL = [
+AVAILABLE_COLORS_SEQUENTIAL = (
     "hot",
     "hsv",
     "icefire",
@@ -30,7 +30,7 @@ AVAILABLE_COLORS_SEQUENTIAL = [
     "rainbow",
     "twilight",
     "viridis",
-]
+)
 
 
 # Extract a list of colors for later use with each visualization
