@@ -46,9 +46,9 @@ from sklearn.preprocessing import LabelEncoder
 
 pd.options.display.float_format = "{:.3f}".format
 
-AVAILABLE_OPERATIONS = ["classification", "regression"]
-AVAILABLE_SCORES_REGRESSION = ["MAE", "MSE", "RMSE", "RMSLE", "R2", "MAPE"]
-AVAILABLE_SCORES_CLASSIFICATION = [
+AVAILABLE_OPERATIONS = ("classification", "regression")
+AVAILABLE_SCORES_REGRESSION = ("MAE", "MSE", "RMSE", "RMSLE", "R2", "MAPE")
+AVAILABLE_SCORES_CLASSIFICATION = (
     "Accuracy",
     "AUC",
     "Recall",
@@ -56,7 +56,7 @@ AVAILABLE_SCORES_CLASSIFICATION = [
     "F1",
     "Kappa",
     "MCC",
-]
+)
 AVAILABLE_NUMBER_OF_INNER_CV_FOLDS = list(range(5, 11))
 
 
