@@ -79,6 +79,26 @@ def clustering(
     return results_df
 
 
+######################################
+# Private Methods / Helper functions #
+######################################
+
+
+def _compute_scores(
+    data: pd.DataFrame,
+    model_name: str,
+    cluster_labels: iter,
+    n_cluster: int,
+):
+    results_dict = {}
+    results_dict["model"] = model_name
+    results_dict["n_clusters"] = n_cluster
+    results_dict["Calinski-Harabasz"] = calinski_harabasz_score(data, cluster_labels)
+    results_dict["Davies_Bouldin"] = davies_bouldin_score(data, cluster_labels)
+    results_dict["Silhouette"] = silhouette_score(data, cluster_labels)
+    return results_dict
+
+
 # https://github.com/smazzanti/are_you_still_using_elbow_method/blob/main/are-you-still-using-elbow-method.ipynb
 def bic_score(X: np.ndarray, labels: np.array):
     """
