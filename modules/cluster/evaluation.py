@@ -19,16 +19,17 @@ from sklearn.metrics import (
     davies_bouldin_score,
     silhouette_score,
 )
-
+from sklearn.utils import resample
 
 # Import libraries for debugging
 
 
 def clustering(
     data: iter,
-    models_to_be_evaluated,
+    models_to_be_evaluated: list,
     n_cluster_min: int,
     n_cluster_max: int,
+    n_bootstrap_samples: int,
 ):
     cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
     cols_cat = data.select_dtypes(
@@ -49,34 +50,91 @@ def clustering(
     labels = _get_feature_names_after_preprocessing(pipeline, includes_model=False)
     # Convert output to Dataframe and add columns names
     data_prep = pd.DataFrame(data_prep, columns=labels, index=data.index)
-    list_sil = []
-    list_ch = []
-    list_db = []
-    list_bic = []
-    list_model = []
-    list_n_cluster = []
+    # Initiate list to collect the results
+    results_list = []
+    # Get list of models
     models = cluster_models_to_evaluate(models=models_to_be_evaluated)
     for name, model in models:
-        for n_cluster in range(n_cluster_min, n_cluster_max + 1):
-            if name in MODELS_WITH_N_COMPONENTS:
-                model.set_params(**{"n_components": n_cluster})
-            elif name in MODELS_WITH_N_CLUSTER:
-                model.set_params(**{"n_clusters": n_cluster})
-            cluster_labels = model.fit_predict(data_prep)  # (n_cluster)
-            list_sil.append(silhouette_score(data_prep, cluster_labels))
-            list_ch.append(calinski_harabasz_score(data_prep, cluster_labels))
-            list_db.append(davies_bouldin_score(data_prep, cluster_labels))
-            list_bic.append(bic_score(data_prep.to_numpy(), cluster_labels))
-            list_model.append(name)
-            list_n_cluster.append(n_cluster)
-    results_df = pd.DataFrame()
-    results_df["model"] = list_model
-    results_df["n_clusters"] = list_n_cluster
-    results_df["BIC"] = list_bic
-    results_df["Calinski-Harabasz"] = list_ch
-    results_df["Davies_Bouldin"] = list_db
-    results_df["Silhouette"] = list_sil
+        if (name == "DBSCAN") & (n_bootstrap_samples == 0):
+            # Fit the model, compute and append the scores
+            cluster_labels = model.fit_predict(data_prep)
+            results_dict = _compute_scores(
+                data=data_prep,
+                model_name=name,
+                cluster_labels=cluster_labels,
+                n_cluster=len(np.unique(model.labels_)),
+            )
+            results_list.append(results_dict)
+        elif (name == "DBSCAN") & (n_bootstrap_samples > 0):
+            for n_bootstrap in range(1, n_bootstrap_samples + 1):
+                # Create a resampled DataFrame
+                data_bootstrap = resample(
+                    data_prep, replace=True, random_state=n_bootstrap
+                )
+                # Fit the model, compute and append the scores
+                cluster_labels = model.fit_predict(data_bootstrap)
+                results_dict = _compute_scores(
+                    data=data_bootstrap,
+                    model_name=name,
+                    cluster_labels=cluster_labels,
+                    n_cluster=len(np.unique(model.labels_)),
+                )
+                results_list.append(results_dict)
+        else:
+            for n_cluster in range(n_cluster_min, n_cluster_max + 1):
+                if name in MODELS_WITH_N_COMPONENTS:
+                    model.set_params(**{"n_components": n_cluster})
+                elif name in MODELS_WITH_N_CLUSTER:
+                    model.set_params(**{"n_clusters": n_cluster})
+                # Compute the scores
+                if n_bootstrap_samples == 0:
+                    # Fit the model and append the scores
+                    cluster_labels = model.fit_predict(data_prep)
+                    results_dict = _compute_scores(
+                        data=data_prep,
+                        model_name=name,
+                        cluster_labels=cluster_labels,
+                        n_cluster=n_cluster,
+                    )
+                    results_list.append(results_dict)
+                else:
+                    for n_bootstrap in range(1, n_bootstrap_samples + 1):
+                        # Create a resampled DataFrame
+                        data_bootstrap = resample(
+                            data_prep, replace=True, random_state=n_bootstrap
+                        )
+                        # Fit the model and append the scores
+                        cluster_labels = model.fit_predict(data_bootstrap)
+                        results_dict = _compute_scores(
+                            data=data_bootstrap,
+                            model_name=name,
+                            cluster_labels=cluster_labels,
+                            n_cluster=n_cluster,
+                        )
+                        results_list.append(results_dict)
+    # Convert the list of dictionaries to DataFrame
+    results_df = pd.DataFrame.from_dict(results_list)
     return results_df
+
+
+######################################
+# Private Methods / Helper functions #
+######################################
+
+
+def _compute_scores(
+    data: pd.DataFrame,
+    model_name: str,
+    cluster_labels: iter,
+    n_cluster: int,
+):
+    results_dict = {}
+    results_dict["model"] = model_name
+    results_dict["n_clusters"] = n_cluster
+    results_dict["Calinski-Harabasz"] = calinski_harabasz_score(data, cluster_labels)
+    results_dict["Davies_Bouldin"] = davies_bouldin_score(data, cluster_labels)
+    results_dict["Silhouette"] = silhouette_score(data, cluster_labels)
+    return results_dict
 
 
 # https://github.com/smazzanti/are_you_still_using_elbow_method/blob/main/are-you-still-using-elbow-method.ipynb
