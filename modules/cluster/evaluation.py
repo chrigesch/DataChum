@@ -133,9 +133,10 @@ def clustering(
                         # in the Silhouette score
                         if n_bootstrap % 50 == 0:
                             results_temp = pd.DataFrame.from_dict(results_list)
-                            coefficients_of_variation_temp = np.std(
-                                results_temp["Silhouette"]
-                            ) / np.mean(results_temp["Silhouette"])
+                            coefficients_of_variation_temp = abs(
+                                np.std(results_temp["Silhouette"])
+                                / np.mean(results_temp["Silhouette"])
+                            )
                             coefficients_of_variation_list.append(
                                 coefficients_of_variation_temp
                             )
