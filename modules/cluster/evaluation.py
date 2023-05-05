@@ -137,6 +137,33 @@ def _compute_scores(
     return results_dict
 
 
+def _monitor_convergence(metric_list: list, n_consecutive: int, maximize=True):
+    """
+    Check if the last evaluation metric in a list does not improve for n consecutive attempts.
+
+    Args:
+        metric_list (list): List of evaluation metrics.
+        n_consecutive (int): Number of consecutive attempts that the evaluation metric does not improve.
+        maximize (bool): If True, assume the metric is being maximized.
+            If False, assume the metric is being minimized.
+
+    Returns:
+        bool: True if the last evaluation metric has not improved for n consecutive attempts, False otherwise.
+    """
+    if len(metric_list) < n_consecutive:
+        return False
+
+    for i in range(1, n_consecutive + 1):
+        if maximize:
+            if metric_list[-i] > metric_list[-i - 1]:
+                return False
+        else:
+            if metric_list[-i] < metric_list[-i - 1]:
+                return False
+
+    return True
+
+
 # https://github.com/smazzanti/are_you_still_using_elbow_method/blob/main/are-you-still-using-elbow-method.ipynb
 def bic_score(X: np.ndarray, labels: np.array):
     """
