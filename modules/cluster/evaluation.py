@@ -98,6 +98,7 @@ def clustering(
                     )
                     results_list.append(results_dict)
                 else:
+                    coefficients_of_variation_list = []
                     for n_bootstrap in range(1, n_bootstrap_samples + 1):
                         # Create a resampled DataFrame
                         data_bootstrap = resample(
@@ -112,6 +113,20 @@ def clustering(
                             n_cluster=n_cluster,
                         )
                         results_list.append(results_dict)
+                        # Every 50 bootstrap replicates, monitor convergence and stop if there is no improvement
+                        # in the Silhouette score
+                        if n_bootstrap % 50 == 0:
+                            results_temp = pd.DataFrame.from_dict(results_list)
+                            coefficients_of_variation_temp = np.std(
+                                results_temp["Silhouette"]
+                            ) / np.mean(results_temp["Silhouette"])
+                            coefficients_of_variation_list.append(
+                                coefficients_of_variation_temp
+                            )
+                            if _monitor_convergence(
+                                coefficients_of_variation_list, 3, False
+                            ):
+                                break
     # Convert the list of dictionaries to DataFrame
     results_df = pd.DataFrame.from_dict(results_list)
     return results_df
