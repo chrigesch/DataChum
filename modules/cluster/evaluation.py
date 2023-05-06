@@ -1,4 +1,5 @@
 # Import moduls from local directories
+from modules.classification_and_regression.models import classification_models_to_tune
 from modules.cluster.models import (
     cluster_models_to_evaluate,
     MODELS_WITH_N_CLUSTER,
@@ -17,8 +18,10 @@ import pandas as pd
 from sklearn.metrics import (
     calinski_harabasz_score,
     davies_bouldin_score,
+    fowlkes_mallows_score,
     silhouette_score,
 )
+from sklearn.model_selection import RepeatedKFold
 from sklearn.utils import resample
 
 # Import libraries for debugging
@@ -26,6 +29,9 @@ from sklearn.utils import resample
 
 def clustering(
     data: iter,
+    imputation_numeric: str,
+    imputation_categorical: str,
+    scaler: str,
     models_to_be_evaluated: list,
     n_cluster_min: int,
     n_cluster_max: int,
@@ -39,9 +45,9 @@ def clustering(
     pipeline = data_preprocessing(
         cols_num=cols_num,
         cols_cat=cols_cat,
-        imputation_numeric="mean",
-        scaler="zscore",
-        imputation_categorical="most_frequent",
+        imputation_numeric=imputation_numeric,
+        scaler=scaler,
+        imputation_categorical=imputation_categorical,
         one_hot_encoding=True,
     )
 
@@ -149,6 +155,102 @@ def clustering(
     return results_df
 
 
+# Prediction-based resampling method:
+# Dudoit, S., & Fridlyand, J. (2002). A prediction-based resampling method for estimating the number
+# of clusters in a dataset. Genome Biology, 3(7), 1–21.
+def clustering_cross_validation(
+    data: iter,
+    imputation_numeric: str,
+    imputation_categorical: str,
+    scaler: str,
+    cluster_models: list,
+    n_cluster_min: int,
+    n_cluster_max: int,
+    classification_model: list,
+    inner_cv_folds: int,
+    inner_cv_rep: int,
+):
+    # Remove data duplicates while retaining the first one
+    data = data.drop_duplicates(keep="first", inplace=False)
+    # Get categorical and numerical column names
+    cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
+    cols_cat = data.select_dtypes(
+        include=["object", "category", "bool"]
+    ).columns.to_list()
+    # Initiate list to collect the results
+    results_list = []
+    # Get list of models
+    cluster_models_list = cluster_models_to_evaluate(models=cluster_models)
+    for name_cluster_model, cluster_model in cluster_models_list:
+        for n_cluster in range(n_cluster_min, n_cluster_max + 1):
+            if name_cluster_model in MODELS_WITH_N_COMPONENTS:
+                cluster_model.set_params(**{"n_components": n_cluster})
+            elif name_cluster_model in MODELS_WITH_N_CLUSTER:
+                cluster_model.set_params(**{"n_clusters": n_cluster})
+
+            # Compute baseline prediction strength
+            # Instantiante an cross-validation instance
+            inner_cv_object = RepeatedKFold(
+                n_splits=inner_cv_folds,
+                n_repeats=inner_cv_rep,
+                random_state=123,
+            )
+            # Start inner loop for cross-validation
+            for counter, (train_index, test_index) in enumerate(
+                inner_cv_object.split(data),
+                start=1,
+            ):
+                # Split training and testing data
+                X_train, X_val = (
+                    data.loc[data.index[train_index]],
+                    data.loc[data.index[test_index]],
+                )
+                # Create pipeline for data preparation
+                pipeline = data_preprocessing(
+                    cols_num=cols_num,
+                    cols_cat=cols_cat,
+                    imputation_numeric=imputation_numeric,
+                    scaler=scaler,
+                    imputation_categorical=imputation_categorical,
+                    one_hot_encoding=True,
+                )
+                # Prepare data
+                X_train_prep = pipeline.fit_transform(X_train)
+                X_val_prep = pipeline.transform(X_val)
+                # Fit a cluster model on the train data and make predictions for it
+                y_train = cluster_model.fit_predict(X_train_prep)
+                # Fit a cluster model on the validation data and make predictions for it
+                y_val = cluster_model.fit_predict(X_val_prep)
+                # Fit the prediction model on the "complete" train data
+                prediction_model = classification_models_to_tune(
+                    models=classification_model,
+                    cv_with_pipeline=False,
+                    n_rows=X_train_prep.shape[0],
+                    n_cols=X_train_prep.shape[1],
+                    inner_cv_folds=inner_cv_folds,
+                )[0][2]
+                prediction_model.fit(X_train_prep, y_train)
+                # Use the fitted prediction model to compute predictions for validation data
+                y_pred = prediction_model.predict(X_val_prep)
+                # Compute prediction strength
+                fowlkes_mallows = fowlkes_mallows_score(y_val, y_pred)
+                # Append all scores to results
+                results_dict = _compute_scores(
+                    data=X_train_prep,
+                    model_name=name_cluster_model,
+                    cluster_labels=y_train,
+                    n_cluster=n_cluster,
+                )
+                results_dict["Fowlkes-Mallows"] = fowlkes_mallows
+                results_list.append(results_dict)
+
+            print("Finished", name_cluster_model, "- n_cluster:", n_cluster)
+
+    # Convert the list of dictionaries to DataFrame
+    all_results_cv = pd.DataFrame.from_dict(results_list)
+    return all_results_cv
+
+
 ######################################
 # Private Methods / Helper functions #
 ######################################
@@ -164,7 +266,7 @@ def _compute_scores(
     results_dict["model"] = model_name
     results_dict["n_clusters"] = n_cluster
     results_dict["Calinski-Harabasz"] = calinski_harabasz_score(data, cluster_labels)
-    results_dict["Davies_Bouldin"] = davies_bouldin_score(data, cluster_labels)
+    results_dict["Davies-Bouldin"] = davies_bouldin_score(data, cluster_labels)
     results_dict["Silhouette"] = silhouette_score(data, cluster_labels)
     return results_dict
 
