@@ -164,7 +164,7 @@ def _compute_scores(
     results_dict["model"] = model_name
     results_dict["n_clusters"] = n_cluster
     results_dict["Calinski-Harabasz"] = calinski_harabasz_score(data, cluster_labels)
-    results_dict["Davies_Bouldin"] = davies_bouldin_score(data, cluster_labels)
+    results_dict["Davies-Bouldin"] = davies_bouldin_score(data, cluster_labels)
     results_dict["Silhouette"] = silhouette_score(data, cluster_labels)
     return results_dict
 
