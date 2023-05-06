@@ -41,6 +41,7 @@ MODELS_WITH_N_CLUSTER = [
     "AgglomerativeClustering_ward",
     "BIRCH",
     "KMeans",
+    "SpectralClustering_nearest_neighbors",
     "SpectralClustering_rbf",
 ]
 MODELS_WITH_N_COMPONENTS = [
