@@ -26,6 +26,9 @@ from sklearn.utils import resample
 
 def clustering(
     data: iter,
+    imputation_numeric: str,
+    imputation_categorical: str,
+    scaler: str,
     models_to_be_evaluated: list,
     n_cluster_min: int,
     n_cluster_max: int,
@@ -39,9 +42,9 @@ def clustering(
     pipeline = data_preprocessing(
         cols_num=cols_num,
         cols_cat=cols_cat,
-        imputation_numeric="mean",
-        scaler="zscore",
-        imputation_categorical="most_frequent",
+        imputation_numeric=imputation_numeric,
+        scaler=scaler,
+        imputation_categorical=imputation_categorical,
         one_hot_encoding=True,
     )
 
