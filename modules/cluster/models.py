@@ -30,7 +30,6 @@ AVAILABLE_MODELS_CLUSTER = [
     "GaussianMixture_spherical",
     "GaussianMixture_tied",
     "KMeans",
-    "SpectralClustering_nearest_neighbors",
     "SpectralClustering_rbf",
 ]
 
@@ -193,18 +192,6 @@ def cluster_models_to_evaluate(models: list):
                     "KMeans",
                     KMeans(
                         random_state=123,
-                    ),
-                )
-            )
-        if model == "SpectralClustering_nearest_neighbors":
-            models_to_evaluate.append(
-                (
-                    "SpectralClustering_nearest_neighbors",
-                    SpectralClustering(
-                        affinity="nearest_neighbors",
-                        random_state=123,
-                        n_jobs=-1,
-                        verbose=False,
                     ),
                 )
             )
