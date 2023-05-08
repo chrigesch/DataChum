@@ -137,6 +137,7 @@ def clustering(
                         results_list.append(results_dict)
                         # Every 50 bootstrap replicates, monitor convergence and stop if there is no improvement
                         # in the Silhouette score
+                        # Citation 50 bootstrap replicates criterion: Pattengale, N. D., Alipour, M., Bininda-Emonds, O. R. P., Moret, B. M. E., & Stamatakis, A. (2010). How Many Bootstrap Replicates Are Necessary? Journal of Computational Biology, 17(3), 337–354. https://doi.org/10.1089/cmb.2009.0179 # noqa E501
                         if n_bootstrap % 50 == 0:
                             results_temp = pd.DataFrame.from_dict(results_list)
                             coefficients_of_variation_temp = abs(
