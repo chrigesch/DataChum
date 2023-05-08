@@ -44,20 +44,23 @@ def cramers_v(var1, var2):
         var2,
         rownames=None,
         colnames=None,
-    ).reset_index()
+    ).reset_index(drop=True)
     # Check if confusion matrix is 2x2 to use a correction or no
     if crosstab.shape[0] == 2:
         correct = False
     else:
         correct = True
-    # Finding Chi-squared test statistic,
-    X2_stat = chi2_contingency(crosstab, correction=correct)[0]
+    print(crosstab)
+    # Finding Chi-squared test statistic and pvalue
+    result = chi2_contingency(crosstab, correction=correct)
+    X2_stat = result[0]
+    pvalue = result[1]
     # Number of observations
     obs = np.sum(np.array(crosstab))
     # Take the minimum value between the columns and the rows of the cross table
     minimum_dimension = min(crosstab.shape) - 1
     # Calculate Cramer's V
-    return np.sqrt(X2_stat / (obs * minimum_dimension))
+    return np.sqrt(X2_stat / (obs * minimum_dimension)), pvalue
 
 
 def main():
