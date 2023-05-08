@@ -171,6 +171,11 @@ def clustering_cross_validation(
     inner_cv_folds: int,
     inner_cv_rep: int,
 ):
+    # Assert input values
+    for cluster_model in cluster_models:
+        assert (
+            cluster_model != "DBSCAN"
+        ), "As the number of clusters cannot be preasigned, DBSCAN ist no sopported for cross-validation"
     # Remove data duplicates while retaining the first one
     data = data.drop_duplicates(keep="first", inplace=False)
     # Get categorical and numerical column names
