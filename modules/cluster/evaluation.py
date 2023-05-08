@@ -36,6 +36,9 @@ def clustering(
     n_cluster_min: int,
     n_cluster_max: int,
     n_bootstrap_samples: int,
+    n_consecutive_bootstraps_without_improvement: int,
+    n_consecutive_clusters_without_improvement: int,
+    monitor_metric: str,
 ):
     cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
     cols_cat = data.select_dtypes(
@@ -89,20 +92,27 @@ def clustering(
                 results_list.append(results_dict)
                 # Every 50 bootstrap replicates, monitor convergence and stop if there is no improvement
                 # in the Silhouette score
-                if n_bootstrap % 50 == 0:
+                if (n_consecutive_bootstraps_without_improvement is not None) & (
+                    n_bootstrap % 50 == 0
+                ):
                     results_temp = pd.DataFrame.from_dict(results_list)
                     coefficients_of_variation_temp = abs(
-                        np.std(results_temp["Silhouette"])
-                        / np.mean(results_temp["Silhouette"])
+                        np.std(results_temp[monitor_metric])
+                        / np.mean(results_temp[monitor_metric])
                     )
                     coefficients_of_variation_list.append(
                         coefficients_of_variation_temp
                     )
                     print("Bootstrap: ", n_bootstrap)
                     print("cv: ", coefficients_of_variation_temp)
-                    if _monitor_convergence(coefficients_of_variation_list, 3, False):
+                    if _monitor_convergence(
+                        coefficients_of_variation_list,
+                        n_consecutive_bootstraps_without_improvement,
+                        False,
+                    ):
                         break
         else:
+            monitor_metrics_per_cluster_list = []
             for n_cluster in range(n_cluster_min, n_cluster_max + 1):
                 if name in MODELS_WITH_N_COMPONENTS:
                     model.set_params(**{"n_components": n_cluster})
@@ -120,7 +130,7 @@ def clustering(
                     )
                     results_list.append(results_dict)
                 else:
-                    coefficients_of_variation_list = []
+                    monitor_coefficients_of_variation_list = []
                     for n_bootstrap in range(1, n_bootstrap_samples + 1):
                         # Create a resampled DataFrame
                         data_bootstrap = resample(
@@ -136,21 +146,40 @@ def clustering(
                         )
                         results_list.append(results_dict)
                         # Every 50 bootstrap replicates, monitor convergence and stop if there is no improvement
-                        # in the Silhouette score
+                        # in the coefficients of variation of the selected metric
                         # Citation 50 bootstrap replicates criterion: Pattengale, N. D., Alipour, M., Bininda-Emonds, O. R. P., Moret, B. M. E., & Stamatakis, A. (2010). How Many Bootstrap Replicates Are Necessary? Journal of Computational Biology, 17(3), 337–354. https://doi.org/10.1089/cmb.2009.0179 # noqa E501
-                        if n_bootstrap % 50 == 0:
+                        if (
+                            n_consecutive_bootstraps_without_improvement is not None
+                        ) & (n_bootstrap % 50 == 0):
                             results_temp = pd.DataFrame.from_dict(results_list)
                             coefficients_of_variation_temp = abs(
-                                np.std(results_temp["Silhouette"])
-                                / np.mean(results_temp["Silhouette"])
+                                np.std(results_temp[monitor_metric])
+                                / np.mean(results_temp[monitor_metric])
                             )
-                            coefficients_of_variation_list.append(
+                            monitor_coefficients_of_variation_list.append(
                                 coefficients_of_variation_temp
                             )
                             if _monitor_convergence(
-                                coefficients_of_variation_list, 3, False
+                                monitor_coefficients_of_variation_list,
+                                n_consecutive_bootstraps_without_improvement,
+                                False,
                             ):
                                 break
+                    # Monitor convergence of adding clusters and stop if there is no improvement in the selected metric
+                    if n_consecutive_clusters_without_improvement is not None:
+                        if monitor_metric == "Davies-Bouldin":
+                            maximize = False
+                        else:
+                            maximize = True
+                        monitor_metrics_per_cluster_list.append(
+                            pd.DataFrame.from_dict(results_list)[monitor_metric].mean()
+                        )
+                        if _monitor_convergence(
+                            monitor_metrics_per_cluster_list,
+                            n_consecutive_clusters_without_improvement,
+                            maximize,
+                        ):
+                            break
     # Convert the list of dictionaries to DataFrame
     results_df = pd.DataFrame.from_dict(results_list)
     return results_df
