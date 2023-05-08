@@ -290,7 +290,7 @@ def _monitor_convergence(metric_list: list, n_consecutive: int, maximize=True):
     Returns:
         bool: True if the last evaluation metric has not improved for n consecutive attempts, False otherwise.
     """
-    if len(metric_list) < n_consecutive:
+    if len(metric_list) <= n_consecutive:
         return False
 
     for i in range(1, n_consecutive + 1):
