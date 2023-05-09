@@ -50,7 +50,6 @@ def cramers_v(var1, var2):
         correct = False
     else:
         correct = True
-    print(crosstab)
     # Finding Chi-squared test statistic and pvalue
     result = chi2_contingency(crosstab, correction=correct)
     X2_stat = result[0]
