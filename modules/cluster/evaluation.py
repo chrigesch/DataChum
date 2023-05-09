@@ -5,6 +5,7 @@ from modules.cluster.models import (
     MODELS_WITH_N_CLUSTER,
     MODELS_WITH_N_COMPONENTS,
 )
+from modules.exploratory_data_analysis.associations import cramers_v
 from modules.utils.preprocessing import (
     data_preprocessing,
     _get_feature_names_after_preprocessing,
@@ -17,9 +18,13 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import (
     calinski_harabasz_score,
+    completeness_score,
     davies_bouldin_score,
     fowlkes_mallows_score,
+    homogeneity_score,
+    rand_score,
     silhouette_score,
+    v_measure_score,
 )
 from sklearn.model_selection import RepeatedKFold
 from sklearn.utils import resample
@@ -303,6 +308,28 @@ def _compute_scores(
     results_dict["Calinski-Harabasz"] = calinski_harabasz_score(data, cluster_labels)
     results_dict["Davies-Bouldin"] = davies_bouldin_score(data, cluster_labels)
     results_dict["Silhouette"] = silhouette_score(data, cluster_labels)
+    return results_dict
+
+
+def _compute_scores_cv(
+    results_dict: dict,
+    cluster_labels_true: iter,
+    cluster_labels_pred: iter,
+):
+    results_dict["CramersV"] = cramers_v(cluster_labels_true, cluster_labels_pred)[0]
+    results_dict["Fowlkes-Mallows"] = fowlkes_mallows_score(
+        cluster_labels_true, cluster_labels_pred
+    )
+    results_dict["RandScore"] = rand_score(cluster_labels_true, cluster_labels_pred)
+    results_dict["Completeness"] = completeness_score(
+        cluster_labels_true, cluster_labels_pred
+    )
+    results_dict["Homogeneity"] = homogeneity_score(
+        cluster_labels_true, cluster_labels_pred
+    )
+    results_dict["V-Measure"] = v_measure_score(
+        cluster_labels_true, cluster_labels_pred
+    )
     return results_dict
 
 
