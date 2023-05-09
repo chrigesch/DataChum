@@ -74,7 +74,7 @@ def _compute_scores_cv(
 
 def _monitor_convergence(metric_list: list, n_consecutive: int, maximize=True):
     """
-    Check if the last evaluation metric in a list does not improve for n consecutive attempts.
+    Check if the last evaluation metrics in a list do not improve for n consecutive attempts.
 
     Args:
         metric_list (list): List of evaluation metrics.
@@ -83,12 +83,12 @@ def _monitor_convergence(metric_list: list, n_consecutive: int, maximize=True):
             If False, assume the metric is being minimized.
 
     Returns:
-        bool: True if the last evaluation metric has not improved for n consecutive attempts, False otherwise.
+        bool: True if the last evaluation metrics have not improved for n consecutive attempts, False otherwise.
     """
-    if len(metric_list) <= n_consecutive:
+    if len(metric_list) < n_consecutive:
         return False
 
-    for i in range(1, n_consecutive + 1):
+    for i in range(1, n_consecutive):
         if maximize:
             if metric_list[-i] > metric_list[-i - 1]:
                 return False
