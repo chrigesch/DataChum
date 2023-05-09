@@ -169,15 +169,29 @@ def clustering(
                             maximize = False
                         else:
                             maximize = True
-                        monitor_metrics_per_cluster_list.append(
-                            pd.DataFrame.from_dict(results_list)[monitor_metric].mean()
-                        )
+                        # Create a DataFrame and filter only the specific model n_clusters
+                        df_temp = pd.DataFrame.from_dict(results_list)
+                        metric_mean = df_temp[
+                            (df_temp["model"] == name)
+                            & (df_temp["n_clusters"] == n_cluster)
+                        ][monitor_metric].mean()
+                        monitor_metrics_per_cluster_list.append(metric_mean)
+                        print("Metric: ", monitor_metrics_per_cluster_list)
+                        print("Maximize: ", maximize)
                         if _monitor_convergence(
                             monitor_metrics_per_cluster_list,
                             n_consecutive_clusters_without_improvement,
                             maximize,
                         ):
                             break
+                print(
+                    "Finished",
+                    name,
+                    "- n_cluster:",
+                    n_cluster,
+                    "- bootstrap samples: ",
+                    n_bootstrap,
+                )
     # Convert the list of dictionaries to DataFrame
     results_df = pd.DataFrame.from_dict(results_list)
     return results_df
