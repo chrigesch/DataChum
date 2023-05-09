@@ -272,16 +272,18 @@ def clustering_cross_validation(
                 prediction_model.fit(X_train_prep, y_train)
                 # Use the fitted prediction model to compute predictions for validation data
                 y_pred = prediction_model.predict(X_val_prep)
-                # Compute prediction strength
-                fowlkes_mallows = fowlkes_mallows_score(y_val, y_pred)
                 # Append all scores to results
                 results_dict = _compute_scores(
                     data=X_train_prep,
                     model_name=name_cluster_model,
-                    cluster_labels=y_train,
                     n_cluster=n_cluster,
+                    cluster_labels=y_train,
                 )
-                results_dict["Fowlkes-Mallows"] = fowlkes_mallows
+                results_dict = _compute_scores_cv(
+                    results_dict=results_dict,
+                    cluster_labels_pred=y_pred,
+                    cluster_labels_true=y_val,
+                )
                 results_list.append(results_dict)
 
             print("Finished", name_cluster_model, "- n_cluster:", n_cluster)
