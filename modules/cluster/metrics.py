@@ -16,6 +16,24 @@ from sklearn.metrics import (
     v_measure_score,
 )
 
+AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CONVERGENCE = (
+    "Calinski-Harabasz",
+    "Davies-Bouldin",
+    "Silhouette",
+)
+
+AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CROSSVALIDATION_CONVERGENCE = (
+    "Calinski-Harabasz",
+    "Davies-Bouldin",
+    "Silhouette",
+    "CramersV",
+    "Fowlkes-Mallows",
+    "RandScore",
+    "Completeness",
+    "Homogeneity",
+    "V-Measure",
+)
+
 
 def _compute_scores(
     data: pd.DataFrame,
