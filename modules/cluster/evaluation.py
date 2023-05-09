@@ -197,6 +197,8 @@ def clustering_cross_validation(
     classification_model: list,
     inner_cv_folds: int,
     inner_cv_rep: int,
+    n_consecutive_clusters_without_improvement: int,
+    monitor_metric: str,
 ):
     # Assert input values
     for cluster_model in cluster_models:
@@ -215,6 +217,8 @@ def clustering_cross_validation(
     # Get list of models
     cluster_models_list = cluster_models_to_evaluate(models=cluster_models)
     for name_cluster_model, cluster_model in cluster_models_list:
+        # Initiate list to collect the results
+        monitor_metrics_per_cluster_list = []
         for n_cluster in range(n_cluster_min, n_cluster_max + 1):
             if name_cluster_model in MODELS_WITH_N_COMPONENTS:
                 cluster_model.set_params(**{"n_components": n_cluster})
@@ -278,6 +282,29 @@ def clustering_cross_validation(
                     cluster_labels_true=y_val,
                 )
                 results_list.append(results_dict)
+
+            # Monitor convergence of adding clusters and stop if there is no improvement in the selected metric
+            if n_consecutive_clusters_without_improvement is not None:
+                if monitor_metric == "Davies-Bouldin":
+                    maximize = False
+                else:
+                    maximize = True
+                # Create a DataFrame and filter only the specific model and n_clusters
+                df_temp = pd.DataFrame.from_dict(results_list)
+                metric_mean = df_temp[
+                    (df_temp["model"] == name_cluster_model)
+                    & (df_temp["n_clusters"] == n_cluster)
+                ][monitor_metric].mean()
+                monitor_metrics_per_cluster_list.append(metric_mean)
+                if (
+                    _monitor_convergence(
+                        monitor_metrics_per_cluster_list,
+                        n_consecutive_clusters_without_improvement,
+                        maximize,
+                    )
+                    is True
+                ):
+                    break
 
             print("Finished", name_cluster_model, "- n_cluster:", n_cluster)
 
