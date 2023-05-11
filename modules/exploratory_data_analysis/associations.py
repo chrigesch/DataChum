@@ -161,10 +161,6 @@ def cramers_v_corrected_stat(var1, var2):
         .reset_index(drop=True)
     )
     confusion_matrix = np.array(crosstab)
-    print(crosstab.shape)
-    print(crosstab)
-    print(confusion_matrix)
-    print(crosstab.values)
     results_chi2 = chi2_contingency(confusion_matrix)
     chi2 = results_chi2[0]
     pvalue = results_chi2[1]
