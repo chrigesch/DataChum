@@ -6,7 +6,6 @@ from modules.utils.preprocessing import (
 )
 
 # Import the required libraries
-from dython.nominal import associations
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -93,11 +92,6 @@ def associations_for_categorical_and_numeric_variables(
     pvalues_df = pd.DataFrame.from_dict(results_pvalues_list)
     pvalues_df.index = cols_all
     return associations_df, pvalues_df
-
-
-@st.cache_data(ttl=3600, max_entries=10)
-def _associations_for_categorical_and_numeric_variables(data):
-    return associations(data, compute_only=True, plot=False)["corr"]
 
 
 @st.cache_data(ttl=3600, max_entries=10)
