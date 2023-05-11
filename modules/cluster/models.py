@@ -1,5 +1,4 @@
 # Import moduls from local directories
-from assets.strings import in_cluster as string
 
 # Import the required libraries
 from sklearn.cluster import (
@@ -61,7 +60,9 @@ def cluster_models_to_evaluate(models: list):
     for model in models:
         assert (
             model in AVAILABLE_MODELS_CLUSTER
-        ), string.models.assert_model_message + str(AVAILABLE_MODELS_CLUSTER)
+        ), "Unrecognized value, model should be one of the following: " + str(
+            AVAILABLE_MODELS_CLUSTER
+        )
     # Initiate empty list to collect the selected models
     models_to_evaluate = []
     # Loop through imput and add selected models
