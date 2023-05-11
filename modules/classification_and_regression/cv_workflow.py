@@ -1,5 +1,4 @@
 # Import moduls from local directories
-from assets.strings import in_classification_and_regression as string
 from modules.classification_and_regression.feature_selection import (
     add_feature_selection_to_pipeline,
 )
@@ -117,20 +116,22 @@ def _cv_workflow_with_pipeline(
     if operation == "regression":
         assert (
             scoring in AVAILABLE_SCORES_REGRESSION
-        ), string.cv_workflow.assert_score_message + str(AVAILABLE_SCORES_REGRESSION)
+        ), "Unrecognized value, 'score' should be one of the following: " + str(
+            AVAILABLE_SCORES_REGRESSION
+        )
     else:
         assert (
             scoring in AVAILABLE_SCORES_CLASSIFICATION
-        ), string.cv_workflow.assert_score_message + str(
+        ), "Unrecognized value, 'score' should be one of the following: " + str(
             AVAILABLE_SCORES_CLASSIFICATION
         )
     assert (
         inner_cv_folds in AVAILABLE_NUMBER_OF_INNER_CV_FOLDS
-    ), string.cv_workflow.assert_n_of_inner_cv_folds_message + str(
+    ), "Unrecognized value, 'inner_cv_folds' should be one of the following: " + str(
         AVAILABLE_NUMBER_OF_INNER_CV_FOLDS
     )
-    assert inner_cv_rep >= 1, string.cv_workflow.assert_n_of_inner_cv_repetitions
-    assert tuning_trials >= 0, string.cv_workflow.assert_n_of_tuning_trials
+    assert inner_cv_rep >= 1, "Unrecognized value, 'inner_cv_rep' should be >= 1"
+    assert tuning_trials >= 0, "Unrecognized value, 'tuning_trials' should be >= 0"
 
     # Initiate dictionary with all scores to compute
     scores_to_compute = _compute_dictionary_with_scores_to_compute_in_cv(
@@ -187,9 +188,7 @@ def _cv_workflow_with_pipeline(
         collect_scores_test = pd.concat([collect_scores_test, test_scores], axis=0)
 
         collect_models.append(pipeline_baseline)
-        collect_tuning_studies.append(
-            string.cv_workflow.tuning_studies_for_baseline_models
-        )
+        collect_tuning_studies.append("This model has not been tuned")
 
         # Cross-validate a tuned model
         if tuning_trials > 0:
@@ -283,20 +282,22 @@ def _cv_workflow_without_pipeline(
     if operation == "regression":
         assert (
             scoring in AVAILABLE_SCORES_REGRESSION
-        ), string.cv_workflow.assert_score_message + str(AVAILABLE_SCORES_REGRESSION)
+        ), "Unrecognized value, 'score' should be one of the following: " + str(
+            AVAILABLE_SCORES_REGRESSION
+        )
     else:
         assert (
             scoring in AVAILABLE_SCORES_CLASSIFICATION
-        ), string.cv_workflow.assert_score_message + str(
+        ), "Unrecognized value, 'score' should be one of the following: " + str(
             AVAILABLE_SCORES_CLASSIFICATION
         )
     assert (
         inner_cv_folds in AVAILABLE_NUMBER_OF_INNER_CV_FOLDS
-    ), string.cv_workflow.assert_n_of_inner_cv_folds_message + str(
+    ), "Unrecognized value, 'inner_cv_folds' should be one of the following: " + str(
         AVAILABLE_NUMBER_OF_INNER_CV_FOLDS
     )
-    assert inner_cv_rep >= 1, string.cv_workflow.assert_n_of_inner_cv_repetitions
-    assert tuning_trials >= 0, string.cv_workflow.assert_n_of_tuning_trials
+    assert inner_cv_rep >= 1, "Unrecognized value, 'inner_cv_rep' should be >= 1"
+    assert tuning_trials >= 0, "Unrecognized value, 'tuning_trials' should be >= 0"
 
     # Initiate dictionary with all scores to compute
     scores_to_compute = _compute_dictionary_with_scores_to_compute_in_cv(
@@ -366,9 +367,7 @@ def _cv_workflow_without_pipeline(
         pipeline_baseline = make_pipeline(pipeline, model_baseline)
         collect_models.append(pipeline_baseline)
 
-        collect_tuning_studies.append(
-            string.cv_workflow.tuning_studies_for_baseline_models
-        )
+        collect_tuning_studies.append("This model has not been tuned")
 
         # Cross-validate a tuned model
         if tuning_trials > 0:
@@ -479,7 +478,10 @@ def main():
             data=data, target_variable=target_variable, n_binns=10
         )
     else:
-        raise ValueError(string.assert_operation_message)
+        raise ValueError(
+            "Unrecognized value, 'operation' should be one of the following: ",
+            AVAILABLE_OPERATIONS,
+        )
     # Split training and testing data: stratified splitting
     X_train, X_test, y_train, y_test = train_test_split(
         data.drop(target_variable, axis="columns"),

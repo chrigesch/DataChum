@@ -1,5 +1,4 @@
 # Import moduls from local directories
-from assets.strings import in_classification_and_regression as string
 
 # Import the required libraries
 import numpy as np
@@ -35,10 +34,10 @@ def add_feature_selection_to_pipeline(pipeline, operation, method):
     assert operation in [
         "classification",
         "regression",
-    ], string.feature_selection.assert_operation_message
+    ], "Unrecognized value, 'operation' should be one of the following: "
     assert (
         method in AVAILABLE_FEATURE_SELECTION_METHODS
-    ), string.feature_selection.assert_method_message + str(
+    ), "Unrecognized value, 'method' should be one of the following: " + str(
         AVAILABLE_FEATURE_SELECTION_METHODS
     )
 
@@ -70,7 +69,7 @@ def tune_feature_selection(params_grid, operation, tune: bool = False):
     assert operation in [
         "classification",
         "regression",
-    ], string.feature_selection.assert_operation_message
+    ], "Unrecognized value, 'operation' should be one of the following: "
     if (tune is True) & (operation == "classification"):
         params_grid["feature_selection"] = CategoricalDistribution(
             choices=[
@@ -101,7 +100,7 @@ class featureSelectorBoruta(TransformerMixin):
         assert operation in [
             "classification",
             "regression",
-        ], string.feature_selection.assert_operation_message
+        ], "Unrecognized value, 'operation' should be one of the following: "
         # Initiate variables
         self.operation = operation
         super().__init__()
