@@ -164,7 +164,11 @@ def cramers_v_corrected_stat(var1, var2):
     phi2corr = max(0, phi2 - ((k - 1) * (r - 1)) / (n - 1))
     rcorr = r - ((r - 1) ** 2) / (n - 1)
     kcorr = k - ((k - 1) ** 2) / (n - 1)
-    cramers_v_score = np.sqrt(phi2corr / min((kcorr - 1), (rcorr - 1)))
+    minDim = min((kcorr - 1), (rcorr - 1))
+    # To prevent division by zero
+    if minDim == 0:
+        minDim = 1
+    cramers_v_score = np.sqrt(phi2corr / minDim)
     return cramers_v_score, pvalue
 
 
