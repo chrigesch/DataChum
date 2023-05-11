@@ -6,7 +6,7 @@ from dython.nominal import associations
 import numpy as np
 import pandas as pd
 import plotly.express as px
-from scipy.stats import chi2_contingency
+from scipy.stats import chi2_contingency, f_oneway
 from sklearn.preprocessing import LabelEncoder
 import streamlit as st
 
@@ -69,7 +69,8 @@ def cramers_v(var1, var2):
 
 
 def cramers_v_corrected_stat(var1, var2):
-    """Calculate Cramers V statistic for categorial-categorial association.
+    """
+    Calculate Cramers V statistic for categorial-categorial association.
     uses correction from Bergsma and Wicher,
     Journal of the Korean Statistical Society 42 (2013): 323-328
     """
@@ -98,6 +99,24 @@ def cramers_v_corrected_stat(var1, var2):
     kcorr = k - ((k - 1) ** 2) / (n - 1)
     cramers_v_score = np.sqrt(phi2corr / min((kcorr - 1), (rcorr - 1)))
     return cramers_v_score, pvalue
+
+
+def eta_square_root(categorical_var, numerical_var):
+    """
+    Calculate the Correlation Ratio (η) for categorical-continuous association
+    """
+    # Perform one-way ANOVA
+    groups = categorical_var.unique()
+    data_grouped = [numerical_var[categorical_var == group] for group in groups]
+    f_value, pvalue = f_oneway(*data_grouped)
+    # Calculate degrees of freedom
+    df_between = len(groups) - 1
+    df_within = len(categorical_var) - len(groups)
+    # Calculate eta square root
+    eta_square_root_score = np.sqrt(
+        (f_value * df_between) / (f_value * df_between + df_within)
+    )
+    return eta_square_root_score, pvalue
 
 
 def main():
