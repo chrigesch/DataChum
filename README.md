@@ -1,2 +1,2 @@
-# my_streamlit_app
+# DataChum
 # This is a web app to analyze data

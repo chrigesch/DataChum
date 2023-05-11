@@ -1,5 +1,10 @@
 # Import moduls from local directories
 from modules.classification_and_regression.models import classification_models_to_tune
+from modules.cluster.metrics import (
+    _compute_scores,
+    _compute_scores_cv,
+    _monitor_convergence,
+)
 from modules.cluster.models import (
     cluster_models_to_evaluate,
     MODELS_WITH_N_CLUSTER,
@@ -12,15 +17,8 @@ from modules.utils.preprocessing import (
 
 
 # Import the required libraries
-import math
 import numpy as np
 import pandas as pd
-from sklearn.metrics import (
-    calinski_harabasz_score,
-    davies_bouldin_score,
-    fowlkes_mallows_score,
-    silhouette_score,
-)
 from sklearn.model_selection import RepeatedKFold
 from sklearn.utils import resample
 
@@ -36,6 +34,9 @@ def clustering(
     n_cluster_min: int,
     n_cluster_max: int,
     n_bootstrap_samples: int,
+    n_consecutive_bootstraps_without_improvement: int,
+    n_consecutive_clusters_without_improvement: int,
+    monitor_metric: str,
 ):
     cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
     cols_cat = data.select_dtypes(
@@ -89,20 +90,27 @@ def clustering(
                 results_list.append(results_dict)
                 # Every 50 bootstrap replicates, monitor convergence and stop if there is no improvement
                 # in the Silhouette score
-                if n_bootstrap % 50 == 0:
+                if (n_consecutive_bootstraps_without_improvement is not None) & (
+                    n_bootstrap % 50 == 0
+                ):
                     results_temp = pd.DataFrame.from_dict(results_list)
                     coefficients_of_variation_temp = abs(
-                        np.std(results_temp["Silhouette"])
-                        / np.mean(results_temp["Silhouette"])
+                        np.std(results_temp[monitor_metric])
+                        / np.mean(results_temp[monitor_metric])
                     )
                     coefficients_of_variation_list.append(
                         coefficients_of_variation_temp
                     )
                     print("Bootstrap: ", n_bootstrap)
                     print("cv: ", coefficients_of_variation_temp)
-                    if _monitor_convergence(coefficients_of_variation_list, 3, False):
+                    if _monitor_convergence(
+                        coefficients_of_variation_list,
+                        n_consecutive_bootstraps_without_improvement,
+                        False,
+                    ):
                         break
         else:
+            monitor_metrics_per_cluster_list = []
             for n_cluster in range(n_cluster_min, n_cluster_max + 1):
                 if name in MODELS_WITH_N_COMPONENTS:
                     model.set_params(**{"n_components": n_cluster})
@@ -120,7 +128,7 @@ def clustering(
                     )
                     results_list.append(results_dict)
                 else:
-                    coefficients_of_variation_list = []
+                    monitor_coefficients_of_variation_list = []
                     for n_bootstrap in range(1, n_bootstrap_samples + 1):
                         # Create a resampled DataFrame
                         data_bootstrap = resample(
@@ -136,20 +144,54 @@ def clustering(
                         )
                         results_list.append(results_dict)
                         # Every 50 bootstrap replicates, monitor convergence and stop if there is no improvement
-                        # in the Silhouette score
-                        if n_bootstrap % 50 == 0:
+                        # in the coefficients of variation of the selected metric
+                        # Citation 50 bootstrap replicates criterion: Pattengale, N. D., Alipour, M., Bininda-Emonds, O. R. P., Moret, B. M. E., & Stamatakis, A. (2010). How Many Bootstrap Replicates Are Necessary? Journal of Computational Biology, 17(3), 337–354. https://doi.org/10.1089/cmb.2009.0179 # noqa E501
+                        if (
+                            n_consecutive_bootstraps_without_improvement is not None
+                        ) & (n_bootstrap % 50 == 0):
                             results_temp = pd.DataFrame.from_dict(results_list)
                             coefficients_of_variation_temp = abs(
-                                np.std(results_temp["Silhouette"])
-                                / np.mean(results_temp["Silhouette"])
+                                np.std(results_temp[monitor_metric])
+                                / np.mean(results_temp[monitor_metric])
                             )
-                            coefficients_of_variation_list.append(
+                            monitor_coefficients_of_variation_list.append(
                                 coefficients_of_variation_temp
                             )
                             if _monitor_convergence(
-                                coefficients_of_variation_list, 3, False
+                                monitor_coefficients_of_variation_list,
+                                n_consecutive_bootstraps_without_improvement,
+                                False,
                             ):
                                 break
+                    # Monitor convergence of adding clusters and stop if there is no improvement in the selected metric
+                    if n_consecutive_clusters_without_improvement is not None:
+                        if monitor_metric == "Davies-Bouldin":
+                            maximize = False
+                        else:
+                            maximize = True
+                        # Create a DataFrame and filter only the specific model n_clusters
+                        df_temp = pd.DataFrame.from_dict(results_list)
+                        metric_mean = df_temp[
+                            (df_temp["model"] == name)
+                            & (df_temp["n_clusters"] == n_cluster)
+                        ][monitor_metric].mean()
+                        monitor_metrics_per_cluster_list.append(metric_mean)
+                        print("Metric: ", monitor_metrics_per_cluster_list)
+                        print("Maximize: ", maximize)
+                        if _monitor_convergence(
+                            monitor_metrics_per_cluster_list,
+                            n_consecutive_clusters_without_improvement,
+                            maximize,
+                        ):
+                            break
+                print(
+                    "Finished",
+                    name,
+                    "- n_cluster:",
+                    n_cluster,
+                    "- bootstrap samples: ",
+                    n_bootstrap,
+                )
     # Convert the list of dictionaries to DataFrame
     results_df = pd.DataFrame.from_dict(results_list)
     return results_df
@@ -169,7 +211,14 @@ def clustering_cross_validation(
     classification_model: list,
     inner_cv_folds: int,
     inner_cv_rep: int,
+    n_consecutive_clusters_without_improvement: int,
+    monitor_metric: str,
 ):
+    # Assert input values
+    for cluster_model in cluster_models:
+        assert (
+            cluster_model != "DBSCAN"
+        ), "As the number of clusters cannot be preasigned, DBSCAN ist no sopported for cross-validation"
     # Remove data duplicates while retaining the first one
     data = data.drop_duplicates(keep="first", inplace=False)
     # Get categorical and numerical column names
@@ -182,6 +231,8 @@ def clustering_cross_validation(
     # Get list of models
     cluster_models_list = cluster_models_to_evaluate(models=cluster_models)
     for name_cluster_model, cluster_model in cluster_models_list:
+        # Initiate list to collect the results
+        monitor_metrics_per_cluster_list = []
         for n_cluster in range(n_cluster_min, n_cluster_max + 1):
             if name_cluster_model in MODELS_WITH_N_COMPONENTS:
                 cluster_model.set_params(**{"n_components": n_cluster})
@@ -232,17 +283,42 @@ def clustering_cross_validation(
                 prediction_model.fit(X_train_prep, y_train)
                 # Use the fitted prediction model to compute predictions for validation data
                 y_pred = prediction_model.predict(X_val_prep)
-                # Compute prediction strength
-                fowlkes_mallows = fowlkes_mallows_score(y_val, y_pred)
                 # Append all scores to results
                 results_dict = _compute_scores(
                     data=X_train_prep,
                     model_name=name_cluster_model,
-                    cluster_labels=y_train,
                     n_cluster=n_cluster,
+                    cluster_labels=y_train,
                 )
-                results_dict["Fowlkes-Mallows"] = fowlkes_mallows
+                results_dict = _compute_scores_cv(
+                    results_dict=results_dict,
+                    cluster_labels_pred=y_pred,
+                    cluster_labels_true=y_val,
+                )
                 results_list.append(results_dict)
+
+            # Monitor convergence of adding clusters and stop if there is no improvement in the selected metric
+            if n_consecutive_clusters_without_improvement is not None:
+                if monitor_metric == "Davies-Bouldin":
+                    maximize = False
+                else:
+                    maximize = True
+                # Create a DataFrame and filter only the specific model and n_clusters
+                df_temp = pd.DataFrame.from_dict(results_list)
+                metric_mean = df_temp[
+                    (df_temp["model"] == name_cluster_model)
+                    & (df_temp["n_clusters"] == n_cluster)
+                ][monitor_metric].mean()
+                monitor_metrics_per_cluster_list.append(metric_mean)
+                if (
+                    _monitor_convergence(
+                        monitor_metrics_per_cluster_list,
+                        n_consecutive_clusters_without_improvement,
+                        maximize,
+                    )
+                    is True
+                ):
+                    break
 
             print("Finished", name_cluster_model, "- n_cluster:", n_cluster)
 
@@ -254,76 +330,3 @@ def clustering_cross_validation(
 ######################################
 # Private Methods / Helper functions #
 ######################################
-
-
-def _compute_scores(
-    data: pd.DataFrame,
-    model_name: str,
-    cluster_labels: iter,
-    n_cluster: int,
-):
-    results_dict = {}
-    results_dict["model"] = model_name
-    results_dict["n_clusters"] = n_cluster
-    results_dict["Calinski-Harabasz"] = calinski_harabasz_score(data, cluster_labels)
-    results_dict["Davies-Bouldin"] = davies_bouldin_score(data, cluster_labels)
-    results_dict["Silhouette"] = silhouette_score(data, cluster_labels)
-    return results_dict
-
-
-def _monitor_convergence(metric_list: list, n_consecutive: int, maximize=True):
-    """
-    Check if the last evaluation metric in a list does not improve for n consecutive attempts.
-
-    Args:
-        metric_list (list): List of evaluation metrics.
-        n_consecutive (int): Number of consecutive attempts that the evaluation metric does not improve.
-        maximize (bool): If True, assume the metric is being maximized.
-            If False, assume the metric is being minimized.
-
-    Returns:
-        bool: True if the last evaluation metric has not improved for n consecutive attempts, False otherwise.
-    """
-    if len(metric_list) < n_consecutive:
-        return False
-
-    for i in range(1, n_consecutive + 1):
-        if maximize:
-            if metric_list[-i] > metric_list[-i - 1]:
-                return False
-        else:
-            if metric_list[-i] < metric_list[-i - 1]:
-                return False
-
-    return True
-
-
-# https://github.com/smazzanti/are_you_still_using_elbow_method/blob/main/are-you-still-using-elbow-method.ipynb
-def bic_score(X: np.ndarray, labels: np.array):
-    """
-    BIC score for the goodness of fit of clusters.
-    This Python function is translated from the Golang implementation by the author of the paper.
-    The original code is available here: https://github.com/bobhancock/goxmeans/blob/a78e909e374c6f97ddd04a239658c7c5b7365e5c/km.go#L778 # noqa E501
-    """
-    n_points = len(labels)
-    n_clusters = len(set(labels))
-    n_dimensions = X.shape[1]
-
-    n_parameters = (n_clusters - 1) + (n_dimensions * n_clusters) + 1
-
-    loglikelihood = 0
-    for label_name in set(labels):
-        X_cluster = X[labels == label_name]
-        n_points_cluster = len(X_cluster)
-        centroid = np.mean(X_cluster, axis=0)
-        variance = np.sum((X_cluster - centroid) ** 2) / (len(X_cluster) - 1)
-        loglikelihood += (
-            n_points_cluster * np.log(n_points_cluster)
-            - n_points_cluster * np.log(n_points)
-            - n_points_cluster * n_dimensions / 2 * np.log(2 * math.pi * variance)
-            - (n_points_cluster - 1) / 2
-        )
-
-    bic = loglikelihood - (n_parameters / 2) * np.log(n_points)
-
-    return bic

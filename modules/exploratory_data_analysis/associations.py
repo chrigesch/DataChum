@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 from scipy.stats import chi2_contingency
+from sklearn.preprocessing import LabelEncoder
 import streamlit as st
 
 # Import modules for debuggung
@@ -39,18 +40,21 @@ def plot_heatmap(associations, color, zmin, zmax):
 
 
 def cramers_v(var1, var2):
-    crosstab = pd.crosstab(
-        var1,
-        var2,
-        rownames=None,
-        colnames=None,
-    ).reset_index(drop=True)
+    var1 = LabelEncoder().fit_transform(y=var1)
+    var2 = LabelEncoder().fit_transform(y=var2)
+    df = pd.DataFrame({"var_1": var1, "var_2": var2})
+    crosstab = (
+        df.groupby(["var_1", "var_2"])["var_1"]
+        .count()
+        .unstack(fill_value=0)
+        .reset_index()
+    )
+    crosstab = np.array(crosstab)
     # Check if confusion matrix is 2x2 to use a correction or no
     if crosstab.shape[0] == 2:
         correct = False
     else:
         correct = True
-    print(crosstab)
     # Finding Chi-squared test statistic and pvalue
     result = chi2_contingency(crosstab, correction=correct)
     X2_stat = result[0]
