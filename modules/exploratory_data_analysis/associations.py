@@ -6,7 +6,6 @@ from modules.utils.preprocessing import (
 )
 
 # Import the required libraries
-from dython.nominal import associations
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -96,11 +95,6 @@ def associations_for_categorical_and_numeric_variables(
 
 
 @st.cache_data(ttl=3600, max_entries=10)
-def _associations_for_categorical_and_numeric_variables(data):
-    return associations(data, compute_only=True, plot=False)["corr"]
-
-
-@st.cache_data(ttl=3600, max_entries=10)
 def plot_heatmap(associations, color, zmin, zmax):
     # Plot the Heatmap
     fig_correlation = px.imshow(
@@ -161,10 +155,6 @@ def cramers_v_corrected_stat(var1, var2):
         .reset_index(drop=True)
     )
     confusion_matrix = np.array(crosstab)
-    print(crosstab.shape)
-    print(crosstab)
-    print(confusion_matrix)
-    print(crosstab.values)
     results_chi2 = chi2_contingency(confusion_matrix)
     chi2 = results_chi2[0]
     pvalue = results_chi2[1]
