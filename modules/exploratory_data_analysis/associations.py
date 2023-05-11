@@ -47,7 +47,7 @@ def cramers_v(var1, var2):
         df.groupby(["var_1", "var_2"])["var_1"]
         .count()
         .unstack(fill_value=0)
-        .reset_index()
+        .reset_index(drop=True)
     )
     crosstab = np.array(crosstab)
     # Check if confusion matrix is 2x2 to use a correction or no
