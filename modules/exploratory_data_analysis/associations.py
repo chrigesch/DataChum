@@ -68,6 +68,38 @@ def cramers_v(var1, var2):
     return cramers_v_score, pvalue
 
 
+def cramers_v_corrected_stat(var1, var2):
+    """Calculate Cramers V statistic for categorial-categorial association.
+    uses correction from Bergsma and Wicher,
+    Journal of the Korean Statistical Society 42 (2013): 323-328
+    """
+    var1 = LabelEncoder().fit_transform(y=var1)
+    var2 = LabelEncoder().fit_transform(y=var2)
+    df = pd.DataFrame({"var_1": var1, "var_2": var2})
+    crosstab = (
+        df.groupby(["var_1", "var_2"])["var_1"]
+        .count()
+        .unstack(fill_value=0)
+        .reset_index(drop=True)
+    )
+    confusion_matrix = np.array(crosstab)
+    print(crosstab.shape)
+    print(crosstab)
+    print(confusion_matrix)
+    print(crosstab.values)
+    results_chi2 = chi2_contingency(confusion_matrix)
+    chi2 = results_chi2[0]
+    pvalue = results_chi2[1]
+    n = confusion_matrix.sum()
+    phi2 = chi2 / n
+    r, k = confusion_matrix.shape
+    phi2corr = max(0, phi2 - ((k - 1) * (r - 1)) / (n - 1))
+    rcorr = r - ((r - 1) ** 2) / (n - 1)
+    kcorr = k - ((k - 1) ** 2) / (n - 1)
+    cramers_v_score = np.sqrt(phi2corr / min((kcorr - 1), (rcorr - 1)))
+    return cramers_v_score, pvalue
+
+
 def main():
     # Load data
     data = read_csv("data/data_c_and_r_with_missings.csv").drop("Loan_ID", axis=1)
