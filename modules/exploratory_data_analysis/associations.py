@@ -64,7 +64,8 @@ def cramers_v(var1, var2):
     # Take the minimum value between the columns and the rows of the cross table
     minimum_dimension = min(crosstab.shape) - 1
     # Calculate Cramer's V
-    return np.sqrt(X2_stat / (obs * minimum_dimension)), pvalue
+    cramers_v_score = np.sqrt(X2_stat / (obs * minimum_dimension))
+    return cramers_v_score, pvalue
 
 
 def main():
