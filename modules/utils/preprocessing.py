@@ -1,5 +1,4 @@
 # Import moduls from local directory
-from assets.strings import in_utils as string
 
 # Import the required libraries
 import numpy as np
@@ -50,22 +49,24 @@ def data_preprocessing(
     one_hot_encoding=True,
 ):
     # Assert input values
-    assert (
-        imputation_numeric in AVAILABLE_IMPUTATION_NUMERIC
-    ), string.preprocessing.assert_imputation_numeric + str(
-        AVAILABLE_IMPUTATION_NUMERIC
+    assert imputation_numeric in AVAILABLE_IMPUTATION_NUMERIC, (
+        "Unrecognized value, 'imputation_numeric' should be one of the following: "
+        + str(AVAILABLE_IMPUTATION_NUMERIC)
     )
-    assert scaler in AVAILABLE_SCALER, string.preprocessing.assert_scaler_message + str(
+    assert (
+        scaler in AVAILABLE_SCALER
+    ), "Unrecognized value, 'scaler' should be one of the following: " + str(
         AVAILABLE_SCALER
     )
-    assert (
-        imputation_categorical in AVAILABLE_IMPUTATION_CATEGORICAL
-    ), string.preprocessing.assert_imputation_categorical + str(
-        AVAILABLE_IMPUTATION_CATEGORICAL
+    assert imputation_categorical in AVAILABLE_IMPUTATION_CATEGORICAL, (
+        "Unrecognized value, 'imputation_categorical' should be one of the following: "
+        + str(AVAILABLE_IMPUTATION_CATEGORICAL)
     )
     assert (
         one_hot_encoding in AVAILABLE_ONE_HOT_ENCODER
-    ), string.preprocessing.assert_one_hot_encoding + str(AVAILABLE_ONE_HOT_ENCODER)
+    ), "Unrecognized value, 'one_hot_encoding' should be one of the following: " + str(
+        AVAILABLE_ONE_HOT_ENCODER
+    )
 
     # Instantiate pipeline for NUMERICAL data
     transformer_num = Pipeline(steps=[])
@@ -130,7 +131,9 @@ def data_preprocessing(
     elif imputation_categorical is None:
         pass
     else:
-        raise ValueError(string.assert_imputation_categorical)
+        raise ValueError(
+            "Unrecognized value, 'imputation_categorical' should be one of the following: "
+        )
 
     # Add one hot encoder
     if one_hot_encoding is True:
