@@ -83,7 +83,7 @@ def main():
             len(cols_cat_and_num) >= 1
         ), "Database must contain 1 or more categorical or numerical columns"
         # Compute associations (necesary for the overview tab)
-        associations_df = associations_for_categorical_and_numeric_variables(data)
+        associations_df = associations_for_categorical_and_numeric_variables(data)[0]
 
         # Create tabs to explore the data
         st.header("Exploratory Data Analysis")
@@ -564,7 +564,7 @@ def main():
                         associations_for_categorical_and_numeric_variables(
                             data_for_missing
                         )
-                    )
+                    )[0]
                     mask = np.triu(np.ones_like(associations_missings, dtype=bool))
                     associations_missings = associations_missings.mask(mask)
                     associations_missings = associations_missings.iloc[
