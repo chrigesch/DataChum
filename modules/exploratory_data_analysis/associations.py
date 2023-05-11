@@ -1,12 +1,16 @@
 # Import moduls from local directories
 from assets.colors import AVAILABLE_COLORS_DIVERGING
+from modules.utils.preprocessing import (
+    data_preprocessing,
+    _get_feature_names_after_preprocessing,
+)
 
 # Import the required libraries
 from dython.nominal import associations
 import numpy as np
 import pandas as pd
 import plotly.express as px
-from scipy.stats import chi2_contingency, f_oneway
+from scipy.stats import chi2_contingency, f_oneway, pearsonr, spearmanr
 from sklearn.preprocessing import LabelEncoder
 import streamlit as st
 
@@ -19,7 +23,80 @@ from modules.utils.load_and_save_data import read_csv
 # Pearson's R for continuous-continuous cases - Correlation Ratio for categorical-continuous cases  -
 # Cramer's V or Theil's U for categorical-categorical cases
 @st.cache_data(ttl=3600, max_entries=10)
-def associations_for_categorical_and_numeric_variables(data):
+def associations_for_categorical_and_numeric_variables(
+    data: pd.DataFrame, num_num_method: str = "spearman"
+):
+    # Get NUMERICAL and CATEGORICAL columns
+    cols_all = data.columns.to_list()
+    cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
+    cols_cat = data.select_dtypes(
+        include=["object", "category", "bool"]
+    ).columns.to_list()
+
+    pipeline = data_preprocessing(
+        cols_num=cols_num,
+        cols_cat=cols_cat,
+        imputation_numeric="most_frequent",
+        scaler=None,
+        imputation_categorical="most_frequent",
+        one_hot_encoding=False,
+    )
+
+    data_prep = pipeline.fit_transform(data)
+    # Get labels of all features
+    labels = _get_feature_names_after_preprocessing(pipeline, includes_model=False)
+    # Convert output to Dataframe and add columns names
+    data_prep = pd.DataFrame(data_prep, columns=labels, index=data.index)
+    # Initiate lists to collect all results
+    results_associations_list = []
+    results_pvalues_list = []
+    # Loop through DataFrame and append results
+    for var_1 in cols_all:
+        row_dict_associations = {}
+        row_dict_pvalues = {}
+        for var_2 in cols_all:
+            # cat_cat: Cramer's V
+            if (var_1 in cols_cat) & (var_2 in cols_cat):
+                result_cramers_v = cramers_v_corrected_stat(
+                    data_prep[var_1], data_prep[var_2]
+                )
+                row_dict_associations[var_2] = result_cramers_v[0]
+                row_dict_pvalues[var_2] = result_cramers_v[1]
+            # num_num: Pearson or Spearman
+            elif (var_1 in cols_num) & (var_2 in cols_num):
+                if num_num_method == "pearson":
+                    result_spearman = pearsonr(data_prep[var_1], data_prep[var_2])
+                    row_dict_associations[var_2] = result_spearman[0]
+                    row_dict_pvalues[var_2] = result_spearman[1]
+                else:
+                    result_spearman = spearmanr(data_prep[var_1], data_prep[var_2])
+                    row_dict_associations[var_2] = result_spearman[0]
+                    row_dict_pvalues[var_2] = result_spearman[1]
+            # cat_num: Correlation Ratio
+            else:
+                if var_1 in cols_cat:
+                    var_cat = var_1
+                    var_num = var_2
+                else:
+                    var_cat = var_2
+                    var_num = var_1
+                result_eta_square_root = eta_square_root(
+                    data_prep[var_cat], data_prep[var_num]
+                )
+                row_dict_associations[var_2] = result_eta_square_root[0]
+                row_dict_pvalues[var_2] = result_eta_square_root[1]
+        results_associations_list.append(row_dict_associations)
+        results_pvalues_list.append(row_dict_pvalues)
+    # Convert the list of dictionaries to DataFrame
+    associations_df = pd.DataFrame.from_dict(results_associations_list)
+    associations_df.index = cols_all
+    pvalues_df = pd.DataFrame.from_dict(results_pvalues_list)
+    pvalues_df.index = cols_all
+    return associations_df, pvalues_df
+
+
+@st.cache_data(ttl=3600, max_entries=10)
+def _associations_for_categorical_and_numeric_variables(data):
     return associations(data, compute_only=True, plot=False)["corr"]
 
 
