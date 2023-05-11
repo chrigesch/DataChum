@@ -1,6 +1,5 @@
 # Import moduls from local directories
 from assets.colors import get_color
-from assets.strings import in_classification_and_regression as string
 from modules.utils.preprocessing import _get_feature_names_after_preprocessing
 
 from econml.dml import LinearDML, CausalForestDML
@@ -321,10 +320,9 @@ AVAILABLE_METHODS_FOR_DOUBLE_ML = ["custom", "linear", "forest"]
 def compute_average_treatment_effect(
     pipeline, data, target_variable, estimation_method, operation, label_encoder=None
 ):
-    assert (
-        estimation_method in AVAILABLE_METHODS_FOR_DOUBLE_ML
-    ), string.interpretation.assert_estimation_method_message + str(
-        AVAILABLE_METHODS_FOR_DOUBLE_ML
+    assert estimation_method in AVAILABLE_METHODS_FOR_DOUBLE_ML, (
+        "Unrecognized value, 'estimation_method' should be one of the following: "
+        + str(AVAILABLE_METHODS_FOR_DOUBLE_ML)
     )
     # Drop all rows with NaNs in target_Variable
     data = data.dropna(subset=target_variable)

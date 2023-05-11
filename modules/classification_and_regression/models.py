@@ -1,5 +1,4 @@
 # Import moduls from local directories
-from assets.strings import in_classification_and_regression as string
 
 # Import the required libraries - classification models
 from sklearn.naive_bayes import GaussianNB
@@ -98,7 +97,9 @@ def classification_models_to_tune(
     for model in models:
         assert (
             model in AVAILABLE_MODELS_CLASSIFICATION
-        ), string.models.assert_model_message + str(AVAILABLE_MODELS_CLASSIFICATION)
+        ), "Unrecognized value, model should be one of the following: " + str(
+            AVAILABLE_MODELS_CLASSIFICATION
+        )
     # Initiate empty list to collect the selected models
     models_to_tune = []
     # Loop through imput and add selected models
@@ -595,7 +596,9 @@ def regression_models_to_tune(
     for model in models:
         assert (
             model in AVAILABLE_MODELS_REGRESSION
-        ), string.models.assert_model_message + str(AVAILABLE_MODELS_REGRESSION)
+        ), "Unrecognized value, model should be one of the following: " + str(
+            AVAILABLE_MODELS_REGRESSION
+        )
     # Initiate empty list to collect the selected models
     models_to_tune = []
     # Loop through imput and add selected models
