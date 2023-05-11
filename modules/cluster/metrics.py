@@ -1,5 +1,5 @@
 # Import moduls from local directories
-from modules.exploratory_data_analysis.associations import cramers_v
+from modules.exploratory_data_analysis.associations import cramers_v_corrected_stat
 
 # Import the required libraries
 import math
@@ -55,7 +55,9 @@ def _compute_scores_cv(
     cluster_labels_true: iter,
     cluster_labels_pred: iter,
 ):
-    results_dict["CramersV"] = cramers_v(cluster_labels_true, cluster_labels_pred)[0]
+    results_dict["CramersV"] = cramers_v_corrected_stat(
+        cluster_labels_true, cluster_labels_pred
+    )[0]
     results_dict["Fowlkes-Mallows"] = fowlkes_mallows_score(
         cluster_labels_true, cluster_labels_pred
     )
