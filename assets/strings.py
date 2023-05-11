@@ -3,13 +3,6 @@
 ######################
 
 
-class in_cluster:
-    class models:
-        assert_model_message = (
-            "Unrecognized value, model should be one of the following: "
-        )
-
-
 class in_utils:
     class preprocessing:
         assert_imputation_categorical = "Unrecognized value, 'imputation_categorical' should be one of the following: "
