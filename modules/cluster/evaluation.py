@@ -25,176 +25,181 @@ from sklearn.utils import resample
 # Import libraries for debugging
 
 
-def clustering(
-    data: iter,
-    imputation_numeric: str,
-    imputation_categorical: str,
-    scaler: str,
-    models_to_be_evaluated: list,
-    n_cluster_min: int,
-    n_cluster_max: int,
-    n_bootstrap_samples: int,
-    n_consecutive_bootstraps_without_improvement: int,
-    n_consecutive_clusters_without_improvement: int,
-    monitor_metric: str,
-):
-    cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
-    cols_cat = data.select_dtypes(
-        include=["object", "category", "bool"]
-    ).columns.to_list()
+class clustering:
+    def __init__(
+        self,
+        data: iter,
+        imputation_numeric: str,
+        imputation_categorical: str,
+        scaler: str,
+        models_to_be_evaluated: list,
+        n_cluster_min: int,
+        n_cluster_max: int,
+        n_bootstrap_samples: int,
+        n_consecutive_bootstraps_without_improvement: int,
+        n_consecutive_clusters_without_improvement: int,
+        monitor_metric: str,
+    ):
+        self.models_to_be_evaluated = models_to_be_evaluated
+        self.monitor_metric = monitor_metric
+        cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
+        cols_cat = data.select_dtypes(
+            include=["object", "category", "bool"]
+        ).columns.to_list()
 
-    pipeline = data_preprocessing(
-        cols_num=cols_num,
-        cols_cat=cols_cat,
-        imputation_numeric=imputation_numeric,
-        scaler=scaler,
-        imputation_categorical=imputation_categorical,
-        one_hot_encoding=True,
-    )
+        self.pipeline = data_preprocessing(
+            cols_num=cols_num,
+            cols_cat=cols_cat,
+            imputation_numeric=imputation_numeric,
+            scaler=scaler,
+            imputation_categorical=imputation_categorical,
+            one_hot_encoding=True,
+        )
 
-    data_prep = pipeline.fit_transform(data)
-    # Get labels of all features
-    labels = _get_feature_names_after_preprocessing(pipeline, includes_model=False)
-    # Convert output to Dataframe and add columns names
-    data_prep = pd.DataFrame(data_prep, columns=labels, index=data.index)
-    # Initiate list to collect the results
-    results_list = []
-    # Get list of models
-    models = cluster_models_to_evaluate(models=models_to_be_evaluated)
-    for name, model in models:
-        if (name == "DBSCAN") & (n_bootstrap_samples == 0):
-            # Fit the model, compute and append the scores
-            cluster_labels = model.fit_predict(data_prep)
-            results_dict = _compute_scores(
-                data=data_prep,
-                model_name=name,
-                cluster_labels=cluster_labels,
-                n_cluster=len(np.unique(model.labels_)),
-            )
-            results_list.append(results_dict)
-        elif (name == "DBSCAN") & (n_bootstrap_samples > 0):
-            coefficients_of_variation_list = []
-            for n_bootstrap in range(1, n_bootstrap_samples + 1):
-                # Create a resampled DataFrame
-                data_bootstrap = resample(
-                    data_prep, replace=True, random_state=n_bootstrap
-                )
+        data_prep = self.pipeline.fit_transform(data)
+        # Get labels of all features
+        labels = _get_feature_names_after_preprocessing(
+            self.pipeline,
+            includes_model=False,
+        )
+        # Convert output to Dataframe and add columns names
+        data_prep = pd.DataFrame(data_prep, columns=labels, index=data.index)
+        # Initiate list to collect the results
+        results_list = []
+        # Get list of models
+        models = cluster_models_to_evaluate(models=self.models_to_be_evaluated)
+        for name, model in models:
+            if (name == "DBSCAN") & (n_bootstrap_samples == 0):
                 # Fit the model, compute and append the scores
-                cluster_labels = model.fit_predict(data_bootstrap)
+                cluster_labels = model.fit_predict(data_prep)
                 results_dict = _compute_scores(
-                    data=data_bootstrap,
+                    data=data_prep,
                     model_name=name,
                     cluster_labels=cluster_labels,
                     n_cluster=len(np.unique(model.labels_)),
                 )
                 results_list.append(results_dict)
-                # Every 50 bootstrap replicates, monitor convergence and stop if there is no improvement
-                # in the Silhouette score
-                if (n_consecutive_bootstraps_without_improvement is not None) & (
-                    n_bootstrap % 50 == 0
-                ):
-                    results_temp = pd.DataFrame.from_dict(results_list)
-                    coefficients_of_variation_temp = abs(
-                        np.std(results_temp[monitor_metric])
-                        / np.mean(results_temp[monitor_metric])
+            elif (name == "DBSCAN") & (n_bootstrap_samples > 0):
+                coefficients_of_variation_list = []
+                for n_bootstrap in range(1, n_bootstrap_samples + 1):
+                    # Create a resampled DataFrame
+                    data_bootstrap = resample(
+                        data_prep, replace=True, random_state=n_bootstrap
                     )
-                    coefficients_of_variation_list.append(
-                        coefficients_of_variation_temp
-                    )
-                    print("Bootstrap: ", n_bootstrap)
-                    print("cv: ", coefficients_of_variation_temp)
-                    if _monitor_convergence(
-                        coefficients_of_variation_list,
-                        n_consecutive_bootstraps_without_improvement,
-                        False,
-                    ):
-                        break
-        else:
-            monitor_metrics_per_cluster_list = []
-            for n_cluster in range(n_cluster_min, n_cluster_max + 1):
-                if name in MODELS_WITH_N_COMPONENTS:
-                    model.set_params(**{"n_components": n_cluster})
-                elif name in MODELS_WITH_N_CLUSTER:
-                    model.set_params(**{"n_clusters": n_cluster})
-                # Compute the scores
-                if n_bootstrap_samples == 0:
-                    # Fit the model and append the scores
-                    cluster_labels = model.fit_predict(data_prep)
+                    # Fit the model, compute and append the scores
+                    cluster_labels = model.fit_predict(data_bootstrap)
                     results_dict = _compute_scores(
-                        data=data_prep,
+                        data=data_bootstrap,
                         model_name=name,
                         cluster_labels=cluster_labels,
-                        n_cluster=n_cluster,
+                        n_cluster=len(np.unique(model.labels_)),
                     )
                     results_list.append(results_dict)
-                else:
-                    monitor_coefficients_of_variation_list = []
-                    for n_bootstrap in range(1, n_bootstrap_samples + 1):
-                        # Create a resampled DataFrame
-                        data_bootstrap = resample(
-                            data_prep, replace=True, random_state=n_bootstrap
+                    # Every 50 bootstrap replicates, monitor convergence and stop if there is no improvement
+                    # in the Silhouette score
+                    if (n_consecutive_bootstraps_without_improvement is not None) & (
+                        n_bootstrap % 50 == 0
+                    ):
+                        results_temp = pd.DataFrame.from_dict(results_list)
+                        coefficients_of_variation_temp = abs(
+                            np.std(results_temp[self.monitor_metric])
+                            / np.mean(results_temp[self.monitor_metric])
                         )
+                        coefficients_of_variation_list.append(
+                            coefficients_of_variation_temp
+                        )
+                        print("Bootstrap: ", n_bootstrap)
+                        print("cv: ", coefficients_of_variation_temp)
+                        if _monitor_convergence(
+                            coefficients_of_variation_list,
+                            n_consecutive_bootstraps_without_improvement,
+                            False,
+                        ):
+                            break
+            else:
+                monitor_metrics_per_cluster_list = []
+                for n_cluster in range(n_cluster_min, n_cluster_max + 1):
+                    if name in MODELS_WITH_N_COMPONENTS:
+                        model.set_params(**{"n_components": n_cluster})
+                    elif name in MODELS_WITH_N_CLUSTER:
+                        model.set_params(**{"n_clusters": n_cluster})
+                    # Compute the scores
+                    if n_bootstrap_samples == 0:
                         # Fit the model and append the scores
-                        cluster_labels = model.fit_predict(data_bootstrap)
+                        cluster_labels = model.fit_predict(data_prep)
                         results_dict = _compute_scores(
-                            data=data_bootstrap,
+                            data=data_prep,
                             model_name=name,
                             cluster_labels=cluster_labels,
                             n_cluster=n_cluster,
                         )
                         results_list.append(results_dict)
-                        # Every 50 bootstrap replicates, monitor convergence and stop if there is no improvement
-                        # in the coefficients of variation of the selected metric
-                        # Citation 50 bootstrap replicates criterion: Pattengale, N. D., Alipour, M., Bininda-Emonds, O. R. P., Moret, B. M. E., & Stamatakis, A. (2010). How Many Bootstrap Replicates Are Necessary? Journal of Computational Biology, 17(3), 337–354. https://doi.org/10.1089/cmb.2009.0179 # noqa E501
-                        if (
-                            n_consecutive_bootstraps_without_improvement is not None
-                        ) & (n_bootstrap % 50 == 0):
-                            results_temp = pd.DataFrame.from_dict(results_list)
-                            coefficients_of_variation_temp = abs(
-                                np.std(results_temp[monitor_metric])
-                                / np.mean(results_temp[monitor_metric])
+                    else:
+                        monitor_coefficients_of_variation_list = []
+                        for n_bootstrap in range(1, n_bootstrap_samples + 1):
+                            # Create a resampled DataFrame
+                            data_bootstrap = resample(
+                                data_prep, replace=True, random_state=n_bootstrap
                             )
-                            monitor_coefficients_of_variation_list.append(
-                                coefficients_of_variation_temp
+                            # Fit the model and append the scores
+                            cluster_labels = model.fit_predict(data_bootstrap)
+                            results_dict = _compute_scores(
+                                data=data_bootstrap,
+                                model_name=name,
+                                cluster_labels=cluster_labels,
+                                n_cluster=n_cluster,
                             )
+                            results_list.append(results_dict)
+                            # Every 50 bootstrap replicates, monitor convergence and stop if there is no improvement
+                            # in the coefficients of variation of the selected metric
+                            # Citation 50 bootstrap replicates criterion: Pattengale, N. D., Alipour, M., Bininda-Emonds, O. R. P., Moret, B. M. E., & Stamatakis, A. (2010). How Many Bootstrap Replicates Are Necessary? Journal of Computational Biology, 17(3), 337–354. https://doi.org/10.1089/cmb.2009.0179 # noqa E501
+                            if (
+                                n_consecutive_bootstraps_without_improvement is not None
+                            ) & (n_bootstrap % 50 == 0):
+                                results_temp = pd.DataFrame.from_dict(results_list)
+                                coefficients_of_variation_temp = abs(
+                                    np.std(results_temp[self.monitor_metric])
+                                    / np.mean(results_temp[self.monitor_metric])
+                                )
+                                monitor_coefficients_of_variation_list.append(
+                                    coefficients_of_variation_temp
+                                )
+                                if _monitor_convergence(
+                                    monitor_coefficients_of_variation_list,
+                                    n_consecutive_bootstraps_without_improvement,
+                                    False,
+                                ):
+                                    break
+                        # Monitor convergence of adding clusters and stop
+                        # if there is no improvement in the selected metric
+                        if n_consecutive_clusters_without_improvement is not None:
+                            if self.monitor_metric == "Davies-Bouldin":
+                                maximize = False
+                            else:
+                                maximize = True
+                            # Create a DataFrame and filter only the specific model n_clusters
+                            df_temp = pd.DataFrame.from_dict(results_list)
+                            metric_mean = df_temp[
+                                (df_temp["model"] == name)
+                                & (df_temp["n_clusters"] == n_cluster)
+                            ][self.monitor_metric].mean()
+                            monitor_metrics_per_cluster_list.append(metric_mean)
                             if _monitor_convergence(
-                                monitor_coefficients_of_variation_list,
-                                n_consecutive_bootstraps_without_improvement,
-                                False,
+                                monitor_metrics_per_cluster_list,
+                                n_consecutive_clusters_without_improvement,
+                                maximize,
                             ):
                                 break
-                    # Monitor convergence of adding clusters and stop if there is no improvement in the selected metric
-                    if n_consecutive_clusters_without_improvement is not None:
-                        if monitor_metric == "Davies-Bouldin":
-                            maximize = False
-                        else:
-                            maximize = True
-                        # Create a DataFrame and filter only the specific model n_clusters
-                        df_temp = pd.DataFrame.from_dict(results_list)
-                        metric_mean = df_temp[
-                            (df_temp["model"] == name)
-                            & (df_temp["n_clusters"] == n_cluster)
-                        ][monitor_metric].mean()
-                        monitor_metrics_per_cluster_list.append(metric_mean)
-                        print("Metric: ", monitor_metrics_per_cluster_list)
-                        print("Maximize: ", maximize)
-                        if _monitor_convergence(
-                            monitor_metrics_per_cluster_list,
-                            n_consecutive_clusters_without_improvement,
-                            maximize,
-                        ):
-                            break
-                print(
-                    "Finished",
-                    name,
-                    "- n_cluster:",
-                    n_cluster,
-                    "- bootstrap samples: ",
-                    n_bootstrap,
-                )
-    # Convert the list of dictionaries to DataFrame
-    results_df = pd.DataFrame.from_dict(results_list)
-    return results_df
+                    print(
+                        "Finished",
+                        name,
+                        "- n_cluster:",
+                        n_cluster,
+                        "- bootstrap samples: ",
+                        n_bootstrap,
+                    )
+        # Convert the list of dictionaries to DataFrame
+        self.all_results = pd.DataFrame.from_dict(results_list)
 
 
 # Prediction-based resampling method:
