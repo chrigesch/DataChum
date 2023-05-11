@@ -7,7 +7,6 @@ from modules.classification_and_regression.cv_workflow import (
     _cv_workflow_without_pipeline,
 )
 from modules.utils.load_and_save_data import read_csv
-from assets.strings import in_classification_and_regression as string
 
 # Import the required Libraries
 import pandas as pd
@@ -89,15 +88,19 @@ class k_fold_cross_validation:
         tune_imp_categorical=False,
     ):
         # Assert input values
-        assert 0.5 <= train_size <= 0.95, string.main.assert_train_size_message
+        assert (
+            0.5 <= train_size <= 0.95
+        ), "Unrecognized value, 'train_size' should be between 0.5 and 0.95"
         if tune_imp_categorical is True:
             assert (
                 imputation_categorical is not None
-            ), string.main.assert_tune_imp_categorical
+            ), "If tune_imp_categorical=True, imputation_categorical must not be None"
         if tune_imp_numeric is True:
-            assert imputation_numeric is not None, string.main.assert_tune_imp_numeric
+            assert (
+                imputation_numeric is not None
+            ), "If tune_imp_numeric=True, imputation_numeric must not be None"
         if tune_scaler is True:
-            assert scaler is not None, string.main.assert_tune_scaler
+            assert scaler is not None, "If tune_scaler=True, scaler must not be None"
         # Constructs all the necessary attributes for the instance
         self.procedure = "k_fold"
         self.operation = operation
@@ -292,17 +295,18 @@ class nested_k_fold_cross_validation:
         if tune_imp_categorical is True:
             assert (
                 imputation_categorical is not None
-            ), string.main.assert_tune_imp_categorical
+            ), "If tune_imp_categorical=True, imputation_categorical must not be None"
         if tune_imp_numeric is True:
-            assert imputation_numeric is not None, string.main.assert_tune_imp_numeric
+            assert (
+                imputation_numeric is not None
+            ), "If tune_imp_numeric=True, imputation_numeric must not be None"
         if tune_scaler is True:
-            assert scaler is not None, string.main.assert_tune_scaler
-        assert (
-            outer_cv_folds in AVAILABLE_NUMBER_OF_OUTER_CV_FOLDS
-        ), string.main.assert_n_of_outer_cv_folds_message + str(
-            AVAILABLE_NUMBER_OF_OUTER_CV_FOLDS
+            assert scaler is not None, "If tune_scaler=True, scaler must not be None"
+        assert outer_cv_folds in AVAILABLE_NUMBER_OF_OUTER_CV_FOLDS, (
+            "Unrecognized value, 'outer_cv_folds' should be one of the following: "
+            + str(AVAILABLE_NUMBER_OF_OUTER_CV_FOLDS)
         )
-        assert outer_cv_rep >= 1, string.main.assert_n_of_outer_cv_repetitions
+        assert outer_cv_rep >= 1, "Unrecognized value, 'outer_cv_rep' should be >= 1"
         # Constructs all the necessary attributes for the instance
         self.procedure = "nested"
         self.operation = operation
