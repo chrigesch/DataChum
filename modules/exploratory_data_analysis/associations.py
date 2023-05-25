@@ -167,8 +167,9 @@ def cramers_v_corrected_stat(var1, var2):
     minDim = min((kcorr - 1), (rcorr - 1))
     # To prevent division by zero
     if minDim == 0:
-        minDim = 1
-    cramers_v_score = np.sqrt(phi2corr / minDim)
+        cramers_v_score = 0
+    else:
+        cramers_v_score = np.sqrt(phi2corr / minDim)
     return cramers_v_score, pvalue
 
 
