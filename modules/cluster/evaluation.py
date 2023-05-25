@@ -25,8 +25,7 @@ def box_plot(
         color_discrete_sequence=list_colors,
         color="n_clusters",
     )
-    fig_variable.update(layout_coloraxis_showscale=False)
-    fig_variable.update_layout(xaxis_type="category")
+    fig_variable.update_layout(xaxis_type="category", showlegend=False)
     fig_variable.update_layout(width=600, height=400)
     return fig_variable
 
@@ -49,7 +48,7 @@ def main():
         ],  # 'GaussianNaiveBayes' | 'LightGBM'
         inner_cv_folds=5,
         inner_cv_rep=1,
-        n_consecutive_clusters_without_improvement=5,
+        n_consecutive_clusters_without_improvement=4,
         monitor_metric="Silhouette",
     )
 
@@ -61,7 +60,7 @@ def main():
         data=clustering_cv_instance.results_cv,
         model_to_be_plotted="AgglomerativeClustering_single",
         score_to_be_plotted="Silhouette",
-        color="viridis",
+        color="hot",  # "hot" | "magma" | "viridis"
     )
 
     return figure_to_plot.show()
