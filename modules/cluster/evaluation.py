@@ -11,12 +11,10 @@ from modules.utils.load_and_save_data import read_csv
 
 
 def box_plot(
-    data: pd.DataFrame,
-    model_to_be_plotted: str,
-    score_to_be_plotted: str,
+    data: pd.DataFrame, model_to_be_plotted: str, score_to_be_plotted: str, color: str
 ):
     list_colors = get_color(
-        "viridis",
+        color,
         len(data[data["model"] == model_to_be_plotted]["n_clusters"].dropna().unique()),
     )
 
@@ -63,6 +61,7 @@ def main():
         data=clustering_cv_instance.results_cv,
         model_to_be_plotted="AgglomerativeClustering_single",
         score_to_be_plotted="Silhouette",
+        color="viridis",
     )
 
     return figure_to_plot.show()
