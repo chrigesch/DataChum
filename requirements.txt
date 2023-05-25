@@ -19,7 +19,7 @@ scipy==1.10.1
 seaborn==0.12.2
 shap==0.40.0
 statsmodels==0.13.5
-streamlit==1.19.0
+streamlit==1.22.0
 tensorflow==2.11.0
 xgboost==1.7.1
 yellowbrick==1.5
