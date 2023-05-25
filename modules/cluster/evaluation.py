@@ -26,7 +26,6 @@ def box_plot(
         color="n_clusters",
     )
     fig_variable.update_layout(xaxis_type="category", showlegend=False)
-    fig_variable.update_layout(width=600, height=400)
     return fig_variable
 
 
