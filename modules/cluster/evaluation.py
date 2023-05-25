@@ -11,7 +11,7 @@ from modules.utils.load_and_save_data import read_csv
 
 
 def box_plot(
-    data: pd.Dataframe,
+    data: pd.DataFrame,
     model_to_be_plotted: str,
     score_to_be_plotted: str,
 ):
@@ -36,29 +36,34 @@ def box_plot(
 def main():
     data = read_csv("data/data_c_and_r_with_missings.csv").drop("Loan_ID", axis=1)
 
-    results_clustering_cv = clustering_cross_validation(
+    clustering_cv_instance = clustering_cross_validation(
         data=data,
         imputation_numeric="most_frequent",
         imputation_categorical="most_frequent",
         scaler="zscore",
         cluster_models=[
             "AgglomerativeClustering_single",
-            "SpectralClustering_nearest_neighbors",
         ],  # 'DBSCAN' | 'AgglomerativeClustering_single' | 'SpectralClustering_nearest_neighbors' | 'SpectralClustering_rbf' | AVAILABLE_MODELS_CLUSTER
         n_cluster_min=2,
         n_cluster_max=8,
         classification_model=[
             "GaussianNaiveBayes"
         ],  # 'GaussianNaiveBayes' | 'LightGBM'
-        inner_cv_folds=10,
-        inner_cv_rep=5,
+        inner_cv_folds=5,
+        inner_cv_rep=1,
+        n_consecutive_clusters_without_improvement=5,
+        monitor_metric="Silhouette",
     )
 
-    results_clustering_cv.results_cv.groupby(
+    clustering_cv_instance.results_cv.groupby(
         by=["model", "n_clusters"]
     ).mean().sort_values(by="Silhouette", ascending=False).reset_index()
 
-    figure_to_plot = box_plot(results_clustering_cv)
+    figure_to_plot = box_plot(
+        data=clustering_cv_instance.results_cv,
+        model_to_be_plotted="AgglomerativeClustering_single",
+        score_to_be_plotted="Silhouette",
+    )
 
     return figure_to_plot.show()
 
