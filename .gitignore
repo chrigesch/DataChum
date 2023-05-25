@@ -1,10 +1,4 @@
 __pycache__/
-assets/__pycache__
 data
-modules/classification_and_regression/__pycache__
-modules/cluster/__pycache__
-modules/exploratory_data_analysis/__pycache__
-modules/utils/__pycache__
-pages_/__pycache__
 notebooks
 .vscode
