@@ -7,8 +7,6 @@ import plotly.express as px
 from sklearn.preprocessing import MinMaxScaler
 
 # Import libraries for debugging
-from modules.cluster.main import clustering, clustering_cross_validation
-from modules.utils.load_and_save_data import read_csv
 
 
 def box_plot(
