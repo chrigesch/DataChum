@@ -11,7 +11,10 @@ from modules.utils.load_and_save_data import read_csv
 
 
 def box_plot(
-    data: pd.DataFrame, model_to_be_plotted: str, score_to_be_plotted: str, color: str
+    data: pd.DataFrame,
+    model_to_be_plotted: str,
+    score_to_be_plotted: str,
+    color: str,
 ):
     list_colors = get_color(
         color,
