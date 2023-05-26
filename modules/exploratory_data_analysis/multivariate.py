@@ -90,6 +90,16 @@ def plot_bubble_chart(
     return fig_variable
 
 
+AVAILABLE_MANIFOLD_IMPLEMENTATIONS = (
+    "lle",
+    "modified",
+    "isomap",
+    "mds",
+    "spectral",
+    "tsne",
+)
+
+
 @st.cache_data(ttl=3600, max_entries=10)
 def plot_manifold(data, target_variable, operation, manifold, n_neighbors):
     # Drop all rows with NaNs in target_Variable
