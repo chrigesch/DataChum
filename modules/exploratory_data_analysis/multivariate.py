@@ -23,7 +23,12 @@ from modules.utils.load_and_save_data import read_csv
 
 @st.cache_data(ttl=3600, max_entries=10)
 def plot_num_with_grouping_variable(
-    data, var_num, var_group: str, barmode: str, color: str, template: str
+    data,
+    var_num,
+    var_group: str,
+    barmode: str,
+    color: str,
+    template: str,
 ):
     data_to_be_plotted = (
         data[[var_group] + var_num].groupby(by=var_group).mean().reset_index()
@@ -101,7 +106,13 @@ AVAILABLE_MANIFOLD_IMPLEMENTATIONS = (
 
 
 @st.cache_data(ttl=3600, max_entries=10)
-def plot_manifold(data, target_variable, operation, manifold, n_neighbors):
+def plot_manifold(
+    data,
+    target_variable,
+    operation,
+    manifold,
+    n_neighbors,
+):
     # Drop all rows with NaNs in target_Variable
     data = data.dropna(subset=target_variable)
     # Separate X and y
@@ -144,7 +155,13 @@ def plot_manifold(data, target_variable, operation, manifold, n_neighbors):
 
 @st.cache_data(ttl=3600, max_entries=10)
 def plot_pca_2d(
-    data, data_pca, exp_var_pc_1, exp_var_pc_2, target: str, color: str, template: str
+    data,
+    data_pca,
+    exp_var_pc_1,
+    exp_var_pc_2,
+    target: str,
+    color: str,
+    template: str,
 ):
     cols_cat = data.select_dtypes(
         include=["object", "category", "bool"]
@@ -206,7 +223,11 @@ def plot_pca_3d(
 
 
 @st.cache_data(ttl=3600, max_entries=10)
-def plot_pca_explained_variances(data_to_plot, color: str, template: str):
+def plot_pca_explained_variances(
+    data_to_plot,
+    color: str,
+    template: str,
+):
     fig_variable = px.line(
         data_to_plot,
         x="index",
@@ -226,7 +247,12 @@ def plot_pca_explained_variances(data_to_plot, color: str, template: str):
 
 @st.cache_data(ttl=3600, max_entries=10)
 def plot_random_feature_dropping_curve(
-    data, target_variable, operation, evaluation_score, average="macro", cv_folds=10
+    data,
+    target_variable,
+    operation,
+    evaluation_score,
+    average="macro",
+    cv_folds=10,
 ):
     # Drop all rows with NaNs in target_Variable
     data = data.dropna(subset=target_variable)
