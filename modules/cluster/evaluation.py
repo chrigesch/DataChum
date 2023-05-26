@@ -32,6 +32,27 @@ def box_plot(
     return fig_variable
 
 
+def line_plot(
+    data: pd.DataFrame,
+    x: str,
+    y: str,
+    traces: str,
+    color: str,
+):
+    list_colors = get_color(color, len(data[traces].unique()))
+
+    fig_variable = px.line(
+        data,
+        x=x,
+        y=y,
+        color=traces,
+        color_discrete_sequence=list_colors,
+    )
+
+    fig_variable.update_layout(xaxis_type="category", showlegend=True)
+    return fig_variable
+
+
 def main():
     data = read_csv("data/data_c_and_r_with_missings.csv").drop("Loan_ID", axis=1)
 
