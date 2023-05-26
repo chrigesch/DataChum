@@ -53,6 +53,10 @@ def line_plot(
     return fig_variable
 
 
+def prepare_results_for_line_plot_models(data: pd.DataFrame):
+    return data.groupby(by=["model", "n_clusters"]).mean().reset_index()
+
+
 def main():
     data = read_csv("data/data_c_and_r_with_missings.csv").drop("Loan_ID", axis=1)
 
