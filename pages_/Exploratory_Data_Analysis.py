@@ -9,6 +9,7 @@ from modules.exploratory_data_analysis.associations import (
     plot_heatmap,
 )
 from modules.exploratory_data_analysis.multivariate import (
+    AVAILABLE_MANIFOLD_IMPLEMENTATIONS,
     plot_bubble_chart,
     plot_manifold,
     plot_num_with_grouping_variable,
@@ -1745,14 +1746,7 @@ def main():
                         )
                         selectbox_manifold = st.selectbox(
                             label="Select the manifold implementation",
-                            options=[
-                                "lle",
-                                "modified",
-                                "isomap",
-                                "mds",
-                                "spectral",
-                                "tsne",
-                            ],
+                            options=AVAILABLE_MANIFOLD_IMPLEMENTATIONS,
                         )
                         # Compute square root of the number of observations
                         square_root_n_observations = int(sqrt(len(data)))
