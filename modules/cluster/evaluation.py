@@ -17,30 +17,9 @@ import plotly.express as px
 import plotly.graph_objs as go
 from sklearn.metrics import silhouette_samples, silhouette_score
 from sklearn.preprocessing import MinMaxScaler
+import streamlit as st
 
 # Import libraries for debugging
-
-
-def box_plot(
-    data: pd.DataFrame,
-    model_to_be_plotted: str,
-    score_to_be_plotted: str,
-    color: str,
-):
-    list_colors = get_color(
-        color,
-        len(data[data["model"] == model_to_be_plotted]["n_clusters"].dropna().unique()),
-    )
-
-    fig_variable = px.box(
-        data,
-        x="n_clusters",
-        y=score_to_be_plotted,
-        color_discrete_sequence=list_colors,
-        color="n_clusters",
-    )
-    fig_variable.update_layout(xaxis_type="category", showlegend=False)
-    return fig_variable
 
 
 def line_plot(
@@ -64,85 +43,17 @@ def line_plot(
     return fig_variable
 
 
-def prepare_results_for_line_plot_metrics(
-    data: pd.DataFrame,
-    model: str,
-):
-    # Initiate list with id variables
-    cols_id = ["model", "n_clusters"]
-    # Get all column names
-    cols_all = data.columns.to_list()
-    # Filter the selected model
-    data = data[data["model"] == model]
-    # Compute means of all folds, repetitions or bootstrap samples
-    data = data.groupby(by=cols_id).mean().reset_index()
-    # Apply MinMax-Scaler to "Calinski-Harabasz" & "Davies-Bouldin"
-    if "Calinski-Harabasz" in cols_all:
-        data["Calinski-Harabasz"] = MinMaxScaler().fit_transform(
-            data["Calinski-Harabasz"].values.reshape(-1, 1)
-        )
-    if "Davies-Bouldin" in cols_all:
-        data["Davies-Bouldin"] = MinMaxScaler().fit_transform(
-            data["Davies-Bouldin"].values.reshape(-1, 1)
-        )
-    # Get only metric columns
-    cols_metrics = [element for element in cols_all if element not in cols_id]
-    # Melt columns and change column names
-    data_prep = data.melt(id_vars=cols_id, value_vars=cols_metrics)
-    data_prep.columns = ["model", "n_clusters", "metric", "scaled_score"]
-    return data_prep
-
-
-def prepare_results_for_line_plot_models(data: pd.DataFrame):
-    return data.groupby(by=["model", "n_clusters"]).mean().reset_index()
-
-
 def silhouette_plot(
-    data: pd.DataFrame,
-    imputation_numerical: str,
-    imputation_categorical: str,
-    scaler: str,
+    X_prep: pd.DataFrame,
     cluster_model: str,
-    n_clusters: int,
+    cluster_labels: np.ndarray,
     color: str,
 ):
-    # Get categorical and numerical column names
-    cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
-    cols_cat = data.select_dtypes(
-        include=["object", "category", "bool"]
-    ).columns.to_list()
-    pipeline = data_preprocessing(
-        cols_num=cols_num,
-        cols_cat=cols_cat,
-        imputation_numeric=imputation_numerical,
-        scaler=scaler,
-        imputation_categorical=imputation_categorical,
-        one_hot_encoding=True,
-    )
-    # Data preparation
-    data_prep = pipeline.fit_transform(data)
-    # Get labels of all features
-    labels = _get_feature_names_after_preprocessing(
-        pipeline,
-        includes_model=False,
-    )
-    # Convert output to Dataframe and add columns names
-    data_prep = pd.DataFrame(data_prep, columns=labels, index=data.index)
-
-    # Get cluster model
-    model_list = cluster_models_to_evaluate(models=cluster_model)[0]
-    model_name = model_list[0]
-    model = model_list[1]
-    if model_name in MODELS_WITH_N_COMPONENTS:
-        model.set_params(**{"n_components": n_clusters})
-    elif model_name in MODELS_WITH_N_CLUSTER:
-        model.set_params(**{"n_clusters": n_clusters})
-    # Fit the model to get the cluster labels
-    cluster_labels = model.fit_predict(data_prep)
+    n_clusters = len(np.unique(cluster_labels))
     # Compute the average silhouette_score
-    silhouette_avg = silhouette_score(data_prep, cluster_labels)
+    silhouette_avg = silhouette_score(X_prep, cluster_labels)
     # Compute the silhouette scores for each sample
-    sample_silhouette_values = silhouette_samples(data_prep, cluster_labels)
+    sample_silhouette_values = silhouette_samples(X_prep, cluster_labels)
     # Initiate list of colors
     list_colors = get_color(color, n_clusters)
     # Create a plot & update title
@@ -183,11 +94,88 @@ def silhouette_plot(
     fig.update_yaxes(
         title="Cluster label",
         showticklabels=False,
-        range=[0, len(data_prep) + (n_clusters + 1) * 10],
+        range=[0, len(X_prep) + (n_clusters + 1) * 10],
     )
 
     fig.update_layout(
-        title=str(model_name) + " - Silhouette plot for the various clusters"
+        title=str(cluster_model) + " - Silhouette plot for the various clusters"
     )
 
     return fig
+
+
+@st.cache_data(ttl=3600, max_entries=10)
+def get_cluster_labels_and_X_prep(
+    data: pd.DataFrame,
+    imputation_numerical: str,
+    imputation_categorical: str,
+    scaler: str,
+    cluster_model: list,
+    n_clusters: int,
+):
+    # Get categorical and numerical column names
+    cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
+    cols_cat = data.select_dtypes(
+        include=["object", "category", "bool"]
+    ).columns.to_list()
+    pipeline = data_preprocessing(
+        cols_num=cols_num,
+        cols_cat=cols_cat,
+        imputation_numeric=imputation_numerical,
+        scaler=scaler,
+        imputation_categorical=imputation_categorical,
+        one_hot_encoding=True,
+    )
+    # Data preparation
+    data_prep = pipeline.fit_transform(data)
+    # Get labels of all features
+    labels = _get_feature_names_after_preprocessing(
+        pipeline,
+        includes_model=False,
+    )
+    # Convert output to Dataframe and add columns names
+    data_prep = pd.DataFrame(data_prep, columns=labels, index=data.index)
+    # Get cluster model
+    model_list = cluster_models_to_evaluate(models=cluster_model)[0]
+    model_name = model_list[0]
+    model = model_list[1]
+    if model_name in MODELS_WITH_N_COMPONENTS:
+        model.set_params(**{"n_components": n_clusters})
+    elif model_name in MODELS_WITH_N_CLUSTER:
+        model.set_params(**{"n_clusters": n_clusters})
+    # Fit the model to get the cluster labels
+    cluster_labels = model.fit_predict(data_prep)
+    return cluster_labels, data_prep
+
+
+def prepare_results_for_line_plot_metrics(
+    data: pd.DataFrame,
+    model: str,
+):
+    # Initiate list with id variables
+    cols_id = ["model", "n_clusters"]
+    # Get all column names
+    cols_all = data.columns.to_list()
+    # Filter the selected model
+    data = data[data["model"] == model]
+    # Compute means of all folds, repetitions or bootstrap samples
+    data = data.groupby(by=cols_id).mean().reset_index()
+    # Apply MinMax-Scaler to "Calinski-Harabasz" & "Davies-Bouldin"
+    if "Calinski-Harabasz" in cols_all:
+        data["Calinski-Harabasz"] = MinMaxScaler().fit_transform(
+            data["Calinski-Harabasz"].values.reshape(-1, 1)
+        )
+    if "Davies-Bouldin" in cols_all:
+        data["Davies-Bouldin"] = MinMaxScaler().fit_transform(
+            data["Davies-Bouldin"].values.reshape(-1, 1)
+        )
+    # Get only metric columns
+    cols_metrics = [element for element in cols_all if element not in cols_id]
+    # Melt columns and change column names
+    data_prep = data.melt(id_vars=cols_id, value_vars=cols_metrics)
+    data_prep.columns = ["model", "n_clusters", "metric", "scaled_score"]
+    return data_prep
+
+
+def prepare_results_for_line_plot_models(data: pd.DataFrame):
+    return data.groupby(by=["model", "n_clusters"]).mean().reset_index()
