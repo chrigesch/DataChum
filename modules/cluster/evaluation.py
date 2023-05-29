@@ -17,6 +17,7 @@ import plotly.express as px
 import plotly.graph_objs as go
 from sklearn.metrics import silhouette_samples, silhouette_score
 from sklearn.preprocessing import MinMaxScaler
+import streamlit as st
 
 # Import libraries for debugging
 
@@ -103,6 +104,7 @@ def silhouette_plot(
     return fig
 
 
+@st.cache_data(ttl=3600, max_entries=10)
 def get_cluster_labels_and_X_prep(
     data: pd.DataFrame,
     imputation_numerical: str,
