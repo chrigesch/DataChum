@@ -21,28 +21,6 @@ from sklearn.preprocessing import MinMaxScaler
 # Import libraries for debugging
 
 
-def box_plot(
-    data: pd.DataFrame,
-    model_to_be_plotted: str,
-    score_to_be_plotted: str,
-    color: str,
-):
-    list_colors = get_color(
-        color,
-        len(data[data["model"] == model_to_be_plotted]["n_clusters"].dropna().unique()),
-    )
-
-    fig_variable = px.box(
-        data,
-        x="n_clusters",
-        y=score_to_be_plotted,
-        color_discrete_sequence=list_colors,
-        color="n_clusters",
-    )
-    fig_variable.update_layout(xaxis_type="category", showlegend=False)
-    return fig_variable
-
-
 def line_plot(
     data: pd.DataFrame,
     x: str,
