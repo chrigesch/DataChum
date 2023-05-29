@@ -64,39 +64,6 @@ def line_plot(
     return fig_variable
 
 
-def prepare_results_for_line_plot_metrics(
-    data: pd.DataFrame,
-    model: str,
-):
-    # Initiate list with id variables
-    cols_id = ["model", "n_clusters"]
-    # Get all column names
-    cols_all = data.columns.to_list()
-    # Filter the selected model
-    data = data[data["model"] == model]
-    # Compute means of all folds, repetitions or bootstrap samples
-    data = data.groupby(by=cols_id).mean().reset_index()
-    # Apply MinMax-Scaler to "Calinski-Harabasz" & "Davies-Bouldin"
-    if "Calinski-Harabasz" in cols_all:
-        data["Calinski-Harabasz"] = MinMaxScaler().fit_transform(
-            data["Calinski-Harabasz"].values.reshape(-1, 1)
-        )
-    if "Davies-Bouldin" in cols_all:
-        data["Davies-Bouldin"] = MinMaxScaler().fit_transform(
-            data["Davies-Bouldin"].values.reshape(-1, 1)
-        )
-    # Get only metric columns
-    cols_metrics = [element for element in cols_all if element not in cols_id]
-    # Melt columns and change column names
-    data_prep = data.melt(id_vars=cols_id, value_vars=cols_metrics)
-    data_prep.columns = ["model", "n_clusters", "metric", "scaled_score"]
-    return data_prep
-
-
-def prepare_results_for_line_plot_models(data: pd.DataFrame):
-    return data.groupby(by=["model", "n_clusters"]).mean().reset_index()
-
-
 def silhouette_plot(
     X_prep: pd.DataFrame,
     cluster_model: str,
@@ -199,3 +166,36 @@ def get_cluster_labels_and_X_prep(
     # Fit the model to get the cluster labels
     cluster_labels = model.fit_predict(data_prep)
     return cluster_labels, data_prep
+
+
+def prepare_results_for_line_plot_metrics(
+    data: pd.DataFrame,
+    model: str,
+):
+    # Initiate list with id variables
+    cols_id = ["model", "n_clusters"]
+    # Get all column names
+    cols_all = data.columns.to_list()
+    # Filter the selected model
+    data = data[data["model"] == model]
+    # Compute means of all folds, repetitions or bootstrap samples
+    data = data.groupby(by=cols_id).mean().reset_index()
+    # Apply MinMax-Scaler to "Calinski-Harabasz" & "Davies-Bouldin"
+    if "Calinski-Harabasz" in cols_all:
+        data["Calinski-Harabasz"] = MinMaxScaler().fit_transform(
+            data["Calinski-Harabasz"].values.reshape(-1, 1)
+        )
+    if "Davies-Bouldin" in cols_all:
+        data["Davies-Bouldin"] = MinMaxScaler().fit_transform(
+            data["Davies-Bouldin"].values.reshape(-1, 1)
+        )
+    # Get only metric columns
+    cols_metrics = [element for element in cols_all if element not in cols_id]
+    # Melt columns and change column names
+    data_prep = data.melt(id_vars=cols_id, value_vars=cols_metrics)
+    data_prep.columns = ["model", "n_clusters", "metric", "scaled_score"]
+    return data_prep
+
+
+def prepare_results_for_line_plot_models(data: pd.DataFrame):
+    return data.groupby(by=["model", "n_clusters"]).mean().reset_index()
