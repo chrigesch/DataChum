@@ -98,51 +98,16 @@ def prepare_results_for_line_plot_models(data: pd.DataFrame):
 
 
 def silhouette_plot(
-    data: pd.DataFrame,
-    imputation_numerical: str,
-    imputation_categorical: str,
-    scaler: str,
+    X_prep: pd.DataFrame,
     cluster_model: str,
-    n_clusters: int,
+    cluster_labels: np.ndarray,
     color: str,
 ):
-    # Get categorical and numerical column names
-    cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
-    cols_cat = data.select_dtypes(
-        include=["object", "category", "bool"]
-    ).columns.to_list()
-    pipeline = data_preprocessing(
-        cols_num=cols_num,
-        cols_cat=cols_cat,
-        imputation_numeric=imputation_numerical,
-        scaler=scaler,
-        imputation_categorical=imputation_categorical,
-        one_hot_encoding=True,
-    )
-    # Data preparation
-    data_prep = pipeline.fit_transform(data)
-    # Get labels of all features
-    labels = _get_feature_names_after_preprocessing(
-        pipeline,
-        includes_model=False,
-    )
-    # Convert output to Dataframe and add columns names
-    data_prep = pd.DataFrame(data_prep, columns=labels, index=data.index)
-
-    # Get cluster model
-    model_list = cluster_models_to_evaluate(models=cluster_model)[0]
-    model_name = model_list[0]
-    model = model_list[1]
-    if model_name in MODELS_WITH_N_COMPONENTS:
-        model.set_params(**{"n_components": n_clusters})
-    elif model_name in MODELS_WITH_N_CLUSTER:
-        model.set_params(**{"n_clusters": n_clusters})
-    # Fit the model to get the cluster labels
-    cluster_labels = model.fit_predict(data_prep)
+    n_clusters = len(np.unique(cluster_labels))
     # Compute the average silhouette_score
-    silhouette_avg = silhouette_score(data_prep, cluster_labels)
+    silhouette_avg = silhouette_score(X_prep, cluster_labels)
     # Compute the silhouette scores for each sample
-    sample_silhouette_values = silhouette_samples(data_prep, cluster_labels)
+    sample_silhouette_values = silhouette_samples(X_prep, cluster_labels)
     # Initiate list of colors
     list_colors = get_color(color, n_clusters)
     # Create a plot & update title
@@ -183,11 +148,11 @@ def silhouette_plot(
     fig.update_yaxes(
         title="Cluster label",
         showticklabels=False,
-        range=[0, len(data_prep) + (n_clusters + 1) * 10],
+        range=[0, len(X_prep) + (n_clusters + 1) * 10],
     )
 
     fig.update_layout(
-        title=str(model_name) + " - Silhouette plot for the various clusters"
+        title=str(cluster_model) + " - Silhouette plot for the various clusters"
     )
 
     return fig
