@@ -93,7 +93,7 @@ def eda_overview_detailed(
     # Alerts that are valid for all columns
     for column in cols_all:
         # Analyze whether column only contains one value
-        if len(data[column].unique()) == 1:
+        if len(data[column].value_counts()) == 1:
             list_variable.append(column)
             list_alerts.append("Constant")
             list_details.append(
