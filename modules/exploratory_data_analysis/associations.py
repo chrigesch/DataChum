@@ -179,16 +179,22 @@ def eta_square_root(categorical_var, numerical_var):
     """
     # Perform one-way ANOVA
     groups = categorical_var.unique()
-    data_grouped = [numerical_var[categorical_var == group] for group in groups]
-    f_value, pvalue = f_oneway(*data_grouped)
-    # Calculate degrees of freedom
-    df_between = len(groups) - 1
-    df_within = len(categorical_var) - len(groups)
-    # Calculate eta square root
-    eta_square_root_score = np.sqrt(
-        (f_value * df_between) / (f_value * df_between + df_within)
-    )
-    return eta_square_root_score, pvalue
+    # If categorical variable is a constant
+    if len(groups) < 2:
+        eta_square_root_score = 0
+        pvalue = 1
+        return eta_square_root_score, pvalue
+    else:
+        data_grouped = [numerical_var[categorical_var == group] for group in groups]
+        f_value, pvalue = f_oneway(*data_grouped)
+        # Calculate degrees of freedom
+        df_between = len(groups) - 1
+        df_within = len(categorical_var) - len(groups)
+        # Calculate eta square root
+        eta_square_root_score = np.sqrt(
+            (f_value * df_between) / (f_value * df_between + df_within)
+        )
+        return eta_square_root_score, pvalue
 
 
 def main():
