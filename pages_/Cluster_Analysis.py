@@ -113,7 +113,8 @@ def main():
                 )
                 if range_min_max_clusters > 3:
                     selectbox_n_consecutive_clusters_without_improvement = st.selectbox(
-                        label="**Monitor convergence of adding clusters: Select the maximum number of consecutive attempts without improvement in the evaluation metric**",
+                        label="**Monitor convergence of adding clusters: Select the maximum number of consecutive "
+                        "attempts without improvement in the evaluation metric**",
                         options=range(1, range_min_max_clusters),
                         index=2,
                     )
@@ -134,7 +135,8 @@ def main():
                     )
                     if selectbox_n_bootstrap_samples > 200:
                         selectbox_n_consecutive_bootstraps_without_improvement = st.selectbox(
-                            label="**Every 50 bootstrap replicates, monitor convergence: Select the maximum number of consecutive attempts without improvement in the coeficient of variation**",
+                            label="**Every 50 bootstrap replicates, monitor convergence: Select the maximum number "
+                            "of consecutive attempts without improvement in the coeficient of variation**",
                             options=range(1, int(selectbox_n_bootstrap_samples / 50)),
                             index=2,
                         )
