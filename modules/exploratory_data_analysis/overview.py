@@ -1,6 +1,6 @@
 # Import moduls from local directories
 from modules.exploratory_data_analysis.associations import (
-    associations_for_categorical_and_numeric_variables,
+    associations_for_categorical_and_numerical_variables,
 )
 
 # Import the required libraries
@@ -260,7 +260,7 @@ def main():
     #    data = read_csv('data/data_c_and_r_with_missings.csv').drop('Loan_ID', axis=1)
     data = read_csv("data/data_c_and_r_complete.csv")
     # Compute associations
-    associations_df = associations_for_categorical_and_numeric_variables(data)
+    associations_df = associations_for_categorical_and_numerical_variables(data)
 
     return print(eda_overview(data)), print(
         eda_overview_detailed(data, associations_df)
