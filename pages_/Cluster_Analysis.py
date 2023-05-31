@@ -13,7 +13,7 @@ import streamlit as st
 
 
 def main():
-    st.subheader("Classification and Regression")
+    st.subheader("Cluster Analysis")
 
     # Profile the app
     #    streamlit_profiler = Profiler()
