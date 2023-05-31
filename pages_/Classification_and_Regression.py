@@ -53,7 +53,7 @@ from modules.utils.load_and_save_data import (
 )
 from modules.utils.preprocessing import (
     AVAILABLE_IMPUTATION_CATEGORICAL,
-    AVAILABLE_IMPUTATION_NUMERIC,
+    AVAILABLE_IMPUTATION_NUMERICAL,
     AVAILABLE_SCALER,
     _get_feature_names_after_preprocessing,
 )
@@ -237,7 +237,7 @@ def main():
             with col_2:
                 selectbox_imput_num = st.selectbox(
                     label="**Select the imputation strategy to use for numerical variables**",
-                    options=AVAILABLE_IMPUTATION_NUMERIC,
+                    options=AVAILABLE_IMPUTATION_NUMERICAL,
                     index=0,
                 )
                 selectbox_scaler = st.selectbox(
@@ -348,7 +348,7 @@ def main():
         with tab_s4:
             # Assign default values:
             selectbox_tune_imp_categorical = False
-            selectbox_tune_imp_numeric = False
+            selectbox_tune_imp_numerical = False
             selectbox_tune_scaler = False
             # Create two columns
             col_1, col_2 = st.columns(2)
@@ -370,7 +370,7 @@ def main():
                         options=[True, False],
                         index=1,
                     )
-                    selectbox_tune_imp_numeric = st.selectbox(
+                    selectbox_tune_imp_numerical = st.selectbox(
                         label="**Include the numerical imputer as a hyperparameter during the tuning process**",
                         options=[True, False],
                         index=1,
@@ -396,7 +396,7 @@ def main():
                         data=data,
                         target_variable=selectbox_target_variable,
                         train_size=selectbox_train_size,
-                        imputation_numeric=selectbox_imput_num,
+                        imputation_numerical=selectbox_imput_num,
                         imputation_categorical=selectbox_imput_cat,
                         scaler=selectbox_scaler,
                         one_hot_encoding=True,
@@ -408,7 +408,7 @@ def main():
                         tuning_trials=selectbox_n_tuning_trials,
                         evaluation_score=selectbox_evaluation_score,
                         average=selectbox_evaluation_average,
-                        tune_imp_numeric=selectbox_tune_imp_numeric,
+                        tune_imp_numerical=selectbox_tune_imp_numerical,
                         tune_scaler=selectbox_tune_scaler,
                         tune_imp_categorical=selectbox_tune_imp_categorical,
                     )
@@ -417,7 +417,7 @@ def main():
                         operation=operation,
                         data=data,
                         target_variable=selectbox_target_variable,
-                        imputation_numeric=selectbox_imput_num,
+                        imputation_numerical=selectbox_imput_num,
                         imputation_categorical=selectbox_imput_cat,
                         scaler=selectbox_scaler,
                         one_hot_encoding=True,
@@ -431,7 +431,7 @@ def main():
                         tuning_trials=selectbox_n_tuning_trials,
                         evaluation_score=selectbox_evaluation_score,
                         average=selectbox_evaluation_average,
-                        tune_imp_numeric=selectbox_tune_imp_numeric,
+                        tune_imp_numerical=selectbox_tune_imp_numerical,
                         tune_scaler=selectbox_tune_scaler,
                         tune_imp_categorical=selectbox_tune_imp_categorical,
                     )
