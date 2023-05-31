@@ -66,7 +66,15 @@ def main():
             cols_num_df = pd.DataFrame({"Numerical Features": cols_num})
             st.dataframe(cols_num_df, use_container_width=True)
         st.subheader("**Cluster Modeling Setup**")
-        # Create four tabs
+        # Create three tabs
+        tab_s1, tab_s2, tab_s3 = st.tabs(
+            [
+                "**Procedure**",
+                "**Preprocessing**",
+                "**Models**",
+            ]
+        )
+        # Tab 1: Procedure
 
 
 if __name__ == "__main__":
