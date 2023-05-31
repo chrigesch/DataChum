@@ -1,4 +1,9 @@
 # Import moduls from local directories
+from modules.classification_and_regression.models import AVAILABLE_MODELS_CLASSIFICATION
+from modules.cluster.metrics import (
+    AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CONVERGENCE,
+    AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CROSSVALIDATION_CONVERGENCE,
+)
 from modules.utils.load_and_save_data import (
     convert_dataframe_to_csv,
     convert_dataframe_to_xlsx,
@@ -7,6 +12,7 @@ from modules.utils.load_and_save_data import (
 )
 
 # Import the required libraries
+import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -75,6 +81,88 @@ def main():
             ]
         )
         # Tab 1: Procedure
+        with tab_s1:
+            col_1, col_2, col_3 = st.columns([1.0, 1.5, 1.5])
+            with col_1:
+                selectradio_procedure = st.radio(
+                    label="**Select the procedure**",
+                    options=[
+                        "Standart Cluster Analysis with optional bootstrapping",
+                        "Cluster Analysis using prediction-based k-fold cross-validation method",
+                    ],
+                    index=1,
+                )
+            with col_2:
+                selectbox_n_cluster_min = st.selectbox(
+                    label="**Select the minimum number of clusters**",
+                    options=range(2, len(data)),
+                    index=0,
+                )
+                selectbox_n_cluster_max = st.selectbox(
+                    label="**Select the maximum number of clusters**",
+                    options=range(selectbox_n_cluster_min, len(data) + 1),
+                    index=0,
+                )
+                range_min_max_clusters = (
+                    selectbox_n_cluster_max - selectbox_n_cluster_min
+                )
+                if range_min_max_clusters > 3:
+                    selectbox_n_consecutive_clusters_without_improvement = st.selectbox(
+                        label="**Monitor convergence of adding clusters: Select the maximum number of consecutive attempts without improvement in the evaluation metric**",
+                        options=range(1, range_min_max_clusters),
+                        index=2,
+                    )
+                else:
+                    selectbox_n_consecutive_clusters_without_improvement = (
+                        selectbox_n_cluster_max
+                    )
+            with col_3:
+                # Selectboxes for bootstrap samples and/or fold numbers
+                if (
+                    selectradio_procedure
+                    == "Standart Cluster Analysis with optional bootstrapping"
+                ):
+                    selectbox_n_bootstrap_samples = st.selectbox(
+                        label="**Select the number of bootstrap samples**",
+                        options=range(0, 5001, 50),
+                        index=0,
+                    )
+                    if selectbox_n_bootstrap_samples > 200:
+                        selectbox_n_consecutive_bootstraps_without_improvement = st.selectbox(
+                            label="**Every 50 bootstrap replicates, monitor convergence: Select the maximum number of consecutive attempts without improvement in the coeficient of variation**",
+                            options=range(1, int(selectbox_n_bootstrap_samples / 50)),
+                            index=2,
+                        )
+                    else:
+                        selectbox_n_consecutive_bootstraps_without_improvement = (
+                            selectbox_n_bootstrap_samples
+                        )
+                    # Selectboxes for evaluation metrics
+                    if (range_min_max_clusters > 3) | (
+                        selectbox_n_bootstrap_samples > 200
+                    ):
+                        selectbox_monitor_metric = st.selectbox(
+                            label="**Select the evaluation metric to monitor convergence**",
+                            options=AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CONVERGENCE,
+                            index=2,
+                        )
+                # If Cluster Analysis using prediction-based resampling method
+                else:
+                    selectbox_n_inner_cv_reps = st.selectbox(
+                        label="**Select the number of times cross-validator needs to be repeated**",
+                        options=range(1, 11, 1),
+                        index=4,
+                    )
+                    selectbox_n_inner_cv_folds = st.selectbox(
+                        label="**Select the number of folds**",
+                        options=range(5, 11, 1),
+                        index=5,
+                    )
+                    selectbox_classification_model = st.selectbox(
+                        label="**Select the classification model to use for predictions**",
+                        options=AVAILABLE_MODELS_CLASSIFICATION,
+                        index=0,
+                    )
 
 
 if __name__ == "__main__":
