@@ -168,6 +168,13 @@ def main():
                         options=AVAILABLE_MODELS_CLASSIFICATION,
                         index=0,
                     )
+                    # Selectboxes for evaluation metrics
+                    if range_min_max_clusters > 3:
+                        selectbox_monitor_metric = st.selectbox(
+                            label="**Select the evaluation metric to monitor convergence**",
+                            options=AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CROSSVALIDATION_CONVERGENCE,
+                            index=2,
+                        )
         # Tab 2: Preprocessing
         with tab_s2:
             col_1, col_2 = st.columns(2)
