@@ -7,6 +7,7 @@ from modules.utils.load_and_save_data import (
 )
 
 # Import the required libraries
+import pandas as pd
 import streamlit as st
 
 # from streamlit_profiler import Profiler
@@ -47,6 +48,25 @@ def main():
                 ":red[**Following columns have been removed as all values of the column are unique:**] "
                 + ", ".join(list_of_dropped_columns)
             )
+        # Get column names (also NUMERICAL and CATEGORICAL)
+        cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
+        cols_cat = data.select_dtypes(
+            include=["object", "category", "bool"]
+        ).columns.to_list()
+        # Create three columns
+        col_1, col_2, col_3 = st.columns(3)
+        with col_1:
+            st.markdown(
+                "Please check if the data types of the features were infered correctly (Integers will be handled as numerical variables)"  # noqa: E501
+            )
+        with col_2:
+            cols_cat_df = pd.DataFrame({"Categorical Features": cols_cat})
+            st.dataframe(cols_cat_df, use_container_width=True)
+        with col_3:
+            cols_num_df = pd.DataFrame({"Numerical Features": cols_num})
+            st.dataframe(cols_num_df, use_container_width=True)
+        st.subheader("**Cluster Modeling Setup**")
+        # Create four tabs
 
 
 if __name__ == "__main__":
