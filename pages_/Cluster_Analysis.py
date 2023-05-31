@@ -188,6 +188,72 @@ def main():
                     options=AVAILABLE_SCALER,
                     index=4,
                 )
+        # Tab 3: Models
+        with tab_s3:
+            models_to_evaluate = []
+            col_1, col_2, col_3, col_4 = st.columns(4)
+            with col_1:
+                checkbox_1 = st.checkbox("AgglomerativeClustering_average")
+                if checkbox_1:
+                    models_to_evaluate.append("AgglomerativeClustering_average")
+                checkbox_2 = st.checkbox("AgglomerativeClustering_complete")
+                if checkbox_2:
+                    models_to_evaluate.append("AgglomerativeClustering_complete")
+                checkbox_3 = st.checkbox("AgglomerativeClustering_single")
+                if checkbox_3:
+                    models_to_evaluate.append("AgglomerativeClustering_single")
+                checkbox_4 = st.checkbox("AgglomerativeClustering_ward", value=True)
+                if checkbox_4:
+                    models_to_evaluate.append("AgglomerativeClustering_ward")
+            with col_2:
+                checkbox_5 = st.checkbox("BayesianGaussianMixture_diag")
+                if checkbox_5:
+                    models_to_evaluate.append("BayesianGaussianMixture_diag")
+                checkbox_6 = st.checkbox("BayesianGaussianMixture_full")
+                if checkbox_6:
+                    models_to_evaluate.append("BayesianGaussianMixture_full")
+                checkbox_7 = st.checkbox("BayesianGaussianMixture_spherical")
+                if checkbox_7:
+                    models_to_evaluate.append("BayesianGaussianMixture_spherical")
+                checkbox_8 = st.checkbox("BayesianGaussianMixture_tied")
+                if checkbox_8:
+                    models_to_evaluate.append("BayesianGaussianMixture_tied")
+            with col_3:
+                checkbox_9 = st.checkbox("GaussianMixture_diag")
+                if checkbox_9:
+                    models_to_evaluate.append("GaussianMixture_diag")
+                checkbox_10 = st.checkbox("GaussianMixture_full")
+                if checkbox_10:
+                    models_to_evaluate.append("GaussianMixture_full")
+                checkbox_11 = st.checkbox("GaussianMixture_spherical")
+                if checkbox_11:
+                    models_to_evaluate.append("GaussianMixture_spherical")
+                checkbox_12 = st.checkbox("GaussianMixture_tied")
+                if checkbox_12:
+                    models_to_evaluate.append("GaussianMixture_tied")
+            with col_4:
+                checkbox_13 = st.checkbox(
+                    "SpectralClustering_nearest_neighbors", value=True
+                )
+                if checkbox_13:
+                    models_to_evaluate.append("SpectralClustering_nearest_neighbors")
+                checkbox_14 = st.checkbox("SpectralClustering_rbf")
+                if checkbox_14:
+                    models_to_evaluate.append("SpectralClustering_rbf")
+                checkbox_15 = st.checkbox("BIRCH")
+                if checkbox_15:
+                    models_to_evaluate.append("BIRCH")
+                checkbox_16 = st.checkbox("KMeans")
+                if checkbox_16:
+                    models_to_evaluate.append("KMeans")
+                # If standart procedure, add "DBSCAN" model (cannot be used with prediction-based)
+                if (
+                    selectradio_procedure
+                    == "Standart Cluster Analysis with optional bootstrapping"
+                ):
+                    checkbox_17 = st.checkbox("DBSCAN")
+                    if checkbox_17:
+                        models_to_evaluate.append("DBSCAN")
 
 
 if __name__ == "__main__":
