@@ -22,7 +22,7 @@ from modules.utils.load_and_save_data import read_csv
 # Pearson's R for continuous-continuous cases - Correlation Ratio for categorical-continuous cases  -
 # Cramer's V or Theil's U for categorical-categorical cases
 @st.cache_data(ttl=3600, max_entries=10)
-def associations_for_categorical_and_numeric_variables(
+def associations_for_categorical_and_numerical_variables(
     data: pd.DataFrame, num_num_method: str = "spearman"
 ):
     # Get NUMERICAL and CATEGORICAL columns
@@ -35,7 +35,7 @@ def associations_for_categorical_and_numeric_variables(
     pipeline = data_preprocessing(
         cols_num=cols_num,
         cols_cat=cols_cat,
-        imputation_numeric="most_frequent",
+        imputation_numerical="most_frequent",
         scaler=None,
         imputation_categorical="most_frequent",
         one_hot_encoding=False,
@@ -202,7 +202,7 @@ def main():
     data = read_csv("data/data_c_and_r_with_missings.csv").drop("Loan_ID", axis=1)
     #    data = read_csv('data/data_c_and_r_complete.csv')
     # Compute associations
-    associations_df = associations_for_categorical_and_numeric_variables(data)
+    associations_df = associations_for_categorical_and_numerical_variables(data)
 
     return print(associations_df.to_markdown())
 
