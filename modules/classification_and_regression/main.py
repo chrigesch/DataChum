@@ -28,7 +28,7 @@ class k_fold_cross_validation:
         name of the target column in dataset
     train_size: float
         float between 0.5 and 0.95
-    imputation_numeric: str
+    imputation_numerical: str
         'mean', 'median', 'most_frequent', 'mice_forest', 'miss_forest', None
     imputation_categorical: str
         'most_frequent', 'mice_forest', 'miss_forest', None
@@ -57,8 +57,8 @@ class k_fold_cross_validation:
         Strategy to evaluate the performance of the cross-validated model on the test set.
     average: str
         Average used to compute AUC, Recall, Precision and F1.
-    tune_imp_numeric: bool
-        use hyperparameter tuning to find the best numeric imputer. (will be ignored when cv_with_pipeline=False)
+    tune_imp_numerical: bool
+        use hyperparameter tuning to find the best numerical imputer. (will be ignored when cv_with_pipeline=False)
     tune_scaler: bool
         use hyperparameter tuning to find the best scaler. (will be ignored when cv_with_pipeline=False)
     tune_impu_categorical: bool
@@ -71,7 +71,7 @@ class k_fold_cross_validation:
         data,
         target_variable: str,
         train_size: float,
-        imputation_numeric,
+        imputation_numerical,
         imputation_categorical,
         scaler,
         one_hot_encoding,
@@ -83,7 +83,7 @@ class k_fold_cross_validation:
         tuning_trials,
         evaluation_score,
         average="macro",
-        tune_imp_numeric=False,
+        tune_imp_numerical=False,
         tune_scaler=False,
         tune_imp_categorical=False,
     ):
@@ -95,10 +95,10 @@ class k_fold_cross_validation:
             assert (
                 imputation_categorical is not None
             ), "If tune_imp_categorical=True, imputation_categorical must not be None"
-        if tune_imp_numeric is True:
+        if tune_imp_numerical is True:
             assert (
-                imputation_numeric is not None
-            ), "If tune_imp_numeric=True, imputation_numeric must not be None"
+                imputation_numerical is not None
+            ), "If tune_imp_numerical=True, imputation_numerical must not be None"
         if tune_scaler is True:
             assert scaler is not None, "If tune_scaler=True, scaler must not be None"
         # Constructs all the necessary attributes for the instance
@@ -107,7 +107,7 @@ class k_fold_cross_validation:
         self.data = data
         self.target_variable = target_variable
         self.train_size = train_size
-        self.imputation_numeric = imputation_numeric
+        self.imputation_numerical = imputation_numerical
         self.imputation_categorical = imputation_categorical
         self.scaler = scaler
         self.one_hot_encoding = one_hot_encoding
@@ -119,7 +119,7 @@ class k_fold_cross_validation:
         self.tuning_trials = tuning_trials
         self.evaluation_score = evaluation_score
         self.average = average
-        self.tune_imp_numeric = tune_imp_numeric
+        self.tune_imp_numerical = tune_imp_numerical
         self.tune_scaler = tune_scaler
         self.tune_imp_categorical = tune_imp_categorical
 
@@ -158,7 +158,7 @@ class k_fold_cross_validation:
             self.X_test,
             self.operation,
             self.inner_cv_folds,
-            self.imputation_numeric,
+            self.imputation_numerical,
             self.imputation_categorical,
             self.scaler,
             self.one_hot_encoding,
@@ -186,7 +186,7 @@ class k_fold_cross_validation:
                 inner_cv_folds=self.inner_cv_folds,
                 inner_cv_rep=self.inner_cv_rep,
                 tuning_trials=self.tuning_trials,
-                tune_imp_numeric=self.tune_imp_numeric,
+                tune_imp_numerical=self.tune_imp_numerical,
                 tune_scaler=self.tune_scaler,
                 tune_imp_categorical=self.tune_imp_categorical,
             )
@@ -228,7 +228,7 @@ class nested_k_fold_cross_validation:
         cleaned DataFrame (check if all of the data types are correctly identified)
     target_variable: str
         name of the target column in dataset.
-    imputation_numeric: str
+    imputation_numerical: str
         'mean', 'median', 'most_frequent', 'mice_forest', 'miss_forest', None.
     imputation_categorical: str
         'most_frequent', 'mice_forest', 'miss_forest', None
@@ -260,8 +260,8 @@ class nested_k_fold_cross_validation:
         Strategy to evaluate the performance of the cross-validated model on the test set.
     average: str
         Average used to compute AUC, Recall, Precision and F1.
-    tune_imp_numeric: bool
-        use hyperparameter tuning to find the best numeric imputer. (will be ignored when cv_with_pipeline=False)
+    tune_imp_numerical: bool
+        use hyperparameter tuning to find the best numerical imputer. (will be ignored when cv_with_pipeline=False)
     tune_scaler: bool
         use hyperparameter tuning to find the best scaler. (will be ignored when cv_with_pipeline=False)
     tune_impu_categorical: bool
@@ -273,7 +273,7 @@ class nested_k_fold_cross_validation:
         operation,
         data,
         target_variable: str,
-        imputation_numeric,
+        imputation_numerical,
         imputation_categorical,
         scaler,
         one_hot_encoding,
@@ -287,7 +287,7 @@ class nested_k_fold_cross_validation:
         tuning_trials,
         evaluation_score,
         average="macro",
-        tune_imp_numeric=False,
+        tune_imp_numerical=False,
         tune_scaler=False,
         tune_imp_categorical=False,
     ):
@@ -296,10 +296,10 @@ class nested_k_fold_cross_validation:
             assert (
                 imputation_categorical is not None
             ), "If tune_imp_categorical=True, imputation_categorical must not be None"
-        if tune_imp_numeric is True:
+        if tune_imp_numerical is True:
             assert (
-                imputation_numeric is not None
-            ), "If tune_imp_numeric=True, imputation_numeric must not be None"
+                imputation_numerical is not None
+            ), "If tune_imp_numerical=True, imputation_numerical must not be None"
         if tune_scaler is True:
             assert scaler is not None, "If tune_scaler=True, scaler must not be None"
         assert outer_cv_folds in AVAILABLE_NUMBER_OF_OUTER_CV_FOLDS, (
@@ -312,7 +312,7 @@ class nested_k_fold_cross_validation:
         self.operation = operation
         self.data = data
         self.target_variable = target_variable
-        self.imputation_numeric = imputation_numeric
+        self.imputation_numerical = imputation_numerical
         self.imputation_categorical = imputation_categorical
         self.scaler = scaler
         self.one_hot_encoding = one_hot_encoding
@@ -326,7 +326,7 @@ class nested_k_fold_cross_validation:
         self.tuning_trials = tuning_trials
         self.evaluation_score = evaluation_score
         self.average = average
-        self.tune_imp_numeric = tune_imp_numeric
+        self.tune_imp_numerical = tune_imp_numerical
         self.tune_scaler = tune_scaler
         self.tune_imp_categorical = tune_imp_categorical
 
@@ -387,7 +387,7 @@ class nested_k_fold_cross_validation:
                 _X_test,
                 self.operation,
                 self.inner_cv_folds,
-                self.imputation_numeric,
+                self.imputation_numerical,
                 self.imputation_categorical,
                 self.scaler,
                 self.one_hot_encoding,
@@ -415,7 +415,7 @@ class nested_k_fold_cross_validation:
                     inner_cv_folds=self.inner_cv_folds,
                     inner_cv_rep=self.inner_cv_rep,
                     tuning_trials=self.tuning_trials,
-                    tune_imp_numeric=self.tune_imp_numeric,
+                    tune_imp_numerical=self.tune_imp_numerical,
                     tune_scaler=self.tune_scaler,
                     tune_imp_categorical=self.tune_imp_categorical,
                 )
@@ -489,7 +489,7 @@ def main():
             data=data,
             target_variable="LoanAmount",  # # 'Gender' | 'Dependents'| 'LoanAmount'
             train_size=0.8,
-            imputation_numeric="mean",
+            imputation_numerical="mean",
             imputation_categorical="most_frequent",  # 'mean'
             scaler="zscore",
             one_hot_encoding=True,
@@ -507,7 +507,7 @@ def main():
             operation="classification",  # 'classification' | 'regression'
             data=data,
             target_variable="Dependents",
-            imputation_numeric="mean",
+            imputation_numerical="mean",
             imputation_categorical="most_frequent",
             scaler="zscore",
             one_hot_encoding=True,
