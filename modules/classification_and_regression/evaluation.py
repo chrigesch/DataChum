@@ -497,7 +497,7 @@ def main():
         data=data,
         target_variable="Gender",  # # 'Gender' | 'Dependents'| 'LoanAmount'
         train_size=0.8,
-        imputation_numeric="mean",
+        imputation_numerical="mean",
         imputation_categorical="most_frequent",
         scaler="zscore",
         one_hot_encoding=True,

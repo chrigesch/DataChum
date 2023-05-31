@@ -29,7 +29,7 @@ class clustering:
     def __init__(
         self,
         data: iter,
-        imputation_numeric: str,
+        imputation_numerical: str,
         imputation_categorical: str,
         scaler: str,
         models_to_be_evaluated: list,
@@ -50,7 +50,7 @@ class clustering:
         self.pipeline = data_preprocessing(
             cols_num=cols_num,
             cols_cat=cols_cat,
-            imputation_numeric=imputation_numeric,
+            imputation_numerical=imputation_numerical,
             scaler=scaler,
             imputation_categorical=imputation_categorical,
             one_hot_encoding=True,
@@ -209,7 +209,7 @@ class clustering_cross_validation:
     def __init__(
         self,
         data: iter,
-        imputation_numeric: str,
+        imputation_numerical: str,
         imputation_categorical: str,
         scaler: str,
         cluster_models: list,
@@ -270,7 +270,7 @@ class clustering_cross_validation:
                     self.pipeline = data_preprocessing(
                         cols_num=cols_num,
                         cols_cat=cols_cat,
-                        imputation_numeric=imputation_numeric,
+                        imputation_numerical=imputation_numerical,
                         scaler=scaler,
                         imputation_categorical=imputation_categorical,
                         one_hot_encoding=True,

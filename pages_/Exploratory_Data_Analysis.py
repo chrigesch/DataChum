@@ -5,7 +5,7 @@ from modules.classification_and_regression.cv_workflow import (
     AVAILABLE_SCORES_REGRESSION,
 )
 from modules.exploratory_data_analysis.associations import (
-    associations_for_categorical_and_numeric_variables,
+    associations_for_categorical_and_numerical_variables,
     plot_heatmap,
 )
 from modules.exploratory_data_analysis.multivariate import (
@@ -84,7 +84,7 @@ def main():
             len(cols_cat_and_num) >= 1
         ), "Database must contain 1 or more categorical or numerical columns"
         # Compute associations (necesary for the overview tab)
-        associations_df = associations_for_categorical_and_numeric_variables(data)[0]
+        associations_df = associations_for_categorical_and_numerical_variables(data)[0]
 
         # Create tabs to explore the data
         st.header("Exploratory Data Analysis")
@@ -562,7 +562,7 @@ def main():
                     ).columns.to_list()
                     # Compute associations (necesary for the overview tab)
                     associations_missings = (
-                        associations_for_categorical_and_numeric_variables(
+                        associations_for_categorical_and_numerical_variables(
                             data_for_missing
                         )
                     )[0]

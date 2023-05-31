@@ -125,7 +125,7 @@ def plot_manifold(
     pipeline = data_preprocessing(
         cols_num,
         cols_cat,
-        imputation_numeric="mean",
+        imputation_numerical="mean",
         scaler="zscore",
         imputation_categorical="most_frequent",
         one_hot_encoding=True,
@@ -266,7 +266,7 @@ def plot_random_feature_dropping_curve(
     pipeline = data_preprocessing(
         cols_num,
         cols_cat,
-        imputation_numeric="mean",
+        imputation_numerical="mean",
         scaler="zscore",
         imputation_categorical="most_frequent",
         one_hot_encoding=True,
@@ -323,7 +323,7 @@ class principal_component_analysis:
         pipeline = data_preprocessing(
             cols_num,
             cols_cat,
-            imputation_numeric="mean",
+            imputation_numerical="mean",
             scaler="zscore",
             imputation_categorical="most_frequent",
             one_hot_encoding=True,
