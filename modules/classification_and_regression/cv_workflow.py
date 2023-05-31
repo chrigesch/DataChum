@@ -45,7 +45,7 @@ def _cv_preparation(
     X_test,
     operation,
     inner_cv_folds,
-    imputation_numeric,
+    imputation_numerical,
     imputation_categorical,
     scaler,
     one_hot_encoding,
@@ -65,7 +65,7 @@ def _cv_preparation(
     pipeline = data_preprocessing(
         cols_num,
         cols_cat,
-        imputation_numeric=imputation_numeric,
+        imputation_numerical=imputation_numerical,
         scaler=scaler,
         imputation_categorical=imputation_categorical,
         one_hot_encoding=one_hot_encoding,
@@ -108,7 +108,7 @@ def _cv_workflow_with_pipeline(
     tuning_trials: int,
     scoring,
     average="macro",
-    tune_imp_numeric=False,
+    tune_imp_numerical=False,
     tune_scaler=False,
     tune_imp_categorical=False,
 ):
@@ -194,7 +194,7 @@ def _cv_workflow_with_pipeline(
         if tuning_trials > 0:
             if (
                 (name == "Linear_Regression")
-                & (tune_imp_numeric is False)
+                & (tune_imp_numerical is False)
                 & (tune_scaler is False)
                 & (tune_imp_categorical is False)
             ):
@@ -207,7 +207,7 @@ def _cv_workflow_with_pipeline(
             # Include data preprocessing procedures in hyperparameter tuning
             p_grid = tune_data_preprocessing(
                 params_grid=p_grid,
-                tune_imp_numeric=tune_imp_numeric,
+                tune_imp_numerical=tune_imp_numerical,
                 tune_scaler=tune_scaler,
                 tune_imp_categorical=tune_imp_categorical,
             )
@@ -508,7 +508,7 @@ def main():
     pipeline = data_preprocessing(
         cols_num,
         cols_cat,
-        imputation_numeric="mean",
+        imputation_numerical="mean",
         scaler="zscore",
         imputation_categorical="most_frequent",
         one_hot_encoding=True,
