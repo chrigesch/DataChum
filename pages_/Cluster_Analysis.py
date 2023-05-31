@@ -10,6 +10,11 @@ from modules.utils.load_and_save_data import (
     read_csv,
     read_xlsx,
 )
+from modules.utils.preprocessing import (
+    AVAILABLE_IMPUTATION_CATEGORICAL,
+    AVAILABLE_IMPUTATION_NUMERICAL,
+    AVAILABLE_SCALER,
+)
 
 # Import the required libraries
 import numpy as np
@@ -163,6 +168,26 @@ def main():
                         options=AVAILABLE_MODELS_CLASSIFICATION,
                         index=0,
                     )
+        # Tab 2: Preprocessing
+        with tab_s2:
+            col_1, col_2 = st.columns(2)
+            with col_1:
+                selectbox_imput_cat = st.selectbox(
+                    label="**Select the imputation strategy to use for categorical variables**",
+                    options=AVAILABLE_IMPUTATION_CATEGORICAL,
+                    index=0,
+                )
+            with col_2:
+                selectbox_imput_num = st.selectbox(
+                    label="**Select the imputation strategy to use for numerical variables**",
+                    options=AVAILABLE_IMPUTATION_NUMERICAL,
+                    index=0,
+                )
+                selectbox_scaler = st.selectbox(
+                    label="**Select the scaling strategy to use for numerical variables**",
+                    options=AVAILABLE_SCALER,
+                    index=4,
+                )
 
 
 if __name__ == "__main__":
