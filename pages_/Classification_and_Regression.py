@@ -178,7 +178,7 @@ def main():
                     selectbox_n_outer_cv_reps = st.selectbox(
                         label="**Select the number of times OUTER cross-validator needs to be repeated**",
                         options=range(1, 11, 1),
-                        index=0,
+                        index=4,
                     )
             with col_2:
                 # Selectboxes for train size and/or number of folds and repetitions
@@ -191,7 +191,7 @@ def main():
                     selectbox_n_inner_cv_reps = st.selectbox(
                         label="**Select the number of times cross-validator needs to be repeated**",
                         options=range(1, 11, 1),
-                        index=0,
+                        index=4,
                     )
                 else:
                     selectbox_n_inner_cv_folds = st.selectbox(
@@ -202,7 +202,7 @@ def main():
                     selectbox_n_inner_cv_reps = st.selectbox(
                         label="**Select the number of times INNER cross-validator needs to be repeated**",
                         options=range(1, 11, 1),
-                        index=0,
+                        index=4,
                     )
             with col_3:
                 # Selectboxes for evaluation metrics
