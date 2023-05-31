@@ -27,7 +27,7 @@ from sklearn.preprocessing import (
 )
 from sklearn.compose import ColumnTransformer
 
-AVAILABLE_IMPUTATION_NUMERIC = (
+AVAILABLE_IMPUTATION_NUMERICAL = (
     "mean",
     "median",
     "most_frequent",
@@ -43,15 +43,15 @@ AVAILABLE_ONE_HOT_ENCODER = (True, False)
 def data_preprocessing(
     cols_num,
     cols_cat,
-    imputation_numeric="mean",
+    imputation_numerical="mean",
     scaler="zscore",
     imputation_categorical="most_frequent",
     one_hot_encoding=True,
 ):
     # Assert input values
-    assert imputation_numeric in AVAILABLE_IMPUTATION_NUMERIC, (
-        "Unrecognized value, 'imputation_numeric' should be one of the following: "
-        + str(AVAILABLE_IMPUTATION_NUMERIC)
+    assert imputation_numerical in AVAILABLE_IMPUTATION_NUMERICAL, (
+        "Unrecognized value, 'imputation_numerical' should be one of the following: "
+        + str(AVAILABLE_IMPUTATION_NUMERICAL)
     )
     assert (
         scaler in AVAILABLE_SCALER
@@ -72,13 +72,13 @@ def data_preprocessing(
     transformer_num = Pipeline(steps=[])
 
     # Add imputation method for NUMERICAL features
-    if imputation_numeric in ["mean", "median", "most_frequent"]:
+    if imputation_numerical in ["mean", "median", "most_frequent"]:
         transformer_num.steps.append(
-            ("imput_num", SimpleImputer(strategy=imputation_numeric))
+            ("imput_num", SimpleImputer(strategy=imputation_numerical))
         )
-    elif imputation_numeric == "mice_forest":
+    elif imputation_numerical == "mice_forest":
         transformer_num.steps.append(("imput_num", miceForestImputer()))
-    elif imputation_numeric == "miss_forest":
+    elif imputation_numerical == "miss_forest":
         transformer_num.steps.append(
             (
                 "imput_num",
@@ -95,7 +95,7 @@ def data_preprocessing(
                 ),
             )
         )
-    elif imputation_numeric is None:
+    elif imputation_numerical is None:
         pass
     else:
         raise ValueError()
@@ -158,11 +158,11 @@ def data_preprocessing(
 
 def tune_data_preprocessing(
     params_grid,
-    tune_imp_numeric: bool = False,
+    tune_imp_numerical: bool = False,
     tune_scaler: bool = False,
     tune_imp_categorical: bool = False,
 ):
-    if tune_imp_numeric is True:
+    if tune_imp_numerical is True:
         params_grid["preprocessor__prep_num__imput_num"] = CategoricalDistribution(
             choices=[
                 SimpleImputer(strategy="mean"),
@@ -424,7 +424,7 @@ def main():
     pipeline = data_preprocessing(
         cols_num,
         cols_cat,
-        imputation_numeric="most_frequent",  # 'mean' | 'miss_forest' | 'most_frequent'
+        imputation_numerical="most_frequent",  # 'mean' | 'miss_forest' | 'most_frequent'
         imputation_categorical="miss_forest",
         scaler="zscore",
     )
