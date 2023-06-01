@@ -1,4 +1,5 @@
 # Import moduls from local directories
+from modules.classification_and_regression.evaluation import corrected_repeated_t_test
 from modules.classification_and_regression.models import AVAILABLE_MODELS_CLASSIFICATION
 from modules.cluster.main import clustering, clustering_cross_validation
 from modules.cluster.metrics import (
@@ -178,6 +179,9 @@ def main():
                             options=AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CROSSVALIDATION_CONVERGENCE,
                             index=2,
                         )
+                    # Create a placeholder for selectbox_monitor_metric
+                    else:
+                        selectbox_monitor_metric = "Silhouette"
         # Tab 2: Preprocessing
         with tab_s2:
             col_1, col_2 = st.columns(2)
@@ -299,13 +303,136 @@ def main():
                         cluster_models=models_to_evaluate,
                         n_cluster_min=selectbox_n_cluster_min,
                         n_cluster_max=selectbox_n_cluster_max,
-                        classification_model=selectbox_classification_model,
+                        classification_model=[selectbox_classification_model],
                         inner_cv_folds=selectbox_n_inner_cv_folds,
                         inner_cv_rep=selectbox_n_inner_cv_reps,
                         n_consecutive_clusters_without_improvement=selectbox_n_consecutive_clusters_without_improvement,
                         monitor_metric=selectbox_monitor_metric,
                     )
             st.success("Done!")
+
+        if st.session_state.cluster_instance is not None:
+            st.subheader("**Model Evaluation**")
+            # Create three tabs
+            tab_e1_1, tab_e1_2, tab_e1_3 = st.tabs(
+                [
+                    "**Clustering Scores**",
+                    "**Evaluation**",
+                    "**Interpretation**",
+                ]
+            )
+            # Tab 1: Clustering Scores
+            with tab_e1_1:
+                # Create DataFrame with clustering scores
+                scores_df = st.session_state.cluster_instance.all_results
+                # Create two columns for the download buttons
+                col_cluster_score_1_1, col_cluster_score_1_2 = st.columns([1, 2])
+                with col_cluster_score_1_1:
+                    st.download_button(
+                        label="Download clustering scores as CSV",
+                        data=convert_dataframe_to_csv(scores_df),
+                        file_name="clustering_scores.csv",
+                        mime="text/csv'",
+                    )
+                with col_cluster_score_1_2:
+                    st.download_button(
+                        label="Download clustering scores as XLSX",
+                        data=convert_dataframe_to_xlsx(scores_df),
+                        file_name="clustering_scores.xlsx",
+                        mime="application/vnd.ms-excel",
+                    )
+                # Create tabs to display results and to compute t-tests
+                col_cluster_score_2_1, col_cluster_score_2_2 = st.columns([2.0, 1.0])
+                # Display cross-validation results
+                with col_cluster_score_2_1:
+                    st.markdown("**Grouped by model & number of clusters**")
+                    scores_df_grouped = (
+                        scores_df.groupby(by=["model", "n_clusters"])
+                        .mean()
+                        .reset_index(drop=False)
+                    )
+                    st.dataframe(
+                        scores_df_grouped.style.format(precision=3),
+                        height=((len(scores_df_grouped) + 1) * 35 + 3),
+                        use_container_width=False,
+                    )
+                    st.markdown("**Complete**")
+                    st.dataframe(
+                        scores_df.set_index(["model", "n_clusters"]).style.format(
+                            "{:.3f}"
+                        ),
+                        use_container_width=False,
+                    )
+                # Compute and display t-test results
+                idx_models_to_be_compared = range(len(scores_df_grouped))
+                with col_cluster_score_2_2:
+                    st.markdown("**Corrected Repeated t-test**")
+                    if st.session_state.cluster_instance.method == "standart":
+                        st.markdown(
+                            "Only available for Cluster Analysis using prediction-based k-fold cross-validation method"
+                            " & if two ore more models were evaluated & if the number of k-folds >= 10 and "
+                            "the number of repetitions >= 5"
+                        )
+                    elif (st.session_state.cluster_instance.method == "k-fold") & (
+                        (len(scores_df_grouped) < 2)
+                        | (st.session_state.cluster_instance.inner_cv_folds < 10)
+                        | (st.session_state.cluster_instance.inner_cv_rep < 5)
+                    ):
+                        st.markdown(
+                            "Only available for Cluster Analysis using prediction-based k-fold cross-validation method"
+                            " & if two ore more models were evaluated & if the number of k-folds >= 10 and "
+                            "the number of repetitions >= 5"
+                        )
+                    else:
+                        selectbox_t_test_model_1 = st.selectbox(
+                            label="**Select the index number of model 1 to be compared**",
+                            options=idx_models_to_be_compared,
+                            index=0,
+                            key="t_test_cluster_model_1",
+                        )
+                        selectbox_t_test_model_2 = st.selectbox(
+                            label="**Select the index number of model 2 to be compared**",
+                            options=[
+                                value
+                                for value in idx_models_to_be_compared
+                                if value != selectbox_t_test_model_1
+                            ],
+                            index=0,
+                            key="t_test_cluster_model_2",
+                        )
+                        selectbox_t_test_evaluation_metric = st.selectbox(
+                            label="**Select the evaluation metric to be compared**",
+                            options=[
+                                value
+                                for value in scores_df.columns.to_list()
+                                if value not in ["model", "n_clusters"]
+                            ],
+                            index=0,
+                            key="t_test_cluster_evaluation_metric",
+                        )
+                        result_t_test = corrected_repeated_t_test(
+                            data=scores_df,
+                            grouping_variable="model",
+                            name_model_1=selectbox_t_test_model_1,
+                            name_model_2=selectbox_t_test_model_2,
+                            evaluation_metric=selectbox_t_test_evaluation_metric,
+                            n_folds=st.session_state.cluster_instance.inner_cv_folds,
+                            n=len(data),
+                        )
+                        st.markdown("**Descriptives**")
+                        st.dataframe(
+                            result_t_test.result_descriptives.set_index(
+                                "model"
+                            ).style.format("{:.3f}"),
+                            use_container_width=False,
+                        )
+                        st.markdown("**Statistics**")
+                        st.dataframe(
+                            result_t_test.result_statistics.set_index(
+                                "t_statistic"
+                            ).style.format("{:.3f}"),
+                            use_container_width=False,
+                        )
 
 
 if __name__ == "__main__":

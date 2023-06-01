@@ -40,6 +40,7 @@ class clustering:
         n_consecutive_clusters_without_improvement: int,
         monitor_metric: str,
     ):
+        self.method = "standart"
         self.imputation_numerical = imputation_numerical
         self.imputation_categorical = imputation_categorical
         self.scaler = scaler
@@ -231,6 +232,7 @@ class clustering_cross_validation:
             assert (
                 cluster_model != "DBSCAN"
             ), "As the number of clusters cannot be preasigned, DBSCAN ist no sopported for cross-validation"
+        self.method = "k-fold"
         self.imputation_numerical = imputation_numerical
         self.imputation_categorical = imputation_categorical
         self.scaler = scaler
@@ -238,6 +240,8 @@ class clustering_cross_validation:
         self.n_cluster_min = n_cluster_min
         self.n_cluster_max = n_cluster_max
         self.classification_model = classification_model
+        self.inner_cv_folds = inner_cv_folds
+        self.inner_cv_rep = inner_cv_rep
         self.monitor_metric = monitor_metric
         # Remove data duplicates while retaining the first one
         data = data.drop_duplicates(keep="first", inplace=False)
@@ -262,8 +266,8 @@ class clustering_cross_validation:
                 # Compute baseline prediction strength
                 # Instantiante an cross-validation instance
                 inner_cv_object = RepeatedKFold(
-                    n_splits=inner_cv_folds,
-                    n_repeats=inner_cv_rep,
+                    n_splits=self.inner_cv_folds,
+                    n_repeats=self.inner_cv_rep,
                     random_state=123,
                 )
                 # Start inner loop for cross-validation
