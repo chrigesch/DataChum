@@ -32,7 +32,7 @@ class clustering:
         imputation_numerical: str,
         imputation_categorical: str,
         scaler: str,
-        models_to_be_evaluated: list,
+        cluster_models: list,
         n_cluster_min: int,
         n_cluster_max: int,
         n_bootstrap_samples: int,
@@ -40,7 +40,7 @@ class clustering:
         n_consecutive_clusters_without_improvement: int,
         monitor_metric: str,
     ):
-        self.models_to_be_evaluated = models_to_be_evaluated
+        self.cluster_models = cluster_models
         self.monitor_metric = monitor_metric
         cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
         cols_cat = data.select_dtypes(
@@ -67,7 +67,7 @@ class clustering:
         # Initiate list to collect the results
         results_list = []
         # Get list of models
-        models = cluster_models_to_evaluate(models=self.models_to_be_evaluated)
+        models = cluster_models_to_evaluate(models=self.cluster_models)
         for name, model in models:
             if (name == "DBSCAN") & (n_bootstrap_samples == 0):
                 # Fit the model, compute and append the scores
