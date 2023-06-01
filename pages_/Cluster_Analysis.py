@@ -1,5 +1,6 @@
 # Import moduls from local directories
 from modules.classification_and_regression.models import AVAILABLE_MODELS_CLASSIFICATION
+from modules.cluster.main import clustering, clustering_cross_validation
 from modules.cluster.metrics import (
     AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CONVERGENCE,
     AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CROSSVALIDATION_CONVERGENCE,
@@ -263,6 +264,48 @@ def main():
                     checkbox_17 = st.checkbox("DBSCAN")
                     if checkbox_17:
                         models_to_evaluate.append("DBSCAN")
+        # Instantiate placeholders | Session state variables
+        if "cluster_instance" not in st.session_state:
+            st.session_state.cluster_instance = None
+        # Create a button to run the cross-validation
+        button_run_cv = st.button(
+            label="**Run cluster analysis**", type="primary", use_container_width=True
+        )
+        if button_run_cv:
+            with st.spinner("Fitting the selected models..."):
+                if (
+                    selectradio_procedure
+                    == "Standart Cluster Analysis with optional bootstrapping"
+                ):
+                    st.session_state.cluster_instance = clustering(
+                        data=data,
+                        imputation_numerical=selectbox_imput_num,
+                        imputation_categorical=selectbox_imput_cat,
+                        scaler=selectbox_scaler,
+                        cluster_models=models_to_evaluate,
+                        n_cluster_min=selectbox_n_cluster_min,
+                        n_cluster_max=selectbox_n_cluster_max,
+                        n_bootstrap_samples=selectbox_n_bootstrap_samples,
+                        n_consecutive_bootstraps_without_improvement=selectbox_n_consecutive_bootstraps_without_improvement,  # noqa: E501
+                        n_consecutive_clusters_without_improvement=selectbox_n_consecutive_clusters_without_improvement,
+                        monitor_metric=selectbox_monitor_metric,
+                    )
+                else:
+                    st.session_state.cluster_instance = clustering_cross_validation(
+                        data=data,
+                        imputation_numerical=selectbox_imput_num,
+                        imputation_categorical=selectbox_imput_cat,
+                        scaler=selectbox_scaler,
+                        cluster_models=models_to_evaluate,
+                        n_cluster_min=selectbox_n_cluster_min,
+                        n_cluster_max=selectbox_n_cluster_max,
+                        classification_model=selectbox_classification_model,
+                        inner_cv_folds=selectbox_n_inner_cv_folds,
+                        inner_cv_rep=selectbox_n_inner_cv_reps,
+                        n_consecutive_clusters_without_improvement=selectbox_n_consecutive_clusters_without_improvement,
+                        monitor_metric=selectbox_monitor_metric,
+                    )
+            st.success("Done!")
 
 
 if __name__ == "__main__":
