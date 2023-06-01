@@ -307,6 +307,17 @@ def main():
                     )
             st.success("Done!")
 
+        if st.session_state.cluster_instance is not None:
+            st.subheader("**Model Evaluation**")
+            # Create three tabs
+            tab_e1_1, tab_e1_2, tab_e1_3 = st.tabs(
+                [
+                    "**Cross-validation Scores**",
+                    "**Evaluation**",
+                    "**Interpretation**",
+                ]
+            )
+
 
 if __name__ == "__main__":
     # Page setup
