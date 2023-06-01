@@ -333,7 +333,7 @@ class clustering_cross_validation:
                 print("Finished", name_cluster_model, "- n_cluster:", n_cluster)
 
         # Convert the list of dictionaries to DataFrame
-        self.results_cv = pd.DataFrame.from_dict(results_list)
+        self.all_results = pd.DataFrame.from_dict(results_list)
 
 
 ######################################
