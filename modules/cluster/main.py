@@ -40,7 +40,12 @@ class clustering:
         n_consecutive_clusters_without_improvement: int,
         monitor_metric: str,
     ):
+        self.imputation_numerical = imputation_numerical
+        self.imputation_categorical = imputation_categorical
+        self.scaler = scaler
         self.cluster_models = cluster_models
+        self.n_cluster_min = n_cluster_min
+        self.n_cluster_max = n_cluster_max
         self.monitor_metric = monitor_metric
         cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
         cols_cat = data.select_dtypes(
@@ -50,9 +55,9 @@ class clustering:
         self.pipeline = data_preprocessing(
             cols_num=cols_num,
             cols_cat=cols_cat,
-            imputation_numerical=imputation_numerical,
-            scaler=scaler,
-            imputation_categorical=imputation_categorical,
+            imputation_numerical=self.imputation_numerical,
+            scaler=self.scaler,
+            imputation_categorical=self.imputation_categorical,
             one_hot_encoding=True,
         )
 
@@ -118,7 +123,7 @@ class clustering:
                             break
             else:
                 monitor_metrics_per_cluster_list = []
-                for n_cluster in range(n_cluster_min, n_cluster_max + 1):
+                for n_cluster in range(self.n_cluster_min, self.n_cluster_max + 1):
                     if name in MODELS_WITH_N_COMPONENTS:
                         model.set_params(**{"n_components": n_cluster})
                     elif name in MODELS_WITH_N_CLUSTER:
@@ -226,7 +231,12 @@ class clustering_cross_validation:
             assert (
                 cluster_model != "DBSCAN"
             ), "As the number of clusters cannot be preasigned, DBSCAN ist no sopported for cross-validation"
+        self.imputation_numerical = imputation_numerical
+        self.imputation_categorical = imputation_categorical
+        self.scaler = scaler
         self.cluster_models = cluster_models
+        self.n_cluster_min = n_cluster_min
+        self.n_cluster_max = n_cluster_max
         self.classification_model = classification_model
         self.monitor_metric = monitor_metric
         # Remove data duplicates while retaining the first one
@@ -243,7 +253,7 @@ class clustering_cross_validation:
         for name_cluster_model, cluster_model in cluster_models_list:
             # Initiate list to collect the results
             monitor_metrics_per_cluster_list = []
-            for n_cluster in range(n_cluster_min, n_cluster_max + 1):
+            for n_cluster in range(self.n_cluster_min, self.n_cluster_max + 1):
                 if name_cluster_model in MODELS_WITH_N_COMPONENTS:
                     cluster_model.set_params(**{"n_components": n_cluster})
                 elif name_cluster_model in MODELS_WITH_N_CLUSTER:
@@ -270,9 +280,9 @@ class clustering_cross_validation:
                     self.pipeline = data_preprocessing(
                         cols_num=cols_num,
                         cols_cat=cols_cat,
-                        imputation_numerical=imputation_numerical,
-                        scaler=scaler,
-                        imputation_categorical=imputation_categorical,
+                        imputation_numerical=self.imputation_numerical,
+                        scaler=self.scaler,
+                        imputation_categorical=self.imputation_categorical,
                         one_hot_encoding=True,
                     )
                     # Prepare data
@@ -333,7 +343,7 @@ class clustering_cross_validation:
                 print("Finished", name_cluster_model, "- n_cluster:", n_cluster)
 
         # Convert the list of dictionaries to DataFrame
-        self.results_cv = pd.DataFrame.from_dict(results_list)
+        self.all_results = pd.DataFrame.from_dict(results_list)
 
 
 ######################################
