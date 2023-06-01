@@ -325,20 +325,46 @@ def main():
                 # Create DataFrame with clustering scores
                 scores_df = st.session_state.cluster_instance.all_results
                 # Create two columns for the download buttons
-                col_cv_score_1_1, col_cv_score_1_2 = st.columns([1, 2])
-                with col_cv_score_1_1:
+                col_cluster_score_1_1, col_cluster_score_1_2 = st.columns([1, 2])
+                with col_cluster_score_1_1:
                     st.download_button(
                         label="Download clustering scores as CSV",
                         data=convert_dataframe_to_csv(scores_df),
                         file_name="clustering_scores.csv",
                         mime="text/csv'",
                     )
-                with col_cv_score_1_2:
+                with col_cluster_score_1_2:
                     st.download_button(
                         label="Download clustering scores as XLSX",
                         data=convert_dataframe_to_xlsx(scores_df),
                         file_name="clustering_scores.xlsx",
                         mime="application/vnd.ms-excel",
+                    )
+                # Create tabs to display results and to compute t-tests
+                col_cluster_score_2_1, col_cluster_score_2_2 = st.columns([2.0, 1.0])
+                # Display cross-validation results
+                with col_cluster_score_2_1:
+                    st.markdown("**Grouped by model & number of clusters**")
+                    st.dataframe(
+                        scores_df.groupby(by=["model", "n_clusters"])
+                        .mean()
+                        .style.format("{:.3f}"),
+                        height=(
+                            (
+                                len(
+                                    scores_df.groupby(by=["model", "n_clusters"]).mean()
+                                )
+                                + 1
+                            )
+                            * 35
+                            + 3
+                        ),
+                        use_container_width=False,
+                    )
+                    st.markdown("**Complete**")
+                    st.dataframe(
+                        scores_df.set_index("model").style.format("{:.3f}"),
+                        use_container_width=False,
                     )
 
 
