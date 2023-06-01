@@ -178,6 +178,9 @@ def main():
                             options=AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CROSSVALIDATION_CONVERGENCE,
                             index=2,
                         )
+                    # Create a placeholder for selectbox_monitor_metric
+                    else:
+                        selectbox_monitor_metric = "Silhouette"
         # Tab 2: Preprocessing
         with tab_s2:
             col_1, col_2 = st.columns(2)
@@ -299,7 +302,7 @@ def main():
                         cluster_models=models_to_evaluate,
                         n_cluster_min=selectbox_n_cluster_min,
                         n_cluster_max=selectbox_n_cluster_max,
-                        classification_model=selectbox_classification_model,
+                        classification_model=[selectbox_classification_model],
                         inner_cv_folds=selectbox_n_inner_cv_folds,
                         inner_cv_rep=selectbox_n_inner_cv_reps,
                         n_consecutive_clusters_without_improvement=selectbox_n_consecutive_clusters_without_improvement,
@@ -312,11 +315,31 @@ def main():
             # Create three tabs
             tab_e1_1, tab_e1_2, tab_e1_3 = st.tabs(
                 [
-                    "**Cross-validation Scores**",
+                    "**Clustering Scores**",
                     "**Evaluation**",
                     "**Interpretation**",
                 ]
             )
+            # Tab 1: Clustering Scores
+            with tab_e1_1:
+                # Create DataFrame with clustering scores
+                scores_df = st.session_state.cluster_instance.all_results
+                # Create two columns for the download buttons
+                col_cv_score_1_1, col_cv_score_1_2 = st.columns([1, 2])
+                with col_cv_score_1_1:
+                    st.download_button(
+                        label="Download clustering scores as CSV",
+                        data=convert_dataframe_to_csv(scores_df),
+                        file_name="clustering_scores.csv",
+                        mime="text/csv'",
+                    )
+                with col_cv_score_1_2:
+                    st.download_button(
+                        label="Download clustering scores as XLSX",
+                        data=convert_dataframe_to_xlsx(scores_df),
+                        file_name="clustering_scores.xlsx",
+                        mime="application/vnd.ms-excel",
+                    )
 
 
 if __name__ == "__main__":
