@@ -1,4 +1,5 @@
 # Import moduls from local directories
+from modules.classification_and_regression.evaluation import corrected_repeated_t_test
 from modules.classification_and_regression.models import AVAILABLE_MODELS_CLASSIFICATION
 from modules.cluster.main import clustering, clustering_cross_validation
 from modules.cluster.metrics import (
@@ -345,27 +346,93 @@ def main():
                 # Display cross-validation results
                 with col_cluster_score_2_1:
                     st.markdown("**Grouped by model & number of clusters**")
-                    st.dataframe(
+                    scores_df_grouped = (
                         scores_df.groupby(by=["model", "n_clusters"])
                         .mean()
-                        .style.format("{:.3f}"),
-                        height=(
-                            (
-                                len(
-                                    scores_df.groupby(by=["model", "n_clusters"]).mean()
-                                )
-                                + 1
-                            )
-                            * 35
-                            + 3
-                        ),
+                        .reset_index(drop=False)
+                    )
+                    st.dataframe(
+                        scores_df_grouped.style.format(precision=3),
+                        height=((len(scores_df_grouped) + 1) * 35 + 3),
                         use_container_width=False,
                     )
                     st.markdown("**Complete**")
                     st.dataframe(
-                        scores_df.set_index("model").style.format("{:.3f}"),
+                        scores_df.set_index(["model", "n_clusters"]).style.format(
+                            "{:.3f}"
+                        ),
                         use_container_width=False,
                     )
+                # Compute and display t-test results
+                idx_models_to_be_compared = range(len(scores_df_grouped))
+                with col_cluster_score_2_2:
+                    st.markdown("**Corrected Repeated t-test**")
+                    if st.session_state.cluster_instance.method == "standart":
+                        st.markdown(
+                            "Only available for Cluster Analysis using prediction-based k-fold cross-validation method"
+                            " & if two ore more models were evaluated & if the number of k-folds >= 10 and "
+                            "the number of repetitions >= 5"
+                        )
+                    elif (st.session_state.cluster_instance.method == "k-fold") & (
+                        (len(scores_df_grouped) < 2)
+                        | (st.session_state.cluster_instance.inner_cv_folds < 10)
+                        | (st.session_state.cluster_instance.inner_cv_rep < 5)
+                    ):
+                        st.markdown(
+                            "Only available for Cluster Analysis using prediction-based k-fold cross-validation method"
+                            " & if two ore more models were evaluated & if the number of k-folds >= 10 and "
+                            "the number of repetitions >= 5"
+                        )
+                    else:
+                        selectbox_t_test_model_1 = st.selectbox(
+                            label="**Select the index number of model 1 to be compared**",
+                            options=idx_models_to_be_compared,
+                            index=0,
+                            key="t_test_cluster_model_1",
+                        )
+                        selectbox_t_test_model_2 = st.selectbox(
+                            label="**Select the index number of model 2 to be compared**",
+                            options=[
+                                value
+                                for value in idx_models_to_be_compared
+                                if value != selectbox_t_test_model_1
+                            ],
+                            index=0,
+                            key="t_test_cluster_model_2",
+                        )
+                        selectbox_t_test_evaluation_metric = st.selectbox(
+                            label="**Select the evaluation metric to be compared**",
+                            options=[
+                                value
+                                for value in scores_df.columns.to_list()
+                                if value not in ["model", "n_clusters"]
+                            ],
+                            index=0,
+                            key="t_test_cluster_evaluation_metric",
+                        )
+                        result_t_test = corrected_repeated_t_test(
+                            data=scores_df,
+                            grouping_variable="model",
+                            name_model_1=selectbox_t_test_model_1,
+                            name_model_2=selectbox_t_test_model_2,
+                            evaluation_metric=selectbox_t_test_evaluation_metric,
+                            n_folds=st.session_state.cluster_instance.inner_cv_folds,
+                            n=len(data),
+                        )
+                        st.markdown("**Descriptives**")
+                        st.dataframe(
+                            result_t_test.result_descriptives.set_index(
+                                "model"
+                            ).style.format("{:.3f}"),
+                            use_container_width=False,
+                        )
+                        st.markdown("**Statistics**")
+                        st.dataframe(
+                            result_t_test.result_statistics.set_index(
+                                "t_statistic"
+                            ).style.format("{:.3f}"),
+                            use_container_width=False,
+                        )
 
 
 if __name__ == "__main__":
