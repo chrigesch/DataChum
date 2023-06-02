@@ -534,6 +534,7 @@ def main():
                             n_folds=st.session_state.cv_instance.inner_cv_folds,
                             n=n_X_train,
                         )
+                        # Change model names
                         result_t_test.result_descriptives["model"] = [
                             selectbox_t_test_model_1,
                             selectbox_t_test_model_2,
