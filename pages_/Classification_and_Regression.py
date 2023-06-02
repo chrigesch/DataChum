@@ -621,16 +621,32 @@ def main():
                                 index=0,
                                 key="t_test_test_model_2",
                             )
+                            # Extract scores to compute corrected_repeated_t_test
+                            evaluation_metric = (
+                                st.session_state.cv_instance.evaluation_score
+                            )
+                            scores_model_1 = scores_test_df[
+                                scores_cv_df["model"] == selectbox_t_test_model_1
+                            ][evaluation_metric]
+                            scores_model_2 = scores_test_df[
+                                scores_cv_df["model"] == selectbox_t_test_model_2
+                            ][evaluation_metric]
+
                             result_t_test = corrected_repeated_t_test(
-                                data=scores_test_df,
-                                grouping_variable="model",
-                                name_model_1=selectbox_t_test_model_1,
-                                name_model_2=selectbox_t_test_model_2,
-                                evaluation_metric=st.session_state.cv_instance.evaluation_score,
+                                scores_model_1=scores_model_1,
+                                scores_model_2=scores_model_2,
                                 n_folds=st.session_state.cv_instance.outer_cv_folds,
                                 n=len(st.session_state.cv_instance.data),
                             )
-                            st.markdown("**Descriptives**")
+                            # Change model names
+                            result_t_test.result_descriptives["model"] = [
+                                selectbox_t_test_model_1,
+                                selectbox_t_test_model_2,
+                            ]
+                            st.markdown(
+                                f"""**Descriptives - {str(evaluation_metric)}**"""
+                            )
+                            # Display results
                             st.dataframe(
                                 result_t_test.result_descriptives.set_index(
                                     "model"
