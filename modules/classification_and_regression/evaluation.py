@@ -38,21 +38,11 @@ from modules.utils.load_and_save_data import read_csv
 class corrected_repeated_t_test:
     def __init__(
         self,
-        data,
-        grouping_variable,
-        name_model_1: str,
-        name_model_2: str,
-        evaluation_metric: str,
+        scores_model_1,
+        scores_model_2,
         n_folds: int,
         n: int,
     ):
-        # Extract the scores to be compared
-        scores_model_1 = data[data[grouping_variable] == name_model_1][
-            evaluation_metric
-        ]
-        scores_model_2 = data[data[grouping_variable] == name_model_2][
-            evaluation_metric
-        ]
         # Compute the difference between the Generalization Errors of both models
         diff = np.array(scores_model_1) - np.array(scores_model_2)
         # Compute the mean of differences
@@ -68,20 +58,14 @@ class corrected_repeated_t_test:
         # To calculate effect size (Rosenthal,1994; Howell, 2012)
         cohens_d = abs(2 * t_static) / np.sqrt(n - 1)
         # r_coeficient = np.sqrt((t_static**2) / ((t_static**2) + (n - 1)))
-        # Strings for printing
-        string_mean = "mean_" + str(evaluation_metric)
-        string_sd = "sd_" + str(evaluation_metric)
         # DataFrame to output descriptives and statistics
-        self.result_descriptives = pd.DataFrame()
-        self.result_descriptives["model"] = [name_model_1, name_model_2]
-        self.result_descriptives[string_mean] = [
-            scores_model_1.mean(),
-            scores_model_2.mean(),
-        ]
-        self.result_descriptives[string_sd] = [
-            scores_model_1.std(),
-            scores_model_2.std(),
-        ]
+        self.result_descriptives = pd.DataFrame(
+            {
+                "model": ["model_1", "model_2"],
+                "mean": [scores_model_1.mean(), scores_model_2.mean()],
+                "sd": [scores_model_1.std(), scores_model_2.std()],
+            }
+        )
         self.result_statistics = pd.DataFrame(
             [[t_static, n - 1, p_value, cohens_d]],
             columns=["t_statistic", "df", "p_value", "cohens_d"],
