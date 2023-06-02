@@ -19,7 +19,6 @@ from modules.utils.preprocessing import (
 )
 
 # Import the required libraries
-import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -410,16 +409,51 @@ def main():
                             index=0,
                             key="t_test_cluster_evaluation_metric",
                         )
+                        # Extract scores to compute corrected_repeated_t_test
+                        scores_model_1 = scores_df[
+                            (
+                                scores_df["model"]
+                                == scores_df_grouped.iloc[selectbox_t_test_model_1, :][
+                                    "model"
+                                ]
+                            )
+                            & (
+                                scores_df["n_clusters"]
+                                == scores_df_grouped.iloc[selectbox_t_test_model_1, :][
+                                    "n_clusters"
+                                ]
+                            )
+                        ][selectbox_t_test_evaluation_metric]
+                        scores_model_2 = scores_df[
+                            (
+                                scores_df["model"]
+                                == scores_df_grouped.iloc[selectbox_t_test_model_2, :][
+                                    "model"
+                                ]
+                            )
+                            & (
+                                scores_df["n_clusters"]
+                                == scores_df_grouped.iloc[selectbox_t_test_model_2, :][
+                                    "n_clusters"
+                                ]
+                            )
+                        ][selectbox_t_test_evaluation_metric]
+                        # Compute t-test
                         result_t_test = corrected_repeated_t_test(
-                            data=scores_df,
-                            grouping_variable="model",
-                            name_model_1=selectbox_t_test_model_1,
-                            name_model_2=selectbox_t_test_model_2,
-                            evaluation_metric=selectbox_t_test_evaluation_metric,
+                            scores_model_1=scores_model_1,
+                            scores_model_2=scores_model_2,
                             n_folds=st.session_state.cluster_instance.inner_cv_folds,
                             n=len(data),
                         )
-                        st.markdown("**Descriptives**")
+                        # Change model names
+                        result_t_test.result_descriptives["model"] = [
+                            selectbox_t_test_model_1,
+                            selectbox_t_test_model_2,
+                        ]
+                        st.markdown(
+                            f"""**Descriptives - {str(selectbox_t_test_evaluation_metric)}**"""
+                        )
+                        # Display results
                         st.dataframe(
                             result_t_test.result_descriptives.set_index(
                                 "model"
