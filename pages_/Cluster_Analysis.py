@@ -2,6 +2,7 @@
 from assets.colors import AVAILABLE_COLORS_SEQUENTIAL
 from modules.classification_and_regression.evaluation import corrected_repeated_t_test
 from modules.classification_and_regression.models import AVAILABLE_MODELS_CLASSIFICATION
+from modules.cluster.evaluation import get_cluster_labels_and_X_prep, silhouette_plot
 from modules.cluster.main import clustering, clustering_cross_validation
 from modules.cluster.metrics import (
     AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CONVERGENCE,
@@ -545,6 +546,50 @@ def main():
                         theme="streamlit",
                         use_container_width=True,
                     )
+                # Silhouette Plot
+                with tab_e1_2_2:
+                    st.markdown(
+                        "**CAUTION: Generation of plots requires re-training the model.**"
+                    )
+                    # Instantiate placeholders | Session state variables
+                    if "fig_sil_plot" not in st.session_state:
+                        st.session_state.fig_sil_plot = None
+                    # Create four columns for plotting options
+                    col_sil_1, col_sil_2, col_sil_3, col_sil_4 = st.columns(4)
+                    with col_sil_1:
+                        selectbox_model_sil_plot = st.selectbox(
+                            label="**Select the model to be plotted**",
+                            options=scores_df_grouped["model"].unique(),
+                            index=0,
+                            key="sil_plot_1_model",
+                        )
+                    with col_sil_2:
+                        selectbox_n_cluster_sil_plot = st.selectbox(
+                            label="**Select cluster solution to be plotted**",
+                            options=scores_df_grouped["n_clusters"].unique(),
+                            index=0,
+                            key="sil_plot_1_n_cluster",
+                        )
+                    with col_sil_3:
+                        button_generate_sil_plot = st.button(
+                            label="**Plot**",
+                            type="secondary",
+                            use_container_width=True,
+                            key="tab_e1_2_2_plot",
+                        )
+                    with button_generate_sil_plot:
+                        cluster_labels, X_prep = get_cluster_labels_and_X_prep(
+                            data=data,
+                            imputation_numerical=st.session_state.cluster_instance.imputation_numerical,
+                            imputation_categorical=st.session_state.cluster_instance.imputation_categorical,
+                            scaler=st.session_state.cluster_instance.scaler,
+                            cluster_model=[selectbox_model_sil_plot],
+                            n_clusters=selectbox_n_cluster_sil_plot,
+                        )
+                        st.session_state.fig_sil_plot = 
+                    if st.session_state.fig_sil_plot is not None:
+                        pass
+
 
 
 if __name__ == "__main__":
