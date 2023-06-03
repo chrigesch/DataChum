@@ -1,4 +1,5 @@
 # Import moduls from local directories
+from assets.colors import AVAILABLE_COLORS_SEQUENTIAL
 from modules.classification_and_regression.evaluation import corrected_repeated_t_test
 from modules.classification_and_regression.models import AVAILABLE_MODELS_CLASSIFICATION
 from modules.cluster.main import clustering, clustering_cross_validation
@@ -6,6 +7,7 @@ from modules.cluster.metrics import (
     AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CONVERGENCE,
     AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CROSSVALIDATION_CONVERGENCE,
 )
+from modules.exploratory_data_analysis.univariate_and_bivariate import plot_num
 from modules.utils.load_and_save_data import (
     convert_dataframe_to_csv,
     convert_dataframe_to_xlsx,
@@ -485,6 +487,63 @@ def main():
                             "**Silhouette Plot**",
                             "**Line Plots**",
                         ]
+                    )
+                # Bar Plots
+                with tab_e1_2_1:
+                    # Create four columns for plotting options
+                    col_box_1, col_box_2, col_box_3, col_box_4 = st.columns(4)
+                    with col_box_1:
+                        selectbox_boxplot_evaluation_metric = st.selectbox(
+                            label="**Select the evaluation metric to be plotted**",
+                            options=[
+                                value
+                                for value in scores_df.columns.to_list()
+                                if value not in ["model", "n_clusters"]
+                            ],
+                            index=0,
+                            key="boxplot_1_evaluation_metric",
+                        )
+                    with col_box_2:
+                        # Create selectbox for plotting options
+                        selectbox_color = st.selectbox(
+                            label="**Select a color scale**",
+                            options=AVAILABLE_COLORS_SEQUENTIAL,
+                            index=0,
+                            key="tab_box_1_color",
+                        )
+                    if len(scores_df_grouped) < 2:
+                        var_cat = None
+                        data_to_be_plotted = scores_df
+                    elif len(scores_df_grouped["n_clusters"].unique()) < 2:
+                        var_cat = "model"
+                        data_to_be_plotted = scores_df
+                    elif len(scores_df_grouped["model"].unique()) < 2:
+                        var_cat = "n_clusters"
+                        data_to_be_plotted = scores_df
+                    else:
+                        with col_box_3:
+                            selectbox_model_boxplot = st.selectbox(
+                                label="**Select the model to be plotted**",
+                                options=scores_df_grouped["model"].unique(),
+                                index=0,
+                                key="boxplot_1_model",
+                            )
+                            var_cat = "n_clusters"
+                            data_to_be_plotted = scores_df[
+                                scores_df["model"] == selectbox_model_boxplot
+                            ]
+                    fig_variable = plot_num(
+                        data=data_to_be_plotted,
+                        var_num=selectbox_boxplot_evaluation_metric,
+                        var_cat=var_cat,
+                        plot_type="Box-Plot",
+                        color=selectbox_color,
+                        template="plotly_white",
+                    )
+                    st.plotly_chart(
+                        fig_variable,
+                        theme="streamlit",
+                        use_container_width=True,
                     )
 
 
