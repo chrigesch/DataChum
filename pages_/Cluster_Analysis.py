@@ -316,8 +316,8 @@ def main():
             tab_e1_1, tab_e1_2, tab_e1_3 = st.tabs(
                 [
                     "**Clustering Scores**",
-                    "**Evaluation**",
-                    "**Interpretation**",
+                    "**Evaluation Plots**",
+                    "**Interpretation Plots**",
                 ]
             )
             # Tab 1: Clustering Scores
