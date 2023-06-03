@@ -1,11 +1,14 @@
 # Import moduls from local directories
+from assets.colors import AVAILABLE_COLORS_SEQUENTIAL
 from modules.classification_and_regression.evaluation import corrected_repeated_t_test
 from modules.classification_and_regression.models import AVAILABLE_MODELS_CLASSIFICATION
+from modules.cluster.evaluation import get_cluster_labels_and_X_prep, silhouette_plot
 from modules.cluster.main import clustering, clustering_cross_validation
 from modules.cluster.metrics import (
     AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CONVERGENCE,
     AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CROSSVALIDATION_CONVERGENCE,
 )
+from modules.exploratory_data_analysis.univariate_and_bivariate import plot_num
 from modules.utils.load_and_save_data import (
     convert_dataframe_to_csv,
     convert_dataframe_to_xlsx,
@@ -316,8 +319,8 @@ def main():
             tab_e1_1, tab_e1_2, tab_e1_3 = st.tabs(
                 [
                     "**Clustering Scores**",
-                    "**Evaluation**",
-                    "**Interpretation**",
+                    "**Evaluation Plots**",
+                    "**Interpretation Plots**",
                 ]
             )
             # Tab 1: Clustering Scores
@@ -467,6 +470,126 @@ def main():
                             ).style.format("{:.3f}"),
                             use_container_width=False,
                         )
+            # Tab 2: Evaluation Plaots
+            with tab_e1_2:
+                # Create uo to three tabs: Bar Plots, Silhouette Plot, Line Plots
+                if len(scores_df_grouped) < 2:
+                    # Create two tabs
+                    tab_e1_2_1, tab_e1_2_2 = st.tabs(
+                        [
+                            "**Bar Plot**",
+                            "**Silhouette Plot**",
+                        ]
+                    )
+                else:
+                    tab_e1_2_1, tab_e1_2_2, tab_el_2_3 = st.tabs(
+                        [
+                            "**Bar Plots**",
+                            "**Silhouette Plot**",
+                            "**Line Plots**",
+                        ]
+                    )
+                # Bar Plots
+                with tab_e1_2_1:
+                    # Create four columns for plotting options
+                    col_box_1, col_box_2, col_box_3, col_box_4 = st.columns(4)
+                    with col_box_1:
+                        selectbox_boxplot_evaluation_metric = st.selectbox(
+                            label="**Select the evaluation metric to be plotted**",
+                            options=[
+                                value
+                                for value in scores_df.columns.to_list()
+                                if value not in ["model", "n_clusters"]
+                            ],
+                            index=0,
+                            key="boxplot_1_evaluation_metric",
+                        )
+                    with col_box_2:
+                        # Create selectbox for plotting options
+                        selectbox_color = st.selectbox(
+                            label="**Select a color scale**",
+                            options=AVAILABLE_COLORS_SEQUENTIAL,
+                            index=0,
+                            key="tab_box_1_color",
+                        )
+                    if len(scores_df_grouped) < 2:
+                        var_cat = None
+                        data_to_be_plotted = scores_df
+                    elif len(scores_df_grouped["n_clusters"].unique()) < 2:
+                        var_cat = "model"
+                        data_to_be_plotted = scores_df
+                    elif len(scores_df_grouped["model"].unique()) < 2:
+                        var_cat = "n_clusters"
+                        data_to_be_plotted = scores_df
+                    else:
+                        with col_box_3:
+                            selectbox_model_boxplot = st.selectbox(
+                                label="**Select the model to be plotted**",
+                                options=scores_df_grouped["model"].unique(),
+                                index=0,
+                                key="boxplot_1_model",
+                            )
+                            var_cat = "n_clusters"
+                            data_to_be_plotted = scores_df[
+                                scores_df["model"] == selectbox_model_boxplot
+                            ]
+                    fig_variable = plot_num(
+                        data=data_to_be_plotted,
+                        var_num=selectbox_boxplot_evaluation_metric,
+                        var_cat=var_cat,
+                        plot_type="Box-Plot",
+                        color=selectbox_color,
+                        template="plotly_white",
+                    )
+                    st.plotly_chart(
+                        fig_variable,
+                        theme="streamlit",
+                        use_container_width=True,
+                    )
+                # Silhouette Plot
+                with tab_e1_2_2:
+                    st.markdown(
+                        "**CAUTION: Generation of plots requires re-training the model.**"
+                    )
+                    # Instantiate placeholders | Session state variables
+                    if "fig_sil_plot" not in st.session_state:
+                        st.session_state.fig_sil_plot = None
+                    # Create four columns for plotting options
+                    col_sil_1, col_sil_2, col_sil_3, col_sil_4 = st.columns(4)
+                    with col_sil_1:
+                        selectbox_model_sil_plot = st.selectbox(
+                            label="**Select the model to be plotted**",
+                            options=scores_df_grouped["model"].unique(),
+                            index=0,
+                            key="sil_plot_1_model",
+                        )
+                    with col_sil_2:
+                        selectbox_n_cluster_sil_plot = st.selectbox(
+                            label="**Select cluster solution to be plotted**",
+                            options=scores_df_grouped["n_clusters"].unique(),
+                            index=0,
+                            key="sil_plot_1_n_cluster",
+                        )
+                    with col_sil_3:
+                        button_generate_sil_plot = st.button(
+                            label="**Plot**",
+                            type="secondary",
+                            use_container_width=True,
+                            key="tab_e1_2_2_plot",
+                        )
+                    with button_generate_sil_plot:
+                        cluster_labels, X_prep = get_cluster_labels_and_X_prep(
+                            data=data,
+                            imputation_numerical=st.session_state.cluster_instance.imputation_numerical,
+                            imputation_categorical=st.session_state.cluster_instance.imputation_categorical,
+                            scaler=st.session_state.cluster_instance.scaler,
+                            cluster_model=[selectbox_model_sil_plot],
+                            n_clusters=selectbox_n_cluster_sil_plot,
+                        )
+                        st.session_state.fig_sil_plot = 
+                    if st.session_state.fig_sil_plot is not None:
+                        pass
+
 
 
 if __name__ == "__main__":
