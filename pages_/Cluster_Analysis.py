@@ -467,6 +467,25 @@ def main():
                             ).style.format("{:.3f}"),
                             use_container_width=False,
                         )
+            # Tab 2: Evaluation Plaots
+            with tab_e1_2:
+                # Create uo to three tabs: Bar Plots, Silhouette Plot, Line Plots
+                if len(scores_df_grouped) < 2:
+                    # Create two tabs
+                    tab_e1_2_1, tab_e1_2_2 = st.tabs(
+                        [
+                            "**Bar Plot**",
+                            "**Silhouette Plot**",
+                        ]
+                    )
+                else:
+                    tab_e1_2_1, tab_e1_2_2, tab_el_2_3 = st.tabs(
+                        [
+                            "**Bar Plots**",
+                            "**Silhouette Plot**",
+                            "**Line Plots**",
+                        ]
+                    )
 
 
 if __name__ == "__main__":
