@@ -55,19 +55,6 @@ def main():
     #    streamlit_profiler = Profiler()
     #    streamlit_profiler.start()
 
-    # Create file uploader object
-    uploaded_file = st.file_uploader("Upload your database", type=["csv", "xlsx"])
-
-    if uploaded_file is not None:
-        # Read the file to a dataframe using pandas
-        if uploaded_file.name[-3:] == "csv":
-            # Read in the csv file
-            data = read_csv(uploaded_file)
-        elif uploaded_file.name[-4:] == "xlsx":
-            # Read in the csv file
-            data = read_xlsx(uploaded_file)
-        else:
-            st.write("Type should be .CSV or .XLSX")
         # Get NUMERICAL, CATEGORICAL and DATETIME column names (Do NOT include DATETIME in "cols_all")
         cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
         cols_cat = data.select_dtypes(
