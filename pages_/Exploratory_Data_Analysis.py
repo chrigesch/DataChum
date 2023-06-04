@@ -47,7 +47,7 @@ import streamlit.components.v1 as components
 
 def main():
     # Add a subtitle
-    st.subheader("Exploratory Data Analysis")
+    st.header("Exploratory Data Analysis")
 
     # Profile the app
     #    streamlit_profiler = Profiler()
@@ -71,9 +71,6 @@ def main():
         ), "Database must contain 1 or more categorical or numerical columns"
         # Compute associations (necesary for the overview tab)
         associations_df = associations_for_categorical_and_numerical_variables(data)[0]
-
-        # Create tabs to explore the data
-        st.header("Exploratory Data Analysis")
 
         # Create tabs, according to the number of CATEGORICAL and NUMERICAL columns
         if len(cols_cat_and_num) == 1:
