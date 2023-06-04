@@ -1,6 +1,11 @@
 from PIL import Image
 import streamlit as st
-from pages_ import Classification_and_Regression, Deployment, Exploratory_Data_Analysis
+from pages_ import (
+    Classification_and_Regression,
+    Cluster_Analysis,
+    Deployment,
+    Exploratory_Data_Analysis,
+)
 
 
 def main():
@@ -31,6 +36,11 @@ def main():
             type="secondary",
             use_container_width=True,
         )
+        button_cluster = st.button(
+            label="**Cluster Analysis**",
+            type="secondary",
+            use_container_width=True,
+        )
         button_deployment = st.button(
             label="**Deployment**", type="secondary", use_container_width=True
         )
@@ -44,6 +54,8 @@ def main():
         st.session_state.page = Exploratory_Data_Analysis
     if button_classification_and_regression:
         st.session_state.page = Classification_and_Regression
+    if button_cluster:
+        st.session_state.page = Cluster_Analysis
     if button_deployment:
         st.session_state.page = Deployment
 
