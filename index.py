@@ -22,8 +22,8 @@ def main():
 
         # Import image and add it to the sidebar
         image = Image.open("assets/logo_01.png")
-        st.image(image, use_column_width=True)
-        st.markdown("**Select an application from the list below**")
+        st.image(image, width=150)
+        st.markdown("**Select a module from the list below**")
 
         # Create a button for each application
         button_exploratory_data_analysis = st.button(
