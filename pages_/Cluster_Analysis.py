@@ -482,7 +482,7 @@ def main():
                         ]
                     )
                 else:
-                    tab_e1_2_1, tab_e1_2_2, tab_el_2_3 = st.tabs(
+                    tab_e1_2_1, tab_e1_2_2, tab_e1_2_3 = st.tabs(
                         [
                             "**Bar Plots**",
                             "**Silhouette Plot**",
@@ -505,7 +505,7 @@ def main():
                         multiple = False
                     else:
                         multiple = True
-                    # Create four columns for plotting options
+                    # Create two columns for plotting options
                     (
                         col_box_1,
                         col_box_2,
@@ -628,6 +628,10 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
+                # Line Plot
+                if len(scores_df_grouped) >= 2:
+                    with tab_e1_2_3:
+                        pass
 
 
 if __name__ == "__main__":
