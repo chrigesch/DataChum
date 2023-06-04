@@ -2,7 +2,13 @@
 from assets.colors import AVAILABLE_COLORS_SEQUENTIAL
 from modules.classification_and_regression.evaluation import corrected_repeated_t_test
 from modules.classification_and_regression.models import AVAILABLE_MODELS_CLASSIFICATION
-from modules.cluster.evaluation import get_cluster_labels_and_X_prep, silhouette_plot
+from modules.cluster.evaluation import (
+    get_cluster_labels_and_X_prep,
+    line_plot,
+    prepare_results_for_line_plot_metrics,
+    prepare_results_for_line_plot_models,
+    silhouette_plot,
+)
 from modules.cluster.main import clustering, clustering_cross_validation
 from modules.cluster.metrics import (
     AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CONVERGENCE,
@@ -12,14 +18,13 @@ from modules.exploratory_data_analysis.univariate_and_bivariate import plot_num
 from modules.utils.load_and_save_data import (
     convert_dataframe_to_csv,
     convert_dataframe_to_xlsx,
-    read_csv,
-    read_xlsx,
 )
 from modules.utils.preprocessing import (
     AVAILABLE_IMPUTATION_CATEGORICAL,
     AVAILABLE_IMPUTATION_NUMERICAL,
     AVAILABLE_SCALER,
 )
+from pages_ import Exploratory_Data_Analysis
 
 # Import the required libraries
 import pandas as pd
@@ -35,19 +40,9 @@ def main():
     #    streamlit_profiler = Profiler()
     #    streamlit_profiler.start()
 
-    # Create file uploader object
-    uploaded_file = st.file_uploader("Upload your database", type=["csv", "xlsx"])
-
-    if uploaded_file is not None:
-        # Read the file to a dataframe using pandas
-        if uploaded_file.name[-3:] == "csv":
-            # Read in the csv file
-            data = read_csv(uploaded_file)
-        elif uploaded_file.name[-4:] == "xlsx":
-            # Read in the csv file
-            data = read_xlsx(uploaded_file)
-        else:
-            st.write("Type should be .CSV or .XLSX")
+    # Copy data from session state
+    if st.session_state.data is not None:
+        data = st.session_state.data
 
         # Drop ID columns (or similar): Analyze whether all values of the column are unique
         # (count of unique values equals column's length)
@@ -473,27 +468,73 @@ def main():
             # Tab 2: Evaluation Plaots
             with tab_e1_2:
                 # Create uo to three tabs: Bar Plots, Silhouette Plot, Line Plots
-                if len(scores_df_grouped) < 2:
+                if len(scores_df_grouped["n_clusters"].unique()) < 2:
                     # Create two tabs
                     tab_e1_2_1, tab_e1_2_2 = st.tabs(
                         [
-                            "**Bar Plot**",
-                            "**Silhouette Plot**",
+                            "**Bar Plots**",
+                            "**Silhouette Plots**",
                         ]
                     )
                 else:
-                    tab_e1_2_1, tab_e1_2_2, tab_el_2_3 = st.tabs(
+                    tab_e1_2_1, tab_e1_2_2, tab_e1_2_3 = st.tabs(
                         [
                             "**Bar Plots**",
-                            "**Silhouette Plot**",
+                            "**Silhouette Plots**",
                             "**Line Plots**",
                         ]
                     )
                 # Bar Plots
                 with tab_e1_2_1:
-                    # Create four columns for plotting options
-                    col_box_1, col_box_2, col_box_3, col_box_4 = st.columns(4)
+                    if len(scores_df_grouped) < 2:
+                        var_cat = None
+                        data_to_be_plotted = scores_df
+                        multiple = False
+                    elif len(scores_df_grouped["n_clusters"].unique()) < 2:
+                        var_cat = "model"
+                        data_to_be_plotted = scores_df
+                        multiple = False
+                    elif len(scores_df_grouped["model"].unique()) < 2:
+                        var_cat = "n_clusters"
+                        data_to_be_plotted = scores_df
+                        multiple = False
+                    else:
+                        multiple = True
+                    # Create two columns for plotting options
+                    (
+                        col_box_1,
+                        col_box_2,
+                    ) = st.columns([1, 3])
                     with col_box_1:
+                        if multiple is True:
+                            selectbox_x_axis = st.selectbox(
+                                label="**Select the variable to be plotted on x-axis**",
+                                options=["n_clusters", "model"],
+                                index=0,
+                                key="boxplot_1_xaxis",
+                            )
+                            if selectbox_x_axis == "model":
+                                selectbox_n_clusters = st.selectbox(
+                                    label="**Select the cluster solution to be plotted**",
+                                    options=scores_df_grouped["n_clusters"].unique(),
+                                    index=0,
+                                    key="boxplot_1_n_clusters",
+                                )
+                                var_cat = "model"
+                                data_to_be_plotted = scores_df[
+                                    scores_df["n_clusters"] == selectbox_n_clusters
+                                ]
+                            else:
+                                selectbox_model_boxplot = st.selectbox(
+                                    label="**Select the model to be plotted**",
+                                    options=scores_df_grouped["model"].unique(),
+                                    index=0,
+                                    key="boxplot_1_model",
+                                )
+                                var_cat = "n_clusters"
+                                data_to_be_plotted = scores_df[
+                                    scores_df["model"] == selectbox_model_boxplot
+                                ]
                         selectbox_boxplot_evaluation_metric = st.selectbox(
                             label="**Select the evaluation metric to be plotted**",
                             options=[
@@ -504,7 +545,6 @@ def main():
                             index=0,
                             key="boxplot_1_evaluation_metric",
                         )
-                    with col_box_2:
                         # Create selectbox for plotting options
                         selectbox_color = st.selectbox(
                             label="**Select a color scale**",
@@ -512,40 +552,20 @@ def main():
                             index=0,
                             key="tab_box_1_color",
                         )
-                    if len(scores_df_grouped) < 2:
-                        var_cat = None
-                        data_to_be_plotted = scores_df
-                    elif len(scores_df_grouped["n_clusters"].unique()) < 2:
-                        var_cat = "model"
-                        data_to_be_plotted = scores_df
-                    elif len(scores_df_grouped["model"].unique()) < 2:
-                        var_cat = "n_clusters"
-                        data_to_be_plotted = scores_df
-                    else:
-                        with col_box_3:
-                            selectbox_model_boxplot = st.selectbox(
-                                label="**Select the model to be plotted**",
-                                options=scores_df_grouped["model"].unique(),
-                                index=0,
-                                key="boxplot_1_model",
-                            )
-                            var_cat = "n_clusters"
-                            data_to_be_plotted = scores_df[
-                                scores_df["model"] == selectbox_model_boxplot
-                            ]
-                    fig_variable = plot_num(
-                        data=data_to_be_plotted,
-                        var_num=selectbox_boxplot_evaluation_metric,
-                        var_cat=var_cat,
-                        plot_type="Box-Plot",
-                        color=selectbox_color,
-                        template="plotly_white",
-                    )
-                    st.plotly_chart(
-                        fig_variable,
-                        theme="streamlit",
-                        use_container_width=True,
-                    )
+                    with col_box_2:
+                        fig_variable = plot_num(
+                            data=data_to_be_plotted,
+                            var_num=selectbox_boxplot_evaluation_metric,
+                            var_cat=var_cat,
+                            plot_type="Box-Plot",
+                            color=selectbox_color,
+                            template="plotly_white",
+                        )
+                        st.plotly_chart(
+                            fig_variable,
+                            theme="streamlit",
+                            use_container_width=True,
+                        )
                 # Silhouette Plot
                 with tab_e1_2_2:
                     st.markdown(
@@ -554,8 +574,8 @@ def main():
                     # Instantiate placeholders | Session state variables
                     if "fig_sil_plot" not in st.session_state:
                         st.session_state.fig_sil_plot = None
-                    # Create four columns for plotting options
-                    col_sil_1, col_sil_2, col_sil_3, col_sil_4 = st.columns(4)
+                    # Create two columns for plotting options
+                    col_sil_1, col_sil_2 = st.columns([1, 3])
                     with col_sil_1:
                         selectbox_model_sil_plot = st.selectbox(
                             label="**Select the model to be plotted**",
@@ -563,33 +583,217 @@ def main():
                             index=0,
                             key="sil_plot_1_model",
                         )
-                    with col_sil_2:
                         selectbox_n_cluster_sil_plot = st.selectbox(
-                            label="**Select cluster solution to be plotted**",
+                            label="**Select the cluster solution to be plotted**",
                             options=scores_df_grouped["n_clusters"].unique(),
                             index=0,
                             key="sil_plot_1_n_cluster",
                         )
-                    with col_sil_3:
+                        selectbox_color = st.selectbox(
+                            label="**Select a color scale**",
+                            options=AVAILABLE_COLORS_SEQUENTIAL,
+                            index=0,
+                            key="tab_sil_1_color",
+                        )
                         button_generate_sil_plot = st.button(
                             label="**Plot**",
                             type="secondary",
                             use_container_width=True,
                             key="tab_e1_2_2_plot",
                         )
-                    with button_generate_sil_plot:
-                        cluster_labels, X_prep = get_cluster_labels_and_X_prep(
-                            data=data,
-                            imputation_numerical=st.session_state.cluster_instance.imputation_numerical,
-                            imputation_categorical=st.session_state.cluster_instance.imputation_categorical,
-                            scaler=st.session_state.cluster_instance.scaler,
-                            cluster_model=[selectbox_model_sil_plot],
-                            n_clusters=selectbox_n_cluster_sil_plot,
+                    with col_sil_2:
+                        if button_generate_sil_plot:
+                            cluster_labels, X_prep = get_cluster_labels_and_X_prep(
+                                data=data,
+                                imputation_numerical=st.session_state.cluster_instance.imputation_numerical,
+                                imputation_categorical=st.session_state.cluster_instance.imputation_categorical,
+                                scaler=st.session_state.cluster_instance.scaler,
+                                cluster_model=[selectbox_model_sil_plot],
+                                n_clusters=selectbox_n_cluster_sil_plot,
+                            )
+                            st.session_state.fig_sil_plot = silhouette_plot(
+                                X_prep=X_prep,
+                                cluster_model=selectbox_model_sil_plot,
+                                cluster_labels=cluster_labels,
+                                color=selectbox_color,
+                            )
+                        if st.session_state.fig_sil_plot is not None:
+                            st.plotly_chart(
+                                st.session_state.fig_sil_plot,
+                                theme="streamlit",
+                                use_container_width=True,
+                            )
+                # Line Plot
+                if len(scores_df_grouped["n_clusters"].unique()) >= 2:
+                    with tab_e1_2_3:
+                        if len(scores_df_grouped["model"].unique()) < 2:
+                            data_to_be_plotted = prepare_results_for_line_plot_metrics(
+                                scores_df,
+                                st.session_state.cluster_instance.cluster_models[0],
+                            )
+                            y_axis = "scaled_score"
+                            traces = "metric"
+                            multiple = False
+                        else:
+                            multiple = True
+                        # Create two columns for plotting options
+                        (
+                            col_line_1,
+                            col_line_2,
+                        ) = st.columns([1, 3])
+                        with col_line_1:
+                            if multiple is True:
+                                selectbox_var_comp = st.selectbox(
+                                    label="**Select the variable to be compared**",
+                                    options=["model", "metric"],
+                                    index=0,
+                                    key="lineplot_1_var_comp",
+                                )
+                                if selectbox_var_comp == "model":
+                                    selectbox_metric_lineplot = st.selectbox(
+                                        label="**Select the metric to be plotted**",
+                                        options=[
+                                            value
+                                            for value in scores_df.columns.to_list()
+                                            if value not in ["model", "n_clusters"]
+                                        ],
+                                        index=0,
+                                        key="lineplot_1_metric",
+                                    )
+                                    y_axis = selectbox_metric_lineplot
+                                    traces = "model"
+                                    data_to_be_plotted = (
+                                        prepare_results_for_line_plot_models(scores_df)
+                                    )
+                                else:
+                                    selectbox_model_lineplot = st.selectbox(
+                                        label="**Select the model to be plotted**",
+                                        options=scores_df_grouped["model"].unique(),
+                                        index=0,
+                                        key="lineplot_1_model",
+                                    )
+                                    y_axis = "scaled_score"
+                                    traces = "metric"
+                                    data_to_be_plotted = (
+                                        prepare_results_for_line_plot_metrics(
+                                            scores_df,
+                                            selectbox_model_lineplot,
+                                        )
+                                    )
+                            # Create selectbox for plotting options
+                            selectbox_color = st.selectbox(
+                                label="**Select a color scale**",
+                                options=AVAILABLE_COLORS_SEQUENTIAL,
+                                index=0,
+                                key="tab_line_1_color",
+                            )
+                        with col_line_2:
+                            if y_axis == "scaled_score":
+                                st.markdown(
+                                    "**CAUTION: A MinMax-Scaler (0, 1) was applied to"
+                                    " Calinski-Harabasz & Davies-Bouldin scores**"
+                                )
+                            fig_variable = line_plot(
+                                data=data_to_be_plotted,
+                                x="n_clusters",
+                                y=y_axis,
+                                traces=traces,
+                                color=selectbox_color,
+                            )
+                            st.plotly_chart(
+                                fig_variable,
+                                theme="streamlit",
+                                use_container_width=True,
+                            )
+            # Tab 3: Interpretation Plots
+            with tab_e1_3:
+                # Create two columns for plotting options
+                col_int_1, col_int_2 = st.columns([1, 3])
+                with col_int_1:
+                    selectbox_model_int_plot = st.selectbox(
+                        label="**Select the model to be plotted**",
+                        options=scores_df_grouped["model"].unique(),
+                        index=0,
+                        key="int_plot_1_model",
+                    )
+                    selectbox_n_cluster_int_plot = st.selectbox(
+                        label="**Select the cluster solution to be plotted**",
+                        options=scores_df_grouped["n_clusters"].unique(),
+                        index=0,
+                        key="int_plot_1_n_cluster",
+                    )
+                    selectbox_color = st.selectbox(
+                        label="**Select a color scale**",
+                        options=AVAILABLE_COLORS_SEQUENTIAL,
+                        index=0,
+                        key="tab_int_1_color",
+                    )
+                    cluster_labels, X_prep = get_cluster_labels_and_X_prep(
+                        data=data,
+                        imputation_numerical=st.session_state.cluster_instance.imputation_numerical,
+                        imputation_categorical=st.session_state.cluster_instance.imputation_categorical,
+                        scaler=st.session_state.cluster_instance.scaler,
+                        cluster_model=[selectbox_model_int_plot],
+                        n_clusters=selectbox_n_cluster_int_plot,
+                    )
+                    # Create a DataFrames to be plotted (with preprocessed data)
+                    data_to_be_plotted = X_prep
+                    data_to_be_plotted["cluster_label"] = cluster_labels
+                    data_to_be_plotted = (
+                        data_to_be_plotted.groupby(by="cluster_label")
+                        .mean()
+                        .reset_index()
+                        .melt(
+                            id_vars="cluster_label",
+                            value_vars=X_prep.columns.to_list(),
                         )
-                        st.session_state.fig_sil_plot = 
-                    if st.session_state.fig_sil_plot is not None:
-                        pass
-
+                    )
+                    # Create a DataFrame to be downloaded (with original data)
+                    data_to_be_downloaded = data
+                    data_to_be_downloaded["cluster_label"] = cluster_labels
+                with col_int_2:
+                    # Create two columns for download buttons
+                    col_int_2_1, col_int_2_2, col_int_2_3 = st.columns(3)
+                    with col_int_2_1:
+                        st.download_button(
+                            label="Assign cluster labels to database and download as CSV",
+                            data=convert_dataframe_to_csv(data_to_be_downloaded),
+                            file_name="data_with_cluster_labels.csv",
+                            mime="text/csv'",
+                        )
+                    with col_int_2_2:
+                        st.download_button(
+                            label="Assign cluster labels to database and download as XLSX",
+                            data=convert_dataframe_to_xlsx(
+                                data_to_be_downloaded.astype("object")
+                            ),
+                            file_name="data_with_cluster_labels.xlsx",
+                            mime="application/vnd.ms-excel",
+                        )
+                    with col_int_2_3:
+                        # Assign labels and go to EDA module
+                        button_assign_labels = st.button(
+                            label="Assign cluster labels to database and go to Exploratory Data Analysis module",
+                            type="secondary",
+                            use_container_width=True,
+                            key="tab_e1_3_assign_labels",
+                        )
+                        if button_assign_labels:
+                            st.session_state.data = data_to_be_downloaded
+                            st.session_state.page = Exploratory_Data_Analysis
+                    # Show the interpretation plot
+                    fig_variable = line_plot(
+                        data=data_to_be_plotted,
+                        x="variable",
+                        y="value",
+                        traces="cluster_label",
+                        color=selectbox_color,
+                    )
+                    st.plotly_chart(
+                        fig_variable,
+                        theme="streamlit",
+                        use_container_width=True,
+                    )
 
 
 if __name__ == "__main__":

@@ -121,7 +121,7 @@ def get_cluster_labels_and_X_prep(
     pipeline = data_preprocessing(
         cols_num=cols_num,
         cols_cat=cols_cat,
-        imputation_numeric=imputation_numerical,
+        imputation_numerical=imputation_numerical,
         scaler=scaler,
         imputation_categorical=imputation_categorical,
         one_hot_encoding=True,

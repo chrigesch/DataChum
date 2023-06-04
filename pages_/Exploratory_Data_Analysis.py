@@ -33,8 +33,6 @@ from modules.exploratory_data_analysis.univariate_and_bivariate import (
 from modules.utils.load_and_save_data import (
     convert_dataframe_to_xlsx,
     convert_dataframe_to_csv,
-    read_csv,
-    read_xlsx,
 )
 
 # Import the required libraries
@@ -49,25 +47,15 @@ import streamlit.components.v1 as components
 
 def main():
     # Add a subtitle
-    st.subheader("Exploratory Data Analysis")
+    st.header("Exploratory Data Analysis")
 
     # Profile the app
     #    streamlit_profiler = Profiler()
     #    streamlit_profiler.start()
 
-    # Create file uploader object
-    uploaded_file = st.file_uploader("Upload your database", type=["csv", "xlsx"])
-
-    if uploaded_file is not None:
-        # Read the file to a dataframe using pandas
-        if uploaded_file.name[-3:] == "csv":
-            # Read in the csv file
-            data = read_csv(uploaded_file)
-        elif uploaded_file.name[-4:] == "xlsx":
-            # Read in the csv file
-            data = read_xlsx(uploaded_file)
-        else:
-            st.write("Type should be .CSV or .XLSX")
+    # Copy data from session state
+    if st.session_state.data is not None:
+        data = st.session_state.data
         # Get NUMERICAL, CATEGORICAL and DATETIME column names (Do NOT include DATETIME in "cols_all")
         cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
         cols_cat = data.select_dtypes(
@@ -85,9 +73,6 @@ def main():
         ), "Database must contain 1 or more categorical or numerical columns"
         # Compute associations (necesary for the overview tab)
         associations_df = associations_for_categorical_and_numerical_variables(data)[0]
-
-        # Create tabs to explore the data
-        st.header("Exploratory Data Analysis")
 
         # Create tabs, according to the number of CATEGORICAL and NUMERICAL columns
         if len(cols_cat_and_num) == 1:
