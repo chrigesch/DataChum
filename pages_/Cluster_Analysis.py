@@ -18,8 +18,6 @@ from modules.exploratory_data_analysis.univariate_and_bivariate import plot_num
 from modules.utils.load_and_save_data import (
     convert_dataframe_to_csv,
     convert_dataframe_to_xlsx,
-    read_csv,
-    read_xlsx,
 )
 from modules.utils.preprocessing import (
     AVAILABLE_IMPUTATION_CATEGORICAL,
@@ -42,19 +40,9 @@ def main():
     #    streamlit_profiler = Profiler()
     #    streamlit_profiler.start()
 
-    # Create file uploader object
-    uploaded_file = st.file_uploader("Upload your database", type=["csv", "xlsx"])
-
-    if uploaded_file is not None:
-        # Read the file to a dataframe using pandas
-        if uploaded_file.name[-3:] == "csv":
-            # Read in the csv file
-            data = read_csv(uploaded_file)
-        elif uploaded_file.name[-4:] == "xlsx":
-            # Read in the csv file
-            data = read_xlsx(uploaded_file)
-        else:
-            st.write("Type should be .CSV or .XLSX")
+    # Copy data from session state
+    if st.session_state.data is not None:
+        data = st.session_state.data
 
         # Drop ID columns (or similar): Analyze whether all values of the column are unique
         # (count of unique values equals column's length)
