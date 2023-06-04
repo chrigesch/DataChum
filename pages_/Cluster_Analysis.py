@@ -26,6 +26,7 @@ from modules.utils.preprocessing import (
     AVAILABLE_IMPUTATION_NUMERICAL,
     AVAILABLE_SCALER,
 )
+from pages_ import Exploratory_Data_Analysis
 
 # Import the required libraries
 import pandas as pd
@@ -673,7 +674,9 @@ def main():
                                     )
                                     y_axis = selectbox_metric_lineplot
                                     traces = "model"
-                                    data_to_be_plotted = prepare_results_for_line_plot_models(scores_df)
+                                    data_to_be_plotted = (
+                                        prepare_results_for_line_plot_models(scores_df)
+                                    )
                                 else:
                                     selectbox_model_lineplot = st.selectbox(
                                         label="**Select the model to be plotted**",
@@ -714,6 +717,95 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
+            # Tab 3: Interpretation Plots
+            with tab_e1_3:
+                # Create two columns for plotting options
+                col_int_1, col_int_2 = st.columns([1, 3])
+                with col_int_1:
+                    selectbox_model_int_plot = st.selectbox(
+                        label="**Select the model to be plotted**",
+                        options=scores_df_grouped["model"].unique(),
+                        index=0,
+                        key="int_plot_1_model",
+                    )
+                    selectbox_n_cluster_int_plot = st.selectbox(
+                        label="**Select the cluster solution to be plotted**",
+                        options=scores_df_grouped["n_clusters"].unique(),
+                        index=0,
+                        key="int_plot_1_n_cluster",
+                    )
+                    selectbox_color = st.selectbox(
+                        label="**Select a color scale**",
+                        options=AVAILABLE_COLORS_SEQUENTIAL,
+                        index=0,
+                        key="tab_int_1_color",
+                    )
+                    cluster_labels, X_prep = get_cluster_labels_and_X_prep(
+                        data=data,
+                        imputation_numerical=st.session_state.cluster_instance.imputation_numerical,
+                        imputation_categorical=st.session_state.cluster_instance.imputation_categorical,
+                        scaler=st.session_state.cluster_instance.scaler,
+                        cluster_model=[selectbox_model_int_plot],
+                        n_clusters=selectbox_n_cluster_int_plot,
+                    )
+                    # Create a DataFrames to be plotted (with preprocessed data)
+                    data_to_be_plotted = X_prep
+                    data_to_be_plotted["cluster_label"] = cluster_labels
+                    data_to_be_plotted = (
+                        data_to_be_plotted.groupby(by="cluster_label")
+                        .mean()
+                        .reset_index()
+                        .melt(
+                            id_vars="cluster_label",
+                            value_vars=X_prep.columns.to_list(),
+                        )
+                    )
+                    # Create a DataFrame to be downloaded (with original data)
+                    data_to_be_downloaded = data
+                    data_to_be_downloaded["cluster_label"] = cluster_labels
+                with col_int_2:
+                    # Create two columns for download buttons
+                    col_int_2_1, col_int_2_2, col_int_2_3 = st.columns(3)
+                    with col_int_2_1:
+                        st.download_button(
+                            label="Assign cluster labels to database and download as CSV",
+                            data=convert_dataframe_to_csv(data_to_be_downloaded),
+                            file_name="data_with_cluster_labels.csv",
+                            mime="text/csv'",
+                        )
+                    with col_int_2_2:
+                        st.download_button(
+                            label="Assign cluster labels to database and download as XLSX",
+                            data=convert_dataframe_to_xlsx(
+                                data_to_be_downloaded.astype("object")
+                            ),
+                            file_name="data_with_cluster_labels.xlsx",
+                            mime="application/vnd.ms-excel",
+                        )
+                    with col_int_2_3:
+                        # Assign labels and go to EDA module
+                        button_assign_labels = st.button(
+                            label="Assign cluster labels to database and go to Exploratory Data Analysis module",
+                            type="secondary",
+                            use_container_width=True,
+                            key="tab_e1_3_assign_labels",
+                        )
+                        if button_assign_labels:
+                            data = data_to_be_downloaded
+                            st.session_state.page = Exploratory_Data_Analysis
+                    # Show the interpretation plot
+                    fig_variable = line_plot(
+                        data=data_to_be_plotted,
+                        x="variable",
+                        y="value",
+                        traces="cluster_label",
+                        color=selectbox_color,
+                    )
+                    st.plotly_chart(
+                        fig_variable,
+                        theme="streamlit",
+                        use_container_width=True,
+                    )
 
 
 if __name__ == "__main__":
