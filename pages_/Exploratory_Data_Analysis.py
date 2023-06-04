@@ -54,7 +54,8 @@ def main():
     # Profile the app
     #    streamlit_profiler = Profiler()
     #    streamlit_profiler.start()
-
+    if st.session_state.data is not None:
+        data = st.session_state.data
         # Get NUMERICAL, CATEGORICAL and DATETIME column names (Do NOT include DATETIME in "cols_all")
         cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
         cols_cat = data.select_dtypes(
