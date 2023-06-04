@@ -52,6 +52,8 @@ def main():
     # Profile the app
     #    streamlit_profiler = Profiler()
     #    streamlit_profiler.start()
+
+    # Copy data from session state
     if st.session_state.data is not None:
         data = st.session_state.data
         # Get NUMERICAL, CATEGORICAL and DATETIME column names (Do NOT include DATETIME in "cols_all")
