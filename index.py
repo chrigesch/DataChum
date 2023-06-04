@@ -22,7 +22,7 @@ def main():
 
     # Set placeholder for data
     if "data" not in st.session_state:
-        st.session_state.data = Exploratory_Data_Analysis
+        st.session_state.data = None
     if uploaded_file is not None:
         # Read the file to a dataframe using pandas
         if uploaded_file.name[-3:] == "csv":
