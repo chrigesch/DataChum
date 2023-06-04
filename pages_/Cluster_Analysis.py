@@ -2,7 +2,13 @@
 from assets.colors import AVAILABLE_COLORS_SEQUENTIAL
 from modules.classification_and_regression.evaluation import corrected_repeated_t_test
 from modules.classification_and_regression.models import AVAILABLE_MODELS_CLASSIFICATION
-from modules.cluster.evaluation import get_cluster_labels_and_X_prep, silhouette_plot
+from modules.cluster.evaluation import (
+    get_cluster_labels_and_X_prep,
+    line_plot,
+    prepare_results_for_line_plot_metrics,
+    prepare_results_for_line_plot_models,
+    silhouette_plot,
+)
 from modules.cluster.main import clustering, clustering_cross_validation
 from modules.cluster.metrics import (
     AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CONVERGENCE,
@@ -473,19 +479,19 @@ def main():
             # Tab 2: Evaluation Plaots
             with tab_e1_2:
                 # Create uo to three tabs: Bar Plots, Silhouette Plot, Line Plots
-                if len(scores_df_grouped) < 2:
+                if len(scores_df_grouped["n_clusters"].unique()) < 2:
                     # Create two tabs
                     tab_e1_2_1, tab_e1_2_2 = st.tabs(
                         [
-                            "**Bar Plot**",
-                            "**Silhouette Plot**",
+                            "**Bar Plots**",
+                            "**Silhouette Plots**",
                         ]
                     )
                 else:
                     tab_e1_2_1, tab_e1_2_2, tab_e1_2_3 = st.tabs(
                         [
                             "**Bar Plots**",
-                            "**Silhouette Plot**",
+                            "**Silhouette Plots**",
                             "**Line Plots**",
                         ]
                     )
@@ -629,9 +635,85 @@ def main():
                                 use_container_width=True,
                             )
                 # Line Plot
-                if len(scores_df_grouped) >= 2:
+                if len(scores_df_grouped["n_clusters"].unique()) >= 2:
                     with tab_e1_2_3:
-                        pass
+                        if len(scores_df_grouped["model"].unique()) < 2:
+                            data_to_be_plotted = prepare_results_for_line_plot_metrics(
+                                scores_df,
+                                st.session_state.cluster_instance.cluster_models[0],
+                            )
+                            y_axis = "scaled_score"
+                            traces = "metric"
+                            multiple = False
+                        else:
+                            multiple = True
+                        # Create two columns for plotting options
+                        (
+                            col_line_1,
+                            col_line_2,
+                        ) = st.columns([1, 3])
+                        with col_line_1:
+                            if multiple is True:
+                                selectbox_var_comp = st.selectbox(
+                                    label="**Select the variable to be compared**",
+                                    options=["model", "metric"],
+                                    index=0,
+                                    key="lineplot_1_var_comp",
+                                )
+                                if selectbox_var_comp == "model":
+                                    selectbox_metric_lineplot = st.selectbox(
+                                        label="**Select the metric to be plotted**",
+                                        options=[
+                                            value
+                                            for value in scores_df.columns.to_list()
+                                            if value not in ["model", "n_clusters"]
+                                        ],
+                                        index=0,
+                                        key="lineplot_1_metric",
+                                    )
+                                    y_axis = selectbox_metric_lineplot
+                                    traces = "model"
+                                    data_to_be_plotted = prepare_results_for_line_plot_models(scores_df)
+                                else:
+                                    selectbox_model_lineplot = st.selectbox(
+                                        label="**Select the model to be plotted**",
+                                        options=scores_df_grouped["model"].unique(),
+                                        index=0,
+                                        key="lineplot_1_model",
+                                    )
+                                    y_axis = "scaled_score"
+                                    traces = "metric"
+                                    data_to_be_plotted = (
+                                        prepare_results_for_line_plot_metrics(
+                                            scores_df,
+                                            selectbox_model_lineplot,
+                                        )
+                                    )
+                            # Create selectbox for plotting options
+                            selectbox_color = st.selectbox(
+                                label="**Select a color scale**",
+                                options=AVAILABLE_COLORS_SEQUENTIAL,
+                                index=0,
+                                key="tab_line_1_color",
+                            )
+                        with col_line_2:
+                            if y_axis == "scaled_score":
+                                st.markdown(
+                                    "**CAUTION: A MinMax-Scaler (0, 1) was applied to"
+                                    " Calinski-Harabasz & Davies-Bouldin scores**"
+                                )
+                            fig_variable = line_plot(
+                                data=data_to_be_plotted,
+                                x="n_clusters",
+                                y=y_axis,
+                                traces=traces,
+                                color=selectbox_color,
+                            )
+                            st.plotly_chart(
+                                fig_variable,
+                                theme="streamlit",
+                                use_container_width=True,
+                            )
 
 
 if __name__ == "__main__":
