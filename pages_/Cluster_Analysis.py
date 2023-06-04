@@ -491,9 +491,55 @@ def main():
                     )
                 # Bar Plots
                 with tab_e1_2_1:
+                    if len(scores_df_grouped) < 2:
+                        var_cat = None
+                        data_to_be_plotted = scores_df
+                        multiple = False
+                    elif len(scores_df_grouped["n_clusters"].unique()) < 2:
+                        var_cat = "model"
+                        data_to_be_plotted = scores_df
+                        multiple = False
+                    elif len(scores_df_grouped["model"].unique()) < 2:
+                        var_cat = "n_clusters"
+                        data_to_be_plotted = scores_df
+                        multiple = False
+                    else:
+                        multiple = True
                     # Create four columns for plotting options
-                    col_box_1, col_box_2, col_box_3, col_box_4 = st.columns(4)
+                    (
+                        col_box_1,
+                        col_box_2,
+                    ) = st.columns([1, 3])
                     with col_box_1:
+                        if multiple is True:
+                            selectbox_x_axis = st.selectbox(
+                                label="**Select the variable to be plotted on x-axis**",
+                                options=["n_clusters", "model"],
+                                index=0,
+                                key="boxplot_1_xaxis",
+                            )
+                            if selectbox_x_axis == "model":
+                                selectbox_n_clusters = st.selectbox(
+                                    label="**Select the cluster solution to be plotted**",
+                                    options=scores_df_grouped["n_clusters"].unique(),
+                                    index=0,
+                                    key="boxplot_1_n_clusters",
+                                )
+                                var_cat = "model"
+                                data_to_be_plotted = scores_df[
+                                    scores_df["n_clusters"] == selectbox_n_clusters
+                                ]
+                            else:
+                                selectbox_model_boxplot = st.selectbox(
+                                    label="**Select the model to be plotted**",
+                                    options=scores_df_grouped["model"].unique(),
+                                    index=0,
+                                    key="boxplot_1_model",
+                                )
+                                var_cat = "n_clusters"
+                                data_to_be_plotted = scores_df[
+                                    scores_df["model"] == selectbox_model_boxplot
+                                ]
                         selectbox_boxplot_evaluation_metric = st.selectbox(
                             label="**Select the evaluation metric to be plotted**",
                             options=[
@@ -504,7 +550,6 @@ def main():
                             index=0,
                             key="boxplot_1_evaluation_metric",
                         )
-                    with col_box_2:
                         # Create selectbox for plotting options
                         selectbox_color = st.selectbox(
                             label="**Select a color scale**",
@@ -512,40 +557,20 @@ def main():
                             index=0,
                             key="tab_box_1_color",
                         )
-                    if len(scores_df_grouped) < 2:
-                        var_cat = None
-                        data_to_be_plotted = scores_df
-                    elif len(scores_df_grouped["n_clusters"].unique()) < 2:
-                        var_cat = "model"
-                        data_to_be_plotted = scores_df
-                    elif len(scores_df_grouped["model"].unique()) < 2:
-                        var_cat = "n_clusters"
-                        data_to_be_plotted = scores_df
-                    else:
-                        with col_box_3:
-                            selectbox_model_boxplot = st.selectbox(
-                                label="**Select the model to be plotted**",
-                                options=scores_df_grouped["model"].unique(),
-                                index=0,
-                                key="boxplot_1_model",
-                            )
-                            var_cat = "n_clusters"
-                            data_to_be_plotted = scores_df[
-                                scores_df["model"] == selectbox_model_boxplot
-                            ]
-                    fig_variable = plot_num(
-                        data=data_to_be_plotted,
-                        var_num=selectbox_boxplot_evaluation_metric,
-                        var_cat=var_cat,
-                        plot_type="Box-Plot",
-                        color=selectbox_color,
-                        template="plotly_white",
-                    )
-                    st.plotly_chart(
-                        fig_variable,
-                        theme="streamlit",
-                        use_container_width=True,
-                    )
+                    with col_box_2:
+                        fig_variable = plot_num(
+                            data=data_to_be_plotted,
+                            var_num=selectbox_boxplot_evaluation_metric,
+                            var_cat=var_cat,
+                            plot_type="Box-Plot",
+                            color=selectbox_color,
+                            template="plotly_white",
+                        )
+                        st.plotly_chart(
+                            fig_variable,
+                            theme="streamlit",
+                            use_container_width=True,
+                        )
                 # Silhouette Plot
                 with tab_e1_2_2:
                     st.markdown(
@@ -586,10 +611,9 @@ def main():
                             cluster_model=[selectbox_model_sil_plot],
                             n_clusters=selectbox_n_cluster_sil_plot,
                         )
-                        st.session_state.fig_sil_plot = 
+                        st.session_state.fig_sil_plot = "to_be_changed"
                     if st.session_state.fig_sil_plot is not None:
                         pass
-
 
 
 if __name__ == "__main__":
