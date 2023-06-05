@@ -727,7 +727,8 @@ def main():
                         file_name="pipeline_"
                         + str(
                             scores_test_df["model"].iloc[selectbox_model_to_be_plotted]
-                        ),
+                        )
+                        + ".pkl",
                         key="download_model_eval",
                         use_container_width=True,
                     )
@@ -740,7 +741,8 @@ def main():
                                 scores_test_df["model"].iloc[
                                     selectbox_model_to_be_plotted
                                 ]
-                            ),
+                            )
+                            + ".pkl",
                             key="download_label_encoder_eval",
                             use_container_width=True,
                         )
