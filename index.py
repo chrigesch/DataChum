@@ -1,5 +1,4 @@
-from PIL import Image
-import streamlit as st
+# Import moduls from local directories
 from pages_ import (
     Classification_and_Regression,
     Cluster_Analysis,
@@ -11,30 +10,16 @@ from modules.utils.load_and_save_data import (
     read_xlsx,
 )
 
+# Import the required libraries
+from PIL import Image
+import streamlit as st
+
 
 def main():
     # Page setup
     st.set_page_config(
         page_title="DataChum", page_icon="assets/logo_01.png", layout="wide"
     )
-    # Create file uploader object
-    uploaded_file = st.file_uploader("Upload your database", type=["csv", "xlsx"])
-
-    # Set placeholder for data
-    if "data" not in st.session_state:
-        st.session_state.data = None
-    if "data_updated" not in st.session_state:
-        st.session_state.data_updated = False
-    if (uploaded_file is not None) & (st.session_state.data_updated is False):
-        # Read the file to a dataframe using pandas
-        if uploaded_file.name[-3:] == "csv":
-            # Read in the csv file
-            st.session_state.data = read_csv(uploaded_file)
-        elif uploaded_file.name[-4:] == "xlsx":
-            # Read in the csv file
-            st.session_state.data = read_xlsx(uploaded_file)
-        else:
-            st.write("Type should be .CSV or .XLSX")
 
     # Display the sidebar with a menu of apps
     with st.sidebar:
@@ -80,6 +65,26 @@ def main():
         st.session_state.page = Cluster_Analysis
     if button_deployment:
         st.session_state.page = Deployment
+
+    # Add a DATA file uploader object (Deployment needs "model" and (optionally) "label_encoder")
+    if st.session_state.page != Deployment:
+        # Set placeholder for data
+        if "data" not in st.session_state:
+            st.session_state.data = None
+        if "data_updated" not in st.session_state:
+            st.session_state.data_updated = False
+        # Create file uploader object
+        uploaded_file = st.file_uploader("Upload your database", type=["csv", "xlsx"])
+        if (uploaded_file is not None) & (st.session_state.data_updated is False):
+            # Read the file to a dataframe using pandas
+            if uploaded_file.name[-3:] == "csv":
+                # Read in the csv file
+                st.session_state.data = read_csv(uploaded_file)
+            elif uploaded_file.name[-4:] == "xlsx":
+                # Read in the csv file
+                st.session_state.data = read_xlsx(uploaded_file)
+            else:
+                st.write("Type should be .CSV or .XLSX")
 
     st.session_state.page.main()
 

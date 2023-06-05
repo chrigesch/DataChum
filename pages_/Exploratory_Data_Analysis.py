@@ -49,7 +49,7 @@ import streamlit.components.v1 as components
 
 def main():
     # Add a subtitle
-    st.header("Exploratory Data Analysis")
+    st.subheader("Exploratory Data Analysis")
 
     # Profile the app
     #    streamlit_profiler = Profiler()
