@@ -782,6 +782,7 @@ def main():
                         )
                         if button_assign_labels:
                             st.session_state.data = data_to_be_downloaded
+                            st.session_state.data_updated = True
                             st.session_state.page = Exploratory_Data_Analysis
                     # Show the interpretation plot
                     fig_variable = line_plot(
