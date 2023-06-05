@@ -23,6 +23,8 @@ def main():
     # Set placeholder for data
     if "data" not in st.session_state:
         st.session_state.data = None
+    if "data_updated" not in st.session_state:
+        st.session_state.data_updated = False
     if uploaded_file is not None:
         # Read the file to a dataframe using pandas
         if uploaded_file.name[-3:] == "csv":
