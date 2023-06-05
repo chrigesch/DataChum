@@ -18,6 +18,8 @@ from modules.exploratory_data_analysis.univariate_and_bivariate import plot_num
 from modules.utils.load_and_save_data import (
     convert_dataframe_to_csv,
     convert_dataframe_to_xlsx,
+    read_csv,
+    read_xlsx,
 )
 from modules.utils.preprocessing import (
     AVAILABLE_IMPUTATION_CATEGORICAL,
@@ -750,7 +752,9 @@ def main():
                     )
                     # Create a DataFrame to be downloaded (with original data)
                     data_to_be_downloaded = data
-                    data_to_be_downloaded["cluster_label"] = cluster_labels
+                    data_to_be_downloaded["cluster_label"] = [
+                        "Cluster " + str(value) for value in cluster_labels
+                    ]
                 with col_int_2:
                     # Create two columns for download buttons
                     col_int_2_1, col_int_2_2, col_int_2_3 = st.columns(3)
@@ -780,6 +784,7 @@ def main():
                         )
                         if button_assign_labels:
                             st.session_state.data = data_to_be_downloaded
+                            st.session_state.data_updated = True
                             st.session_state.page = Exploratory_Data_Analysis
                     # Show the interpretation plot
                     fig_variable = line_plot(
@@ -801,4 +806,19 @@ if __name__ == "__main__":
     st.set_page_config(
         page_title="DataChum", page_icon="assets/logo_01.png", layout="wide"
     )
+    # Create file uploader object
+    uploaded_file = st.file_uploader("Upload your database", type=["csv", "xlsx"])
+    # Set placeholder for data
+    if "data" not in st.session_state:
+        st.session_state.data = None
+    if uploaded_file is not None:
+        # Read the file to a dataframe using pandas
+        if uploaded_file.name[-3:] == "csv":
+            # Read in the csv file
+            st.session_state.data = read_csv(uploaded_file)
+        elif uploaded_file.name[-4:] == "xlsx":
+            # Read in the csv file
+            st.session_state.data = read_xlsx(uploaded_file)
+        else:
+            st.write("Type should be .CSV or .XLSX")
     main()

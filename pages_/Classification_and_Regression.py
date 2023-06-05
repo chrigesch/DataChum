@@ -48,6 +48,8 @@ from modules.classification_and_regression.main import (
 from modules.utils.load_and_save_data import (
     convert_dataframe_to_csv,
     convert_dataframe_to_xlsx,
+    read_csv,
+    read_xlsx,
 )
 from modules.utils.preprocessing import (
     AVAILABLE_IMPUTATION_CATEGORICAL,
@@ -727,7 +729,8 @@ def main():
                         file_name="pipeline_"
                         + str(
                             scores_test_df["model"].iloc[selectbox_model_to_be_plotted]
-                        ),
+                        )
+                        + ".pkl",
                         key="download_model_eval",
                         use_container_width=True,
                     )
@@ -740,7 +743,8 @@ def main():
                                 scores_test_df["model"].iloc[
                                     selectbox_model_to_be_plotted
                                 ]
-                            ),
+                            )
+                            + ".pkl",
                             key="download_label_encoder_eval",
                             use_container_width=True,
                         )
@@ -1644,4 +1648,19 @@ if __name__ == "__main__":
     st.set_page_config(
         page_title="DataChum", page_icon="assets/logo_01.png", layout="wide"
     )
+    # Create file uploader object
+    uploaded_file = st.file_uploader("Upload your database", type=["csv", "xlsx"])
+    # Set placeholder for data
+    if "data" not in st.session_state:
+        st.session_state.data = None
+    if uploaded_file is not None:
+        # Read the file to a dataframe using pandas
+        if uploaded_file.name[-3:] == "csv":
+            # Read in the csv file
+            st.session_state.data = read_csv(uploaded_file)
+        elif uploaded_file.name[-4:] == "xlsx":
+            # Read in the csv file
+            st.session_state.data = read_xlsx(uploaded_file)
+        else:
+            st.write("Type should be .CSV or .XLSX")
     main()
