@@ -1,5 +1,4 @@
-from PIL import Image
-import streamlit as st
+# Import moduls from local directories
 from pages_ import (
     Classification_and_Regression,
     Cluster_Analysis,
@@ -10,6 +9,10 @@ from modules.utils.load_and_save_data import (
     read_csv,
     read_xlsx,
 )
+
+# Import the required libraries
+from PIL import Image
+import streamlit as st
 
 
 def main():
