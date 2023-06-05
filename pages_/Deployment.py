@@ -62,11 +62,24 @@ def main():
             st.markdown(
                 "No LabelEncoder provided: Predictions will not be transformed back to original encoding"
             )
-        data_to_predict_on = pd.DataFrame(
+        empty_df = pd.DataFrame(
             columns=pipeline_deployment.feature_names_in_,
             index=[0],
         )
-        st.data_editor(data_to_predict_on, num_rows="dynamic")
+        edited_df = st.data_editor(empty_df, num_rows="dynamic")
+
+        # Make predictions
+        if "predictions" not in st.session_state:
+            st.session_state.predictions = None
+
+        button_predict = st.button(
+            label="Make predictions",
+            type="primary",
+            use_container_width=True,
+            key="button_predict",
+        )
+        if button_predict:
+            st.session_state.predictions = pipeline_deployment(edited_df)
 
 
 if __name__ == "__main__":
