@@ -750,7 +750,9 @@ def main():
                     )
                     # Create a DataFrame to be downloaded (with original data)
                     data_to_be_downloaded = data
-                    data_to_be_downloaded["cluster_label"] = cluster_labels
+                    data_to_be_downloaded["cluster_label"] = [
+                        "Cluster " + str(value) for value in cluster_labels
+                    ]
                 with col_int_2:
                     # Create two columns for download buttons
                     col_int_2_1, col_int_2_2, col_int_2_3 = st.columns(3)
