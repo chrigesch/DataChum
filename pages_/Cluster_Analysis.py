@@ -56,8 +56,8 @@ def main():
                 list_of_dropped_columns.append(column)
         if len(list_of_dropped_columns) > 0:
             #            st.markdown(f"""**{str(string_to_be_displayed)}**""")
-            st.markdown(
-                ":red[**Following columns have been removed as all values of the column are unique:**] "
+            st.warning(
+                "Following columns have been removed as all values of the column are unique: "
                 + ", ".join(list_of_dropped_columns)
             )
         # Get column names (also NUMERICAL and CATEGORICAL)
