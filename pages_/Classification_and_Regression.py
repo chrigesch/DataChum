@@ -89,8 +89,8 @@ def main():
                 list_of_dropped_columns.append(column)
         if len(list_of_dropped_columns) > 0:
             #            st.markdown(f"""**{str(string_to_be_displayed)}**""")
-            st.markdown(
-                ":red[**Following columns have been removed as all values of the column are unique:**] "
+            st.warning(
+                "Following columns have been removed as all values of the column are unique: "
                 + ", ".join(list_of_dropped_columns)
             )
         # Get column names (also NUMERICAL and CATEGORICAL)
@@ -116,7 +116,7 @@ def main():
                 "Please check if the data types of the features were infered correctly (Integers will be handled as numerical variables)"  # noqa: E501
             )
             if data[selectbox_target_variable].isna().sum() > 0:
-                st.markdown(
+                st.warning(
                     "This target variable contains "
                     + str(data[selectbox_target_variable].isna().sum())
                     + " missing values. These will be removed before starting the cross-validation"
