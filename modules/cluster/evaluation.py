@@ -22,6 +22,7 @@ import streamlit as st
 # Import libraries for debugging
 
 
+@st.cache_data(ttl=3600, max_entries=10)
 def line_plot(
     data: pd.DataFrame,
     x: str,
@@ -43,6 +44,7 @@ def line_plot(
     return fig_variable
 
 
+@st.cache_data(ttl=3600, max_entries=10)
 def silhouette_plot(
     X_prep: pd.DataFrame,
     cluster_model: str,
@@ -148,6 +150,7 @@ def get_cluster_labels_and_X_prep(
     return cluster_labels, data_prep
 
 
+@st.cache_data(ttl=3600, max_entries=10)
 def prepare_results_for_line_plot_metrics(
     data: pd.DataFrame,
     model: str,
@@ -177,5 +180,6 @@ def prepare_results_for_line_plot_metrics(
     return data_prep
 
 
+@st.cache_data(ttl=3600, max_entries=10)
 def prepare_results_for_line_plot_models(data: pd.DataFrame):
     return data.groupby(by=["model", "n_clusters"]).mean().reset_index()

@@ -84,7 +84,7 @@ def main():
                 # Read in the csv file
                 st.session_state.data = read_xlsx(uploaded_file)
             else:
-                st.write("Type should be .CSV or .XLSX")
+                st.error("Type should be .CSV or .XLSX")
 
     st.session_state.page.main()
 
