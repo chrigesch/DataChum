@@ -28,12 +28,12 @@ def main():
         if uploaded_pipeline is not None:
             # Read the file and check if it is a pipeline object
             if uploaded_pipeline.name[-3:] != "pkl":
-                st.warning("Type should be .PKL")
+                st.error("Type should be .PKL")
             else:
                 # Read in the uploaded file
                 unpickled_pipeline = pickle.load(uploaded_pipeline)
                 if type(unpickled_pipeline) != sklearn.pipeline.Pipeline:
-                    st.warning("Only sklearn Pipelines are supported")
+                    st.error("Only sklearn Pipelines are supported")
                 else:
                     pipeline_deployment = unpickled_pipeline
     with col_2:
@@ -44,7 +44,7 @@ def main():
         if uploaded_label_encoder is not None:
             # Read the file and check if it is a pipeline object
             if uploaded_label_encoder.name[-3:] != "pkl":
-                st.warning("Type should be .PKL")
+                st.error("Type should be .PKL")
             else:
                 # Read in the uploaded file
                 unpickled_label_encoder = pickle.load(uploaded_label_encoder)
@@ -52,7 +52,7 @@ def main():
                     type(unpickled_label_encoder)
                     != sklearn.preprocessing._label.LabelEncoder
                 ):
-                    st.warning("Only sklearn LabelEncoder are supported")
+                    st.error("Only sklearn LabelEncoder are supported")
                 else:
                     label_encoder_deployment = unpickled_label_encoder
     st.subheader("Deployment")
