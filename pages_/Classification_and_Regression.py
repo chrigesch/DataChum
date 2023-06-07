@@ -240,6 +240,17 @@ def main():
                     label="**Select a feature selection strategy**",
                     options=AVAILABLE_FEATURE_SELECTION_METHODS,
                     index=3,
+                    help="**For more information of the Boruta method,** see Kumar, S. S., & Shaikh, T. (2017)."
+                    " Empirical Evaluation of the Performance of Feature Selection Approaches on Random Forest."
+                    " 2017 International Conference on Computer and Applications (ICCA), 227-231."
+                    " https://doi.org/10.1109/COMAPP.2017.8079769 and Speiser, J. L., Miller, M. E., Tooze, J.,"
+                    " & Ip, E. (2019). A comparison of random forest variable selection methods for"
+                    " classification prediction modeling. Expert Systems with Applications, 134, 93-101."
+                    " https://doi.org/10.1016/j.eswa.2019.05.028.  \n **For more information of the L1-based"
+                    " linear support vector machine (L1-SVM) and LASSO,** see Sun, P., Wang, D., Mok, V. C.,"
+                    " & Shi, L. (2019). Comparison of Feature Selection Methods and Machine Learning"
+                    " Classifiers for Radiomics Analysis in Glioma Grading. IEEE Access, 7, 102010-102020."
+                    " https://doi.org/10.1109/ACCESS.2019.2928975",
                 )
         # Tab 3: Models
         with tab_s3:
