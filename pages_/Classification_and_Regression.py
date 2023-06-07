@@ -1641,6 +1641,10 @@ def main():
                             label="**Compute ATE**",
                             type="secondary",
                             use_container_width=True,
+                            help="**For more information of Double/Debiased ML, see:** Chernozhukov, V., Chetverikov,"
+                            " D., Demirer, M., Duflo, E., Hansen, C., Newey, W., & Robins, J. (2018). Double/debiased"
+                            " machine learning for treatment and structural parameters. The Econometrics Journal,"
+                            " 21(1), C1-C68. https://doi.org/10.1111/ectj.12097",
                         )
                         with st.spinner("Computing ATE..."):
                             if button_d_d_ml:
