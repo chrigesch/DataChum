@@ -240,6 +240,17 @@ def main():
                     label="**Select a feature selection strategy**",
                     options=AVAILABLE_FEATURE_SELECTION_METHODS,
                     index=3,
+                    help="**For more information of the Boruta method,** see Kumar, S. S., & Shaikh, T. (2017)."
+                    " Empirical Evaluation of the Performance of Feature Selection Approaches on Random Forest."
+                    " 2017 International Conference on Computer and Applications (ICCA), 227-231."
+                    " https://doi.org/10.1109/COMAPP.2017.8079769 and Speiser, J. L., Miller, M. E., Tooze, J.,"
+                    " & Ip, E. (2019). A comparison of random forest variable selection methods for"
+                    " classification prediction modeling. Expert Systems with Applications, 134, 93-101."
+                    " https://doi.org/10.1016/j.eswa.2019.05.028.  \n **For more information of the L1-based"
+                    " linear support vector machine (L1-SVM) and LASSO,** see Sun, P., Wang, D., Mok, V. C.,"
+                    " & Shi, L. (2019). Comparison of Feature Selection Methods and Machine Learning"
+                    " Classifiers for Radiomics Analysis in Glioma Grading. IEEE Access, 7, 102010-102020."
+                    " https://doi.org/10.1109/ACCESS.2019.2928975",
                 )
         # Tab 3: Models
         with tab_s3:
@@ -484,7 +495,17 @@ def main():
                     )
                 # Compute and display t-test results
                 with col_cv_score_2_2:
-                    st.markdown("**Corrected Repeated t-test**")
+                    st.markdown(
+                        "**Corrected Repeated t-test**",
+                        help="**It is recommended to run 10-times 10-fold cross-validation.**"
+                        " For more information, see:  \nNadeau, C., & Bengio, Y. (2003). Inference for the"
+                        " generalization error. Machine Learning, 52(3), 239-281."
+                        " https://doi.org/10.1023/A:1024068626366.  \nBouckaert, R. R., & Frank, E. (2004)."
+                        " Evaluating the Replicability of Significance Tests for Comparing Learning Algorithms."
+                        " In H. Dai, R. Srikant, & C. Zhang (Eds.), Advances in Knowledge Discovery and Data Mining."
+                        " PAKDD 2004. Lecture Notes in Computer Science, vol 3056 (pp. 3-12). Springer."
+                        " https://doi.org/10.1007/978-3-540-24775-3_3",
+                    )
                     models_to_be_compared = scores_cv_df["model"].unique().tolist()
                     if len(models_to_be_compared) < 2:
                         st.markdown(
@@ -586,7 +607,17 @@ def main():
                 # Compute and display t-test results
                 if st.session_state.cv_instance.procedure == "nested":
                     with col_test_score_2_2:
-                        st.markdown("**Corrected Repeated t-test**")
+                        st.markdown(
+                            "**Corrected Repeated t-test**",
+                            help="**It is recommended to run 10-times 10-fold cross-validation.**"
+                            " For more information, see:  \nNadeau, C., & Bengio, Y. (2003). Inference for the"
+                            " generalization error. Machine Learning, 52(3), 239-281."
+                            " https://doi.org/10.1023/A:1024068626366.  \nBouckaert, R. R., & Frank, E. (2004)."
+                            " Evaluating the Replicability of Significance Tests for Comparing Learning Algorithms."
+                            " In H. Dai, R. Srikant, & C. Zhang (Eds.), Advances in Knowledge Discovery and Data Mining."  # noqa E:501
+                            " PAKDD 2004. Lecture Notes in Computer Science, vol 3056 (pp. 3-12). Springer."
+                            " https://doi.org/10.1007/978-3-540-24775-3_3",
+                        )
                         models_to_be_compared = (
                             scores_test_df["model"].unique().tolist()
                         )
@@ -1610,6 +1641,10 @@ def main():
                             label="**Compute ATE**",
                             type="secondary",
                             use_container_width=True,
+                            help="**For more information of Double/Debiased ML, see:** Chernozhukov, V., Chetverikov,"
+                            " D., Demirer, M., Duflo, E., Hansen, C., Newey, W., & Robins, J. (2018). Double/debiased"
+                            " machine learning for treatment and structural parameters. The Econometrics Journal,"
+                            " 21(1), C1-C68. https://doi.org/10.1111/ectj.12097",
                         )
                         with st.spinner("Computing ATE..."):
                             if button_d_d_ml:

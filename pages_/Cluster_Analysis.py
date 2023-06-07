@@ -97,6 +97,9 @@ def main():
                         "Cluster Analysis using prediction-based k-fold cross-validation method",
                     ],
                     index=1,
+                    help="**For more information of the prediction-based resampling method, see:** Dudoit, S.,"
+                    " & Fridlyand, J. (2002). A prediction-based resampling method for estimating the number"
+                    " of clusters in a dataset. Genome Biology, 3(7), 1-21.",
                 )
             with col_2:
                 selectbox_n_cluster_min = st.selectbox(
@@ -365,7 +368,17 @@ def main():
                 # Compute and display t-test results
                 idx_models_to_be_compared = range(len(scores_df_grouped))
                 with col_cluster_score_2_2:
-                    st.markdown("**Corrected Repeated t-test**")
+                    st.markdown(
+                        "**Corrected Repeated t-test**",
+                        help="**It is recommended to run 10-times 10-fold cross-validation.**"
+                        " For more information, see:  \nNadeau, C., & Bengio, Y. (2003). Inference for the"
+                        " generalization error. Machine Learning, 52(3), 239-281."
+                        " https://doi.org/10.1023/A:1024068626366.  \nBouckaert, R. R., & Frank, E. (2004)."
+                        " Evaluating the Replicability of Significance Tests for Comparing Learning Algorithms."
+                        " In H. Dai, R. Srikant, & C. Zhang (Eds.), Advances in Knowledge Discovery and Data Mining."
+                        " PAKDD 2004. Lecture Notes in Computer Science, vol 3056 (pp. 3-12). Springer."
+                        " https://doi.org/10.1007/978-3-540-24775-3_3",
+                    )
                     if st.session_state.cluster_instance.method == "standart":
                         st.markdown(
                             "Only available for Cluster Analysis using prediction-based k-fold cross-validation method"

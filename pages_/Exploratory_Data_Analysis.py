@@ -1495,17 +1495,32 @@ def main():
                             )
                         else:
                             selectbox_average = []
-                        if st.button("Click to plot"):
-                            fig_rfdc = plot_random_feature_dropping_curve(
-                                data=data,
-                                target_variable=selectbox_target,
-                                operation=operation,
-                                evaluation_score=selectbox_evaluation_score,
-                                average=selectbox_average,
-                                cv_folds=selectbox_n_cv_folds,
+                        # Initiate a placeholder for the figure
+                        if "fig_rfdc" not in st.session_state:
+                            st.session_state.fig_rfdc = None
+
+                        if st.button(
+                            "Generate plot",
+                            type="primary",
+                            use_container_width=True,
+                            key="button_plot_fig_rfdc",
+                        ):
+                            st.session_state.fig_rfdc = (
+                                plot_random_feature_dropping_curve(
+                                    data=data,
+                                    target_variable=selectbox_target,
+                                    operation=operation,
+                                    evaluation_score=selectbox_evaluation_score,
+                                    average=selectbox_average,
+                                    cv_folds=selectbox_n_cv_folds,
+                                )
                             )
-                            with col_6_2:
-                                components.html(fig_rfdc, height=600)
+                    with col_6_2:
+                        if st.session_state.fig_rfdc is not None:
+                            components.html(
+                                st.session_state.fig_rfdc,
+                                height=600,
+                            )
 
                 # Tab 6_4: PCA Proyection
                 with tab_6_4:
@@ -1735,27 +1750,38 @@ def main():
                             label="Select the manifold implementation",
                             options=AVAILABLE_MANIFOLD_IMPLEMENTATIONS,
                         )
-                        # Compute square root of the number of observations
-                        square_root_n_observations = int(sqrt(len(data)))
-                        selectbox_n_neighbors = st.selectbox(
-                            label="Select the number of neighbors",
-                            options=range(2, 3 * square_root_n_observations),
-                            index=square_root_n_observations,
-                        )
-                        # Initiate 'operation'
-                        if selectbox_target in cols_cat:
-                            operation = "classification"
-                        else:
-                            operation = "regression"
+                        # Initiate a placeholder for the figure
+                        if "fig_manifold" not in st.session_state:
+                            st.session_state.fig_manifold = None
+
+                        if st.button(
+                            "Generate plot",
+                            type="primary",
+                            use_container_width=True,
+                            key="button_plot_fig_manifold",
+                        ):
+                            # Compute square root of the number of observations
+                            square_root_n_observations = int(sqrt(len(data)))
+                            selectbox_n_neighbors = st.selectbox(
+                                label="Select the number of neighbors",
+                                options=range(2, 3 * square_root_n_observations),
+                                index=square_root_n_observations,
+                            )
+                            # Initiate 'operation'
+                            if selectbox_target in cols_cat:
+                                operation = "classification"
+                            else:
+                                operation = "regression"
+                            st.session_state.fig_manifold = plot_manifold(
+                                data=data,
+                                target_variable=selectbox_target,
+                                operation=operation,
+                                manifold=selectbox_manifold,
+                                n_neighbors=selectbox_n_neighbors,
+                            )
                     with col_6_2:
-                        fig_variable = plot_manifold(
-                            data=data,
-                            target_variable=selectbox_target,
-                            operation=operation,
-                            manifold=selectbox_manifold,
-                            n_neighbors=selectbox_n_neighbors,
-                        )
-                        components.html(fig_variable, height=600)
+                        if st.session_state.fig_manifold is not None:
+                            components.html(st.session_state.fig_manifold, height=600)
 
 
 #    streamlit_profiler.stop()
