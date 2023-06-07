@@ -1495,17 +1495,31 @@ def main():
                             )
                         else:
                             selectbox_average = []
-                        if st.button("Click to plot"):
-                            fig_rfdc = plot_random_feature_dropping_curve(
-                                data=data,
-                                target_variable=selectbox_target,
-                                operation=operation,
-                                evaluation_score=selectbox_evaluation_score,
-                                average=selectbox_average,
-                                cv_folds=selectbox_n_cv_folds,
+                        # Initiate a placeholder for the figure
+                        if "fig_rfdc" not in st.session_state:
+                            st.session_state.fig_rfdc = None
+
+                        if st.button(
+                            "Generate plot",
+                            type="primary",
+                            use_container_width=True,
+                        ):
+                            st.session_state.fig_rfdc = (
+                                plot_random_feature_dropping_curve(
+                                    data=data,
+                                    target_variable=selectbox_target,
+                                    operation=operation,
+                                    evaluation_score=selectbox_evaluation_score,
+                                    average=selectbox_average,
+                                    cv_folds=selectbox_n_cv_folds,
+                                )
                             )
-                            with col_6_2:
-                                components.html(fig_rfdc, height=600)
+                    with col_6_2:
+                        if st.session_state.fig_rfdc is not None:
+                            components.html(
+                                st.session_state.fig_rfdc,
+                                height=600,
+                            )
 
                 # Tab 6_4: PCA Proyection
                 with tab_6_4:
