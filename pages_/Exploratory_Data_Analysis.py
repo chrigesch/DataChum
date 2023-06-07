@@ -1503,6 +1503,7 @@ def main():
                             "Generate plot",
                             type="primary",
                             use_container_width=True,
+                            key="button_plot_fig_rfdc",
                         ):
                             st.session_state.fig_rfdc = (
                                 plot_random_feature_dropping_curve(
