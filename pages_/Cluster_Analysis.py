@@ -97,6 +97,9 @@ def main():
                         "Cluster Analysis using prediction-based k-fold cross-validation method",
                     ],
                     index=1,
+                    help="**For more information of the prediction-based resampling method, see:** Dudoit, S.,"
+                    " & Fridlyand, J. (2002). A prediction-based resampling method for estimating the number"
+                    " of clusters in a dataset. Genome Biology, 3(7), 1-21.",
                 )
             with col_2:
                 selectbox_n_cluster_min = st.selectbox(
