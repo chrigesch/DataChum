@@ -121,13 +121,8 @@ def cramers_v(var1, var2):
         .reset_index(drop=True)
     )
     crosstab = np.array(crosstab)
-    # Check if confusion matrix is 2x2 to use a correction or no
-    if crosstab.shape[0] == 2:
-        correct = False
-    else:
-        correct = True
     # Finding Chi-squared test statistic and pvalue
-    result = chi2_contingency(crosstab, correction=correct)
+    result = chi2_contingency(crosstab, correction=False)
     X2_stat = result[0]
     pvalue = result[1]
     # Number of observations
@@ -155,7 +150,7 @@ def cramers_v_corrected_stat(var1, var2):
         .reset_index(drop=True)
     )
     confusion_matrix = np.array(crosstab)
-    results_chi2 = chi2_contingency(confusion_matrix)
+    results_chi2 = chi2_contingency(confusion_matrix, correction=False)
     chi2 = results_chi2[0]
     pvalue = results_chi2[1]
     n = confusion_matrix.sum()
