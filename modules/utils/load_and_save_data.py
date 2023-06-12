@@ -72,7 +72,7 @@ def _dt_inplace(df):
     for c in df.columns[df.dtypes == "object"]:  # don't cnvt num
         try:
             df[c] = pd.to_datetime(df[c])
-        except (ParserError, ValueError):  # Can't cnvrt some
+        except (ParserError, TypeError, ValueError):  # Can't cnvrt some
             pass  # ...so leave whole column as-is unconverted
     return df
 
