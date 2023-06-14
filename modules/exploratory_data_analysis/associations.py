@@ -26,7 +26,6 @@ def associations_for_categorical_and_numerical_variables(
     data: pd.DataFrame, num_num_method: str = "spearman"
 ):
     # Get NUMERICAL and CATEGORICAL columns
-    cols_all = data.columns.to_list()
     cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
     cols_cat = data.select_dtypes(
         include=["object", "category", "bool"]
@@ -50,10 +49,10 @@ def associations_for_categorical_and_numerical_variables(
     results_associations_list = []
     results_pvalues_list = []
     # Loop through DataFrame and append results
-    for var_1 in cols_all:
+    for var_1 in labels:
         row_dict_associations = {}
         row_dict_pvalues = {}
-        for var_2 in cols_all:
+        for var_2 in labels:
             # cat_cat: Cramer's V
             if (var_1 in cols_cat) & (var_2 in cols_cat):
                 result_cramers_v = cramers_v_corrected_stat(
@@ -88,9 +87,9 @@ def associations_for_categorical_and_numerical_variables(
         results_pvalues_list.append(row_dict_pvalues)
     # Convert the list of dictionaries to DataFrame
     associations_df = pd.DataFrame.from_dict(results_associations_list)
-    associations_df.index = cols_all
+    associations_df.index = labels
     pvalues_df = pd.DataFrame.from_dict(results_pvalues_list)
-    pvalues_df.index = cols_all
+    pvalues_df.index = labels
     return associations_df, pvalues_df
 
 
