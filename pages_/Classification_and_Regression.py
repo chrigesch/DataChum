@@ -53,7 +53,7 @@ from modules.utils.load_and_save_data import (
 )
 from modules.utils.preprocessing import (
     AVAILABLE_IMPUTATION_CATEGORICAL,
-    AVAILABLE_IMPUTATION_NUMERIC,
+    AVAILABLE_IMPUTATION_NUMERICAL,
     AVAILABLE_SCALER,
     _get_feature_names_after_preprocessing,
 )
@@ -75,19 +75,9 @@ def main():
     #    streamlit_profiler = Profiler()
     #    streamlit_profiler.start()
 
-    # Create file uploader object
-    uploaded_file = st.file_uploader("Upload your database", type=["csv", "xlsx"])
-
-    if uploaded_file is not None:
-        # Read the file to a dataframe using pandas
-        if uploaded_file.name[-3:] == "csv":
-            # Read in the csv file
-            data = read_csv(uploaded_file)
-        elif uploaded_file.name[-4:] == "xlsx":
-            # Read in the csv file
-            data = read_xlsx(uploaded_file)
-        else:
-            st.write("Type should be .CSV or .XLSX")
+    # Copy data from session state
+    if st.session_state.data is not None:
+        data = st.session_state.data
 
         # Drop ID columns (or similar): Analyze whether all values of the column are unique
         # (count of unique values equals column's length)
@@ -99,8 +89,8 @@ def main():
                 list_of_dropped_columns.append(column)
         if len(list_of_dropped_columns) > 0:
             #            st.markdown(f"""**{str(string_to_be_displayed)}**""")
-            st.markdown(
-                ":red[**Following columns have been removed as all values of the column are unique:**] "
+            st.warning(
+                "Following columns have been removed as all values of the column are unique: "
                 + ", ".join(list_of_dropped_columns)
             )
         # Get column names (also NUMERICAL and CATEGORICAL)
@@ -126,7 +116,7 @@ def main():
                 "Please check if the data types of the features were infered correctly (Integers will be handled as numerical variables)"  # noqa: E501
             )
             if data[selectbox_target_variable].isna().sum() > 0:
-                st.markdown(
+                st.warning(
                     "This target variable contains "
                     + str(data[selectbox_target_variable].isna().sum())
                     + " missing values. These will be removed before starting the cross-validation"
@@ -178,7 +168,7 @@ def main():
                     selectbox_n_outer_cv_reps = st.selectbox(
                         label="**Select the number of times OUTER cross-validator needs to be repeated**",
                         options=range(1, 11, 1),
-                        index=0,
+                        index=4,
                     )
             with col_2:
                 # Selectboxes for train size and/or number of folds and repetitions
@@ -191,7 +181,7 @@ def main():
                     selectbox_n_inner_cv_reps = st.selectbox(
                         label="**Select the number of times cross-validator needs to be repeated**",
                         options=range(1, 11, 1),
-                        index=0,
+                        index=4,
                     )
                 else:
                     selectbox_n_inner_cv_folds = st.selectbox(
@@ -202,7 +192,7 @@ def main():
                     selectbox_n_inner_cv_reps = st.selectbox(
                         label="**Select the number of times INNER cross-validator needs to be repeated**",
                         options=range(1, 11, 1),
-                        index=0,
+                        index=4,
                     )
             with col_3:
                 # Selectboxes for evaluation metrics
@@ -237,7 +227,7 @@ def main():
             with col_2:
                 selectbox_imput_num = st.selectbox(
                     label="**Select the imputation strategy to use for numerical variables**",
-                    options=AVAILABLE_IMPUTATION_NUMERIC,
+                    options=AVAILABLE_IMPUTATION_NUMERICAL,
                     index=0,
                 )
                 selectbox_scaler = st.selectbox(
@@ -250,6 +240,17 @@ def main():
                     label="**Select a feature selection strategy**",
                     options=AVAILABLE_FEATURE_SELECTION_METHODS,
                     index=3,
+                    help="**For more information of the Boruta method,** see Kumar, S. S., & Shaikh, T. (2017)."
+                    " Empirical Evaluation of the Performance of Feature Selection Approaches on Random Forest."
+                    " 2017 International Conference on Computer and Applications (ICCA), 227-231."
+                    " https://doi.org/10.1109/COMAPP.2017.8079769 and Speiser, J. L., Miller, M. E., Tooze, J.,"
+                    " & Ip, E. (2019). A comparison of random forest variable selection methods for"
+                    " classification prediction modeling. Expert Systems with Applications, 134, 93-101."
+                    " https://doi.org/10.1016/j.eswa.2019.05.028.  \n **For more information of the L1-based"
+                    " linear support vector machine (L1-SVM) and LASSO,** see Sun, P., Wang, D., Mok, V. C.,"
+                    " & Shi, L. (2019). Comparison of Feature Selection Methods and Machine Learning"
+                    " Classifiers for Radiomics Analysis in Glioma Grading. IEEE Access, 7, 102010-102020."
+                    " https://doi.org/10.1109/ACCESS.2019.2928975",
                 )
         # Tab 3: Models
         with tab_s3:
@@ -348,7 +349,7 @@ def main():
         with tab_s4:
             # Assign default values:
             selectbox_tune_imp_categorical = False
-            selectbox_tune_imp_numeric = False
+            selectbox_tune_imp_numerical = False
             selectbox_tune_scaler = False
             # Create two columns
             col_1, col_2 = st.columns(2)
@@ -370,7 +371,7 @@ def main():
                         options=[True, False],
                         index=1,
                     )
-                    selectbox_tune_imp_numeric = st.selectbox(
+                    selectbox_tune_imp_numerical = st.selectbox(
                         label="**Include the numerical imputer as a hyperparameter during the tuning process**",
                         options=[True, False],
                         index=1,
@@ -396,7 +397,7 @@ def main():
                         data=data,
                         target_variable=selectbox_target_variable,
                         train_size=selectbox_train_size,
-                        imputation_numeric=selectbox_imput_num,
+                        imputation_numerical=selectbox_imput_num,
                         imputation_categorical=selectbox_imput_cat,
                         scaler=selectbox_scaler,
                         one_hot_encoding=True,
@@ -408,7 +409,7 @@ def main():
                         tuning_trials=selectbox_n_tuning_trials,
                         evaluation_score=selectbox_evaluation_score,
                         average=selectbox_evaluation_average,
-                        tune_imp_numeric=selectbox_tune_imp_numeric,
+                        tune_imp_numerical=selectbox_tune_imp_numerical,
                         tune_scaler=selectbox_tune_scaler,
                         tune_imp_categorical=selectbox_tune_imp_categorical,
                     )
@@ -417,7 +418,7 @@ def main():
                         operation=operation,
                         data=data,
                         target_variable=selectbox_target_variable,
-                        imputation_numeric=selectbox_imput_num,
+                        imputation_numerical=selectbox_imput_num,
                         imputation_categorical=selectbox_imput_cat,
                         scaler=selectbox_scaler,
                         one_hot_encoding=True,
@@ -431,7 +432,7 @@ def main():
                         tuning_trials=selectbox_n_tuning_trials,
                         evaluation_score=selectbox_evaluation_score,
                         average=selectbox_evaluation_average,
-                        tune_imp_numeric=selectbox_tune_imp_numeric,
+                        tune_imp_numerical=selectbox_tune_imp_numerical,
                         tune_scaler=selectbox_tune_scaler,
                         tune_imp_categorical=selectbox_tune_imp_categorical,
                     )
@@ -494,7 +495,17 @@ def main():
                     )
                 # Compute and display t-test results
                 with col_cv_score_2_2:
-                    st.markdown("**Corrected Repeated t-test**")
+                    st.markdown(
+                        "**Corrected Repeated t-test**",
+                        help="**It is recommended to run 10-times 10-fold cross-validation.**"
+                        " For more information, see:  \nNadeau, C., & Bengio, Y. (2003). Inference for the"
+                        " generalization error. Machine Learning, 52(3), 239-281."
+                        " https://doi.org/10.1023/A:1024068626366.  \nBouckaert, R. R., & Frank, E. (2004)."
+                        " Evaluating the Replicability of Significance Tests for Comparing Learning Algorithms."
+                        " In H. Dai, R. Srikant, & C. Zhang (Eds.), Advances in Knowledge Discovery and Data Mining."
+                        " PAKDD 2004. Lecture Notes in Computer Science, vol 3056 (pp. 3-12). Springer."
+                        " https://doi.org/10.1007/978-3-540-24775-3_3",
+                    )
                     models_to_be_compared = scores_cv_df["model"].unique().tolist()
                     if len(models_to_be_compared) < 2:
                         st.markdown(
@@ -517,16 +528,29 @@ def main():
                             index=0,
                             key="t_test_cv_model_2",
                         )
+                        # Extract scores to compute corrected_repeated_t_test
+                        evaluation_metric = (
+                            st.session_state.cv_instance.evaluation_score
+                        )
+                        scores_model_1 = scores_cv_df[
+                            scores_cv_df["model"] == selectbox_t_test_model_1
+                        ][evaluation_metric]
+                        scores_model_2 = scores_cv_df[
+                            scores_cv_df["model"] == selectbox_t_test_model_2
+                        ][evaluation_metric]
+
                         result_t_test = corrected_repeated_t_test(
-                            data=scores_cv_df,
-                            grouping_variable="model",
-                            name_model_1=selectbox_t_test_model_1,
-                            name_model_2=selectbox_t_test_model_2,
-                            evaluation_metric=st.session_state.cv_instance.evaluation_score,
+                            scores_model_1=scores_model_1,
+                            scores_model_2=scores_model_2,
                             n_folds=st.session_state.cv_instance.inner_cv_folds,
                             n=n_X_train,
                         )
-                        st.markdown("**Descriptives**")
+                        # Change model names
+                        result_t_test.result_descriptives["model"] = [
+                            selectbox_t_test_model_1,
+                            selectbox_t_test_model_2,
+                        ]
+                        st.markdown(f"""**Descriptives - {str(evaluation_metric)}**""")
                         st.dataframe(
                             result_t_test.result_descriptives.set_index(
                                 "model"
@@ -583,7 +607,17 @@ def main():
                 # Compute and display t-test results
                 if st.session_state.cv_instance.procedure == "nested":
                     with col_test_score_2_2:
-                        st.markdown("**Corrected Repeated t-test**")
+                        st.markdown(
+                            "**Corrected Repeated t-test**",
+                            help="**It is recommended to run 10-times 10-fold cross-validation.**"
+                            " For more information, see:  \nNadeau, C., & Bengio, Y. (2003). Inference for the"
+                            " generalization error. Machine Learning, 52(3), 239-281."
+                            " https://doi.org/10.1023/A:1024068626366.  \nBouckaert, R. R., & Frank, E. (2004)."
+                            " Evaluating the Replicability of Significance Tests for Comparing Learning Algorithms."
+                            " In H. Dai, R. Srikant, & C. Zhang (Eds.), Advances in Knowledge Discovery and Data Mining."  # noqa E:501
+                            " PAKDD 2004. Lecture Notes in Computer Science, vol 3056 (pp. 3-12). Springer."
+                            " https://doi.org/10.1007/978-3-540-24775-3_3",
+                        )
                         models_to_be_compared = (
                             scores_test_df["model"].unique().tolist()
                         )
@@ -608,16 +642,32 @@ def main():
                                 index=0,
                                 key="t_test_test_model_2",
                             )
+                            # Extract scores to compute corrected_repeated_t_test
+                            evaluation_metric = (
+                                st.session_state.cv_instance.evaluation_score
+                            )
+                            scores_model_1 = scores_test_df[
+                                scores_cv_df["model"] == selectbox_t_test_model_1
+                            ][evaluation_metric]
+                            scores_model_2 = scores_test_df[
+                                scores_cv_df["model"] == selectbox_t_test_model_2
+                            ][evaluation_metric]
+
                             result_t_test = corrected_repeated_t_test(
-                                data=scores_test_df,
-                                grouping_variable="model",
-                                name_model_1=selectbox_t_test_model_1,
-                                name_model_2=selectbox_t_test_model_2,
-                                evaluation_metric=st.session_state.cv_instance.evaluation_score,
+                                scores_model_1=scores_model_1,
+                                scores_model_2=scores_model_2,
                                 n_folds=st.session_state.cv_instance.outer_cv_folds,
                                 n=len(st.session_state.cv_instance.data),
                             )
-                            st.markdown("**Descriptives**")
+                            # Change model names
+                            result_t_test.result_descriptives["model"] = [
+                                selectbox_t_test_model_1,
+                                selectbox_t_test_model_2,
+                            ]
+                            st.markdown(
+                                f"""**Descriptives - {str(evaluation_metric)}**"""
+                            )
+                            # Display results
                             st.dataframe(
                                 result_t_test.result_descriptives.set_index(
                                     "model"
@@ -710,7 +760,8 @@ def main():
                         file_name="pipeline_"
                         + str(
                             scores_test_df["model"].iloc[selectbox_model_to_be_plotted]
-                        ),
+                        )
+                        + ".pkl",
                         key="download_model_eval",
                         use_container_width=True,
                     )
@@ -723,7 +774,8 @@ def main():
                                 scores_test_df["model"].iloc[
                                     selectbox_model_to_be_plotted
                                 ]
-                            ),
+                            )
+                            + ".pkl",
                             key="download_label_encoder_eval",
                             use_container_width=True,
                         )
@@ -1589,6 +1641,10 @@ def main():
                             label="**Compute ATE**",
                             type="secondary",
                             use_container_width=True,
+                            help="**For more information of Double/Debiased ML, see:** Chernozhukov, V., Chetverikov,"
+                            " D., Demirer, M., Duflo, E., Hansen, C., Newey, W., & Robins, J. (2018). Double/debiased"
+                            " machine learning for treatment and structural parameters. The Econometrics Journal,"
+                            " 21(1), C1-C68. https://doi.org/10.1111/ectj.12097",
                         )
                         with st.spinner("Computing ATE..."):
                             if button_d_d_ml:
@@ -1627,4 +1683,19 @@ if __name__ == "__main__":
     st.set_page_config(
         page_title="DataChum", page_icon="assets/logo_01.png", layout="wide"
     )
+    # Create file uploader object
+    uploaded_file = st.file_uploader("Upload your database", type=["csv", "xlsx"])
+    # Set placeholder for data
+    if "data" not in st.session_state:
+        st.session_state.data = None
+    if uploaded_file is not None:
+        # Read the file to a dataframe using pandas
+        if uploaded_file.name[-3:] == "csv":
+            # Read in the csv file
+            st.session_state.data = read_csv(uploaded_file)
+        elif uploaded_file.name[-4:] == "xlsx":
+            # Read in the csv file
+            st.session_state.data = read_xlsx(uploaded_file)
+        else:
+            st.write("Type should be .CSV or .XLSX")
     main()

@@ -5,10 +5,11 @@ from modules.classification_and_regression.cv_workflow import (
     AVAILABLE_SCORES_REGRESSION,
 )
 from modules.exploratory_data_analysis.associations import (
-    associations_for_categorical_and_numeric_variables,
+    associations_for_categorical_and_numerical_variables,
     plot_heatmap,
 )
 from modules.exploratory_data_analysis.multivariate import (
+    AVAILABLE_MANIFOLD_IMPLEMENTATIONS,
     plot_bubble_chart,
     plot_manifold,
     plot_num_with_grouping_variable,
@@ -54,19 +55,9 @@ def main():
     #    streamlit_profiler = Profiler()
     #    streamlit_profiler.start()
 
-    # Create file uploader object
-    uploaded_file = st.file_uploader("Upload your database", type=["csv", "xlsx"])
-
-    if uploaded_file is not None:
-        # Read the file to a dataframe using pandas
-        if uploaded_file.name[-3:] == "csv":
-            # Read in the csv file
-            data = read_csv(uploaded_file)
-        elif uploaded_file.name[-4:] == "xlsx":
-            # Read in the csv file
-            data = read_xlsx(uploaded_file)
-        else:
-            st.write("Type should be .CSV or .XLSX")
+    # Copy data from session state
+    if st.session_state.data is not None:
+        data = st.session_state.data
         # Get NUMERICAL, CATEGORICAL and DATETIME column names (Do NOT include DATETIME in "cols_all")
         cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
         cols_cat = data.select_dtypes(
@@ -83,10 +74,7 @@ def main():
             len(cols_cat_and_num) >= 1
         ), "Database must contain 1 or more categorical or numerical columns"
         # Compute associations (necesary for the overview tab)
-        associations_df = associations_for_categorical_and_numeric_variables(data)[0]
-
-        # Create tabs to explore the data
-        st.header("Exploratory Data Analysis")
+        associations_df = associations_for_categorical_and_numerical_variables(data)[0]
 
         # Create tabs, according to the number of CATEGORICAL and NUMERICAL columns
         if len(cols_cat_and_num) == 1:
@@ -561,7 +549,7 @@ def main():
                     ).columns.to_list()
                     # Compute associations (necesary for the overview tab)
                     associations_missings = (
-                        associations_for_categorical_and_numeric_variables(
+                        associations_for_categorical_and_numerical_variables(
                             data_for_missing
                         )
                     )[0]
@@ -1507,17 +1495,32 @@ def main():
                             )
                         else:
                             selectbox_average = []
-                        if st.button("Click to plot"):
-                            fig_rfdc = plot_random_feature_dropping_curve(
-                                data=data,
-                                target_variable=selectbox_target,
-                                operation=operation,
-                                evaluation_score=selectbox_evaluation_score,
-                                average=selectbox_average,
-                                cv_folds=selectbox_n_cv_folds,
+                        # Initiate a placeholder for the figure
+                        if "fig_rfdc" not in st.session_state:
+                            st.session_state.fig_rfdc = None
+
+                        if st.button(
+                            "Generate plot",
+                            type="primary",
+                            use_container_width=True,
+                            key="button_plot_fig_rfdc",
+                        ):
+                            st.session_state.fig_rfdc = (
+                                plot_random_feature_dropping_curve(
+                                    data=data,
+                                    target_variable=selectbox_target,
+                                    operation=operation,
+                                    evaluation_score=selectbox_evaluation_score,
+                                    average=selectbox_average,
+                                    cv_folds=selectbox_n_cv_folds,
+                                )
                             )
-                            with col_6_2:
-                                components.html(fig_rfdc, height=600)
+                    with col_6_2:
+                        if st.session_state.fig_rfdc is not None:
+                            components.html(
+                                st.session_state.fig_rfdc,
+                                height=600,
+                            )
 
                 # Tab 6_4: PCA Proyection
                 with tab_6_4:
@@ -1745,40 +1748,63 @@ def main():
                         )
                         selectbox_manifold = st.selectbox(
                             label="Select the manifold implementation",
-                            options=[
-                                "lle",
-                                "modified",
-                                "isomap",
-                                "mds",
-                                "spectral",
-                                "tsne",
-                            ],
+                            options=AVAILABLE_MANIFOLD_IMPLEMENTATIONS,
                         )
-                        # Compute square root of the number of observations
-                        square_root_n_observations = int(sqrt(len(data)))
-                        selectbox_n_neighbors = st.selectbox(
-                            label="Select the number of neighbors",
-                            options=range(2, 3 * square_root_n_observations),
-                            index=square_root_n_observations,
-                        )
-                        # Initiate 'operation'
-                        if selectbox_target in cols_cat:
-                            operation = "classification"
-                        else:
-                            operation = "regression"
+                        # Initiate a placeholder for the figure
+                        if "fig_manifold" not in st.session_state:
+                            st.session_state.fig_manifold = None
+
+                        if st.button(
+                            "Generate plot",
+                            type="primary",
+                            use_container_width=True,
+                            key="button_plot_fig_manifold",
+                        ):
+                            # Compute square root of the number of observations
+                            square_root_n_observations = int(sqrt(len(data)))
+                            selectbox_n_neighbors = st.selectbox(
+                                label="Select the number of neighbors",
+                                options=range(2, 3 * square_root_n_observations),
+                                index=square_root_n_observations,
+                            )
+                            # Initiate 'operation'
+                            if selectbox_target in cols_cat:
+                                operation = "classification"
+                            else:
+                                operation = "regression"
+                            st.session_state.fig_manifold = plot_manifold(
+                                data=data,
+                                target_variable=selectbox_target,
+                                operation=operation,
+                                manifold=selectbox_manifold,
+                                n_neighbors=selectbox_n_neighbors,
+                            )
                     with col_6_2:
-                        fig_variable = plot_manifold(
-                            data=data,
-                            target_variable=selectbox_target,
-                            operation=operation,
-                            manifold=selectbox_manifold,
-                            n_neighbors=selectbox_n_neighbors,
-                        )
-                        components.html(fig_variable, height=600)
+                        if st.session_state.fig_manifold is not None:
+                            components.html(st.session_state.fig_manifold, height=600)
 
 
 #    streamlit_profiler.stop()
 
 
 if __name__ == "__main__":
+    # Page setup
+    st.set_page_config(
+        page_title="DataChum", page_icon="assets/logo_01.png", layout="wide"
+    )
+    # Create file uploader object
+    uploaded_file = st.file_uploader("Upload your database", type=["csv", "xlsx"])
+    # Set placeholder for data
+    if "data" not in st.session_state:
+        st.session_state.data = None
+    if uploaded_file is not None:
+        # Read the file to a dataframe using pandas
+        if uploaded_file.name[-3:] == "csv":
+            # Read in the csv file
+            st.session_state.data = read_csv(uploaded_file)
+        elif uploaded_file.name[-4:] == "xlsx":
+            # Read in the csv file
+            st.session_state.data = read_xlsx(uploaded_file)
+        else:
+            st.write("Type should be .CSV or .XLSX")
     main()

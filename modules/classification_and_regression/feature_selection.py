@@ -326,7 +326,7 @@ def main():
     pipeline = data_preprocessing(
         cols_num,
         cols_cat,
-        imputation_numeric="most_frequent",
+        imputation_numerical="most_frequent",
         imputation_categorical="most_frequent",
         scaler="zscore",
     )

@@ -22,7 +22,7 @@ from modules.utils.load_and_save_data import read_csv
 # Pearson's R for continuous-continuous cases - Correlation Ratio for categorical-continuous cases  -
 # Cramer's V or Theil's U for categorical-categorical cases
 @st.cache_data(ttl=3600, max_entries=10)
-def associations_for_categorical_and_numeric_variables(
+def associations_for_categorical_and_numerical_variables(
     data: pd.DataFrame, num_num_method: str = "spearman"
 ):
     # Get NUMERICAL and CATEGORICAL columns
@@ -35,7 +35,7 @@ def associations_for_categorical_and_numeric_variables(
     pipeline = data_preprocessing(
         cols_num=cols_num,
         cols_cat=cols_cat,
-        imputation_numeric="most_frequent",
+        imputation_numerical="most_frequent",
         scaler=None,
         imputation_categorical="most_frequent",
         one_hot_encoding=False,
@@ -121,13 +121,8 @@ def cramers_v(var1, var2):
         .reset_index(drop=True)
     )
     crosstab = np.array(crosstab)
-    # Check if confusion matrix is 2x2 to use a correction or no
-    if crosstab.shape[0] == 2:
-        correct = False
-    else:
-        correct = True
     # Finding Chi-squared test statistic and pvalue
-    result = chi2_contingency(crosstab, correction=correct)
+    result = chi2_contingency(crosstab, correction=False)
     X2_stat = result[0]
     pvalue = result[1]
     # Number of observations
@@ -155,7 +150,7 @@ def cramers_v_corrected_stat(var1, var2):
         .reset_index(drop=True)
     )
     confusion_matrix = np.array(crosstab)
-    results_chi2 = chi2_contingency(confusion_matrix)
+    results_chi2 = chi2_contingency(confusion_matrix, correction=False)
     chi2 = results_chi2[0]
     pvalue = results_chi2[1]
     n = confusion_matrix.sum()
@@ -167,8 +162,9 @@ def cramers_v_corrected_stat(var1, var2):
     minDim = min((kcorr - 1), (rcorr - 1))
     # To prevent division by zero
     if minDim == 0:
-        minDim = 1
-    cramers_v_score = np.sqrt(phi2corr / minDim)
+        cramers_v_score = 0
+    else:
+        cramers_v_score = np.sqrt(phi2corr / minDim)
     return cramers_v_score, pvalue
 
 
@@ -178,16 +174,22 @@ def eta_square_root(categorical_var, numerical_var):
     """
     # Perform one-way ANOVA
     groups = categorical_var.unique()
-    data_grouped = [numerical_var[categorical_var == group] for group in groups]
-    f_value, pvalue = f_oneway(*data_grouped)
-    # Calculate degrees of freedom
-    df_between = len(groups) - 1
-    df_within = len(categorical_var) - len(groups)
-    # Calculate eta square root
-    eta_square_root_score = np.sqrt(
-        (f_value * df_between) / (f_value * df_between + df_within)
-    )
-    return eta_square_root_score, pvalue
+    # If categorical variable is a constant
+    if len(groups) < 2:
+        eta_square_root_score = 0
+        pvalue = 1
+        return eta_square_root_score, pvalue
+    else:
+        data_grouped = [numerical_var[categorical_var == group] for group in groups]
+        f_value, pvalue = f_oneway(*data_grouped)
+        # Calculate degrees of freedom
+        df_between = len(groups) - 1
+        df_within = len(categorical_var) - len(groups)
+        # Calculate eta square root
+        eta_square_root_score = np.sqrt(
+            (f_value * df_between) / (f_value * df_between + df_within)
+        )
+        return eta_square_root_score, pvalue
 
 
 def main():
@@ -195,7 +197,7 @@ def main():
     data = read_csv("data/data_c_and_r_with_missings.csv").drop("Loan_ID", axis=1)
     #    data = read_csv('data/data_c_and_r_complete.csv')
     # Compute associations
-    associations_df = associations_for_categorical_and_numeric_variables(data)
+    associations_df = associations_for_categorical_and_numerical_variables(data)
 
     return print(associations_df.to_markdown())
 

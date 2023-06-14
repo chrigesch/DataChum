@@ -1,6 +1,6 @@
 # Import moduls from local directories
 from modules.exploratory_data_analysis.associations import (
-    associations_for_categorical_and_numeric_variables,
+    associations_for_categorical_and_numerical_variables,
 )
 
 # Import the required libraries
@@ -93,7 +93,7 @@ def eda_overview_detailed(
     # Alerts that are valid for all columns
     for column in cols_all:
         # Analyze whether column only contains one value
-        if len(data[column].unique()) == 1:
+        if len(data[column].value_counts()) == 1:
             list_variable.append(column)
             list_alerts.append("Constant")
             list_details.append(
@@ -260,7 +260,7 @@ def main():
     #    data = read_csv('data/data_c_and_r_with_missings.csv').drop('Loan_ID', axis=1)
     data = read_csv("data/data_c_and_r_complete.csv")
     # Compute associations
-    associations_df = associations_for_categorical_and_numeric_variables(data)
+    associations_df = associations_for_categorical_and_numerical_variables(data)
 
     return print(eda_overview(data)), print(
         eda_overview_detailed(data, associations_df)

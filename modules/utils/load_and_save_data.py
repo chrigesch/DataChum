@@ -72,16 +72,13 @@ def _dt_inplace(df):
     for c in df.columns[df.dtypes == "object"]:  # don't cnvt num
         try:
             df[c] = pd.to_datetime(df[c])
-        except (ParserError, ValueError):  # Can't cnvrt some
+        except (ParserError, TypeError, ValueError):  # Can't cnvrt some
             pass  # ...so leave whole column as-is unconverted
     return df
 
 
 @st.cache_data(ttl=3600, max_entries=10)
 def _reduce_memory_usage(data):
-    cols_to_change = data.select_dtypes(include=["object"]).columns.to_list()
-    for col_name in cols_to_change:
-        data[col_name] = data[col_name].astype("category")
     cols_to_change = data.select_dtypes(include=["float64"]).columns.to_list()
     for col_name in cols_to_change:
         data[col_name] = data[col_name].astype("float32")
