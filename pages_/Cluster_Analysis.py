@@ -157,6 +157,9 @@ def main():
                             options=AVAILABLE_METRICS_TO_MONITOR_CLUSTERING_CONVERGENCE,
                             index=2,
                         )
+                    # Create a placeholder for selectbox_monitor_metric
+                    else:
+                        selectbox_monitor_metric = "Silhouette"
                 # If Cluster Analysis using prediction-based resampling method
                 else:
                     selectbox_n_inner_cv_reps = st.selectbox(
