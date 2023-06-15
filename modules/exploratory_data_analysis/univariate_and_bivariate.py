@@ -104,7 +104,7 @@ def plot_num(
             list_labels = []
             for value in data[var_cat].dropna().unique():
                 list_data.append(data[data[var_cat] == value][var_num].dropna())
-                list_labels.append(value)
+                list_labels.append(str(value))
             list_colors = get_color(color, len(list_labels))
         # Freedman–Diaconis rule to compute bin width
         q1 = data[var_num].dropna().quantile(0.25)
