@@ -1380,7 +1380,7 @@ def main():
                             )
                         else:
                             with col_ip_2_1_2:
-                                st.markdown(
+                                st.warning(
                                     "**Caution: The model-agnostic Permutation Explainer will be used, which takes significantly longer than the TreeExplainer**"  # noqa: E501
                                 )
                                 if len(X_to_be_plotted) > 100:
