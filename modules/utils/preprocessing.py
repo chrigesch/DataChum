@@ -26,6 +26,7 @@ from sklearn.preprocessing import (
     StandardScaler,
 )
 from sklearn.compose import ColumnTransformer
+import streamlit as st
 import unicodedata
 
 AVAILABLE_IMPUTATION_NUMERICAL = (
@@ -347,6 +348,7 @@ class missForestClassifierImputer(TransformerMixin):
 ######################################
 
 
+@st.cache_data(ttl=3600, max_entries=10)
 def clean_strings_and_feature_names(data: pd.DataFrame):
     # Get
     cols_cat = data.select_dtypes(
