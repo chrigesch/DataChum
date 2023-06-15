@@ -200,6 +200,9 @@ class clustering:
                                 maximize,
                             ):
                                 break
+                    # Create a placeholder
+                    if n_bootstrap_samples == 0:
+                        n_bootstrap = 0
                     print(
                         "Finished",
                         name,
