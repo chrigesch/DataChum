@@ -64,6 +64,9 @@ class clustering:
         )
 
         data_prep = self.pipeline.fit_transform(data)
+        # Check if data_prep is a sparse matrix (in Compressed Sparse Row format)
+        if type(data_prep) == scipy.sparse._csr.csr_matrix:
+            data_prep = data_prep.toarray()
         # Get labels of all features
         labels = _get_feature_names_after_preprocessing(
             self.pipeline,
