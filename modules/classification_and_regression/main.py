@@ -7,6 +7,7 @@ from modules.classification_and_regression.cv_workflow import (
     _cv_workflow_without_pipeline,
 )
 from modules.utils.load_and_save_data import read_csv
+from modules.utils.preprocessing import clean_strings_and_feature_names
 
 # Import the required Libraries
 import pandas as pd
@@ -130,6 +131,8 @@ class k_fold_cross_validation:
         self.data = self.data.dropna(subset=self.target_variable)
         # Remove data duplicates while retaining the first one
         self.data = self.data.drop_duplicates(keep="first", inplace=False)
+        # Clean strings and feature names
+        self.data = clean_strings_and_feature_names(self.data)
         # If classification problem, apply LabelEncoder to 'y'
         if self.operation == "classification":
             self.label_encoder = LabelEncoder()
@@ -337,6 +340,8 @@ class nested_k_fold_cross_validation:
         self.data = self.data.dropna(subset=self.target_variable)
         # Remove data duplicates while retaining the first one
         self.data = self.data.drop_duplicates(keep="first", inplace=False)
+        # Clean strings and feature names
+        self.data = clean_strings_and_feature_names(self.data)
         # If classification problem, apply LabelEncoder to 'y'
         if self.operation == "classification":
             self.label_encoder = LabelEncoder()
