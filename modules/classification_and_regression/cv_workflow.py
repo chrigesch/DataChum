@@ -23,6 +23,7 @@ from modules.utils.preprocessing import (
 from copy import deepcopy
 import pandas as pd
 from pandas import qcut
+import scipy
 from time import time
 from sklearn.model_selection import RepeatedStratifiedKFold
 from optuna.integration import OptunaSearchCV
@@ -329,6 +330,10 @@ def _cv_workflow_without_pipeline(
         pipeline.fit(X_train, y_train)
         X_train_prep = pipeline.transform(X_train)
         X_test_prep = pipeline.transform(X_test)
+        # Check if X_train_prep is a sparse matrix (in Compressed Sparse Row format)
+        if type(X_train_prep) == scipy.sparse._csr.csr_matrix:
+            X_train_prep = X_train_prep.toarray()
+            X_test_prep = X_test_prep.toarray()
         # Get labels of all features
         labels = _get_feature_names_after_preprocessing(pipeline, includes_model=False)
         # Convert output to Dataframe and add columns names

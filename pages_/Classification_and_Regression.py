@@ -55,6 +55,7 @@ from modules.utils.preprocessing import (
     AVAILABLE_IMPUTATION_CATEGORICAL,
     AVAILABLE_IMPUTATION_NUMERICAL,
     AVAILABLE_SCALER,
+    clean_strings_and_feature_names,
     _get_feature_names_after_preprocessing,
 )
 
@@ -78,7 +79,8 @@ def main():
     # Copy data from session state
     if st.session_state.data is not None:
         data = st.session_state.data
-
+        # Clean strings and feature names
+        data = clean_strings_and_feature_names(data=data)
         # Drop ID columns (or similar): Analyze whether all values of the column are unique
         # (count of unique values equals column's length)
         cols_all = data.columns.to_list()

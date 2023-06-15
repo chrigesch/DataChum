@@ -26,6 +26,8 @@ from sklearn.preprocessing import (
     StandardScaler,
 )
 from sklearn.compose import ColumnTransformer
+import streamlit as st
+import unicodedata
 
 AVAILABLE_IMPUTATION_NUMERICAL = (
     "mean",
@@ -346,6 +348,34 @@ class missForestClassifierImputer(TransformerMixin):
 ######################################
 
 
+@st.cache_data(ttl=3600, max_entries=10)
+def clean_strings_and_feature_names(data: pd.DataFrame):
+    # Get
+    cols_cat = data.select_dtypes(
+        include=["object", "category", "bool"]
+    ).columns.to_list()
+    for column in cols_cat:
+        cells_all = []
+        for cell in data[column]:
+            cell_only_alnum = _strip_accents_and_extract_alnum(cell)
+            cells_all.append(cell_only_alnum)
+        data[column] = cells_all
+    # Rename feature names (LightGBMError: Do not support special JSON characters)
+    data = data.rename(columns=lambda x: _strip_accents_and_extract_alnum(x))
+    return data
+
+
+def _strip_accents_and_extract_alnum(seq):
+    # Strip accents
+    seq_wo_accents = "".join(
+        c
+        for c in unicodedata.normalize("NFD", str(seq))
+        if unicodedata.category(c) != "Mn"
+    )
+    # Only keep alphanumeric and underscore
+    return "".join(c for c in seq_wo_accents if (str(c).isalnum() or c == "_"))
+
+
 def _convert_from_dtype_to_dtype(data, from_dtype, to_dtype):
     data_result = data.copy(deep=True)
     object_columns = data_result.select_dtypes([from_dtype]).columns.tolist()
@@ -373,13 +403,9 @@ def _fit_pipeline_to_get_preprocessed_data(
         labels = np.concatenate([cols_num, encoded_cat])
     else:
         labels = cols_num
-    # Change columns names ([LightGBM] Do not support special JSON characters in feature name.)
-    import re
-
-    labels_new = [re.sub(r"[^A-Za-z0-9_]+", "", value) for value in labels]
     # Convert output to Dataframe and add columns names
-    X_train_prep = pd.DataFrame(X_train_prep, columns=labels_new, index=X_train.index)
-    X_test_prep = pd.DataFrame(X_test_prep, columns=labels_new, index=X_test.index)
+    X_train_prep = pd.DataFrame(X_train_prep, columns=labels, index=X_train.index)
+    X_test_prep = pd.DataFrame(X_test_prep, columns=labels, index=X_test.index)
 
     return X_train_prep, X_test_prep
 
@@ -387,22 +413,16 @@ def _fit_pipeline_to_get_preprocessed_data(
 def _get_feature_names_after_preprocessing(pipeline, includes_model: bool):
     # Get column names of the pipeline and remove prefixes
     # (do not include the model, which is the last part of the pipeline)
-    import re
-
     col_names_without_prefix = []
     if includes_model is True:
         for element in pipeline[:-1].get_feature_names_out():
             element = element.removeprefix("prep_cat__")
             element = element.removeprefix("prep_num__")
-            # Change columns names ([LightGBM] Do not support special JSON characters in feature name.)
-            element = re.sub(r"[^A-Za-z0-9_]+", "", element)
             col_names_without_prefix.append(element)
     else:
         for element in pipeline.get_feature_names_out():
             element = element.removeprefix("prep_cat__")
             element = element.removeprefix("prep_num__")
-            # Change columns names ([LightGBM] Do not support special JSON characters in feature name.)
-            element = re.sub(r"[^A-Za-z0-9_]+", "", element)
             col_names_without_prefix.append(element)
     return col_names_without_prefix
 

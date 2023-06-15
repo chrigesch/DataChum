@@ -19,6 +19,7 @@ from modules.utils.preprocessing import (
 # Import the required libraries
 import numpy as np
 import pandas as pd
+import scipy
 from sklearn.model_selection import RepeatedKFold
 from sklearn.utils import resample
 
@@ -63,6 +64,9 @@ class clustering:
         )
 
         data_prep = self.pipeline.fit_transform(data)
+        # Check if data_prep is a sparse matrix (in Compressed Sparse Row format)
+        if type(data_prep) == scipy.sparse._csr.csr_matrix:
+            data_prep = data_prep.toarray()
         # Get labels of all features
         labels = _get_feature_names_after_preprocessing(
             self.pipeline,
@@ -196,6 +200,9 @@ class clustering:
                                 maximize,
                             ):
                                 break
+                    # Create a placeholder
+                    if n_bootstrap_samples == 0:
+                        n_bootstrap = 0
                     print(
                         "Finished",
                         name,
@@ -292,6 +299,10 @@ class clustering_cross_validation:
                     # Prepare data
                     X_train_prep = self.pipeline.fit_transform(X_train)
                     X_val_prep = self.pipeline.transform(X_val)
+                    # Check if X_train_prep is a sparse matrix (in Compressed Sparse Row format)
+                    if type(X_train_prep) == scipy.sparse._csr.csr_matrix:
+                        X_train_prep = X_train_prep.toarray()
+                        X_val_prep = X_val_prep.toarray()
                     # Fit a cluster model on the train data and make predictions for it
                     y_train = cluster_model.fit_predict(X_train_prep)
                     # Fit a cluster model on the validation data and make predictions for it
