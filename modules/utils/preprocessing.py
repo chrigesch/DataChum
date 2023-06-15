@@ -26,6 +26,8 @@ from sklearn.preprocessing import (
     StandardScaler,
 )
 from sklearn.compose import ColumnTransformer
+import streamlit as st
+import unicodedata
 
 AVAILABLE_IMPUTATION_NUMERICAL = (
     "mean",
@@ -344,6 +346,34 @@ class missForestClassifierImputer(TransformerMixin):
 ######################################
 # Private Methods / Helper functions #
 ######################################
+
+
+@st.cache_data(ttl=3600, max_entries=10)
+def clean_strings_and_feature_names(data: pd.DataFrame):
+    # Get
+    cols_cat = data.select_dtypes(
+        include=["object", "category", "bool"]
+    ).columns.to_list()
+    for column in cols_cat:
+        cells_all = []
+        for cell in data[column]:
+            cell_only_alnum = _strip_accents_and_extract_alnum(cell)
+            cells_all.append(cell_only_alnum)
+        data[column] = cells_all
+    # Rename feature names (LightGBMError: Do not support special JSON characters)
+    data = data.rename(columns=lambda x: _strip_accents_and_extract_alnum(x))
+    return data
+
+
+def _strip_accents_and_extract_alnum(seq):
+    # Strip accents
+    seq_wo_accents = "".join(
+        c
+        for c in unicodedata.normalize("NFD", str(seq))
+        if unicodedata.category(c) != "Mn"
+    )
+    # Only keep alphanumeric and underscore
+    return "".join(c for c in seq_wo_accents if (str(c).isalnum() or c == "_"))
 
 
 def _convert_from_dtype_to_dtype(data, from_dtype, to_dtype):
