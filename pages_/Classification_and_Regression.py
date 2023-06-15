@@ -1380,7 +1380,7 @@ def main():
                             )
                         else:
                             with col_ip_2_1_2:
-                                st.markdown(
+                                st.warning(
                                     "**Caution: The model-agnostic Permutation Explainer will be used, which takes significantly longer than the TreeExplainer**"  # noqa: E501
                                 )
                                 if len(X_to_be_plotted) > 100:
@@ -1662,6 +1662,26 @@ def main():
                                 )
                                 st.success("Done!")
                         if st.session_state.ate_df is not None:
+                            # Create two columns for download buttons
+                            col_ip_3_1, col_ip_3_2 = st.columns([1, 2])
+                            with col_ip_3_1:
+                                st.download_button(
+                                    label="Download ATE values as CSV",
+                                    data=convert_dataframe_to_csv(
+                                        st.session_state.ate_df
+                                    ),
+                                    file_name="ATE_values.csv",
+                                    mime="text/csv'",
+                                )
+                            with col_ip_3_2:
+                                st.download_button(
+                                    label="Download ATE values as XLSX",
+                                    data=convert_dataframe_to_xlsx(
+                                        st.session_state.ate_df
+                                    ),
+                                    file_name="ATE_values.xlsx",
+                                    mime="application/vnd.ms-excel",
+                                )
                             st.session_state.fig_ate = plot_ate(st.session_state.ate_df)
                             # Create two columns: to display the DataFrame and the Plot
                             col_ip_3_1, col_ip_3_2 = st.columns([1, 1])

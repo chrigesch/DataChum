@@ -11,6 +11,7 @@ import plotly.express as px
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import scipy
 import shap
 from sklearn.inspection import partial_dependence
 
@@ -23,7 +24,12 @@ def partial_dependence_plot(feature, pipeline, X, frac_ice: float):
         pipeline, includes_model=True
     )
     # Apply preprocessing to data (everything but the model)
-    X_prep = pd.DataFrame(pipeline[:-1].transform(X), columns=col_names_without_prefix)
+    X_prep = pipeline[:-1].transform(X)
+    # Check if X_prep is a sparse matrix (in Compressed Sparse Row format)
+    if type(X_prep) == scipy.sparse._csr.csr_matrix:
+        X_prep = X_prep.toarray()
+    # Apply preprocessing to data (everything but the model)
+    X_prep = pd.DataFrame(X_prep, columns=col_names_without_prefix)
     # Define maximum number of columns, instantiate subplots and set titles
     if len(feature) < 2:
         max_columns = 1
@@ -90,8 +96,12 @@ def compute_shap_values_agnostic(pipeline, X, n_samples: int, operation: bool):
     col_names_without_prefix = _get_feature_names_after_preprocessing(
         pipeline, includes_model=True
     )
+    X_prep = pipeline[:-1].transform(X)
+    # Check if X_prep is a sparse matrix (in Compressed Sparse Row format)
+    if type(X_prep) == scipy.sparse._csr.csr_matrix:
+        X_prep = X_prep.toarray()
     # Apply preprocessing to data (everything but the model)
-    X_prep = pd.DataFrame(pipeline[:-1].transform(X), columns=col_names_without_prefix)
+    X_prep = pd.DataFrame(X_prep, columns=col_names_without_prefix)
     # Set the explainer (model is the last element of the pipeline)
     if operation == "regression":
         explainer = shap.explainers.Permutation(pipeline[-1].predict, X_prep)
@@ -109,8 +119,12 @@ def compute_shap_values_tree(pipeline, X: iter):
     col_names_without_prefix = _get_feature_names_after_preprocessing(
         pipeline, includes_model=True
     )
+    X_prep = pipeline[:-1].transform(X)
+    # Check if X_prep is a sparse matrix (in Compressed Sparse Row format)
+    if type(X_prep) == scipy.sparse._csr.csr_matrix:
+        X_prep = X_prep.toarray()
     # Apply preprocessing to data (everything but the model)
-    X_prep = pd.DataFrame(pipeline[:-1].transform(X), columns=col_names_without_prefix)
+    X_prep = pd.DataFrame(X_prep, columns=col_names_without_prefix)
     # Set the model: the last element of the pipeline
     explainer = fasttreeshap.TreeExplainer(
         pipeline[-1], n_jobs=-1
@@ -339,10 +353,12 @@ def compute_average_treatment_effect(
     col_names_without_prefix = _get_feature_names_after_preprocessing(
         pipeline, includes_model=True
     )
+    observations = pipeline[:-1].transform(X)
+    # Check if X_prep is a sparse matrix (in Compressed Sparse Row format)
+    if type(observations) == scipy.sparse._csr.csr_matrix:
+        observations = observations.toarray()
     # Apply preprocessing to data (everything but the model)
-    observations = pd.DataFrame(
-        pipeline[:-1].transform(X), columns=col_names_without_prefix
-    )
+    observations = pd.DataFrame(observations, columns=col_names_without_prefix)
     # Initiate variables to collect results
     feature_name = []
     ate = []
