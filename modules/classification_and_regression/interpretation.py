@@ -23,12 +23,7 @@ def partial_dependence_plot(feature, pipeline, X, frac_ice: float):
         pipeline, includes_model=True
     )
     # Apply preprocessing to data (everything but the model)
-    X_prep = pipeline[:-1].transform(X)
-    # Check if X_prep is a sparse matrix (in Compressed Sparse Row format)
-    if type(X_prep) == scipy.sparse._csr.csr_matrix:
-        X_prep = X_prep.toarray()
-    # Apply preprocessing to data (everything but the model)
-    X_prep = pd.DataFrame(X_prep, columns=col_names_without_prefix)
+    X_prep = pd.DataFrame(pipeline[:-1].transform(X), columns=col_names_without_prefix)
     # Define maximum number of columns, instantiate subplots and set titles
     if len(feature) < 2:
         max_columns = 1
