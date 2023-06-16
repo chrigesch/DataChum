@@ -254,6 +254,7 @@ class miceForestImputer(TransformerMixin):
 
     def transform(self, X):
         data_mice_forest_t = X.copy(deep=True)
+        self.columns = X.columns
         # Convert all 'object' to 'category' (mice_forest & miss_forest)
         data_mice_forest_t = _convert_from_dtype_to_dtype(
             data_mice_forest_t, from_dtype="object", to_dtype="category"
@@ -273,6 +274,9 @@ class miceForestImputer(TransformerMixin):
         )
 
         return data_mice_forest_t_completed
+
+    def get_feature_names_out(self, feature_names):
+        return self.columns
 
 
 class missForestClassifierImputer(TransformerMixin):
