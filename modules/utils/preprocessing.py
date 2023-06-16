@@ -144,7 +144,11 @@ def data_preprocessing(
         )
 
     # Instantiate an empty ColumnTransformer
-    preprocessor = ColumnTransformer(transformers=[], remainder="passthrough")
+    preprocessor = ColumnTransformer(
+        transformers=[],
+        remainder="passthrough",
+        sparse_threshold=0.0,
+    )
 
     # Add pipelines of NUMERICAL and CATEGORICAL data to the ColumnTransformer
     preprocessor.transformers.append(("prep_num", transformer_num, cols_num))
