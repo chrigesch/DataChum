@@ -342,6 +342,7 @@ class missForestClassifierImputer(TransformerMixin):
         return self
 
     def transform(self, X):
+        self.columns = X.columns
         # Transform X with the already fitted encoder
         data_encoded = self.ordinal_encoder.transform(X)
         # Imput missings with the already fitted imputer
@@ -349,6 +350,9 @@ class missForestClassifierImputer(TransformerMixin):
         data_decoded = self.ordinal_encoder.inverse_transform(data_imputed)
 
         return data_decoded
+
+    def get_feature_names_out(self, feature_names):
+        return self.columns
 
 
 ######################################
