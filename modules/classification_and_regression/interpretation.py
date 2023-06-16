@@ -344,12 +344,10 @@ def compute_average_treatment_effect(
     col_names_without_prefix = _get_feature_names_after_preprocessing(
         pipeline, includes_model=True
     )
-    observations = pipeline[:-1].transform(X)
-    # Check if X_prep is a sparse matrix (in Compressed Sparse Row format)
-    if type(observations) == scipy.sparse._csr.csr_matrix:
-        observations = observations.toarray()
     # Apply preprocessing to data (everything but the model)
-    observations = pd.DataFrame(observations, columns=col_names_without_prefix)
+    observations = pd.DataFrame(
+        pipeline[:-1].transform(X), columns=col_names_without_prefix
+    )
     # Initiate variables to collect results
     feature_name = []
     ate = []
