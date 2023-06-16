@@ -15,7 +15,6 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
-import scipy
 from sklearn.metrics import silhouette_samples, silhouette_score
 from sklearn.preprocessing import MinMaxScaler
 import streamlit as st
@@ -131,9 +130,6 @@ def get_cluster_labels_and_X_prep(
     )
     # Data preparation
     data_prep = pipeline.fit_transform(data)
-    # Check if data_prep is a sparse matrix (in Compressed Sparse Row format)
-    if type(data_prep) == scipy.sparse._csr.csr_matrix:
-        data_prep = data_prep.toarray()
     # Get labels of all features
     labels = _get_feature_names_after_preprocessing(
         pipeline,

@@ -144,7 +144,11 @@ def data_preprocessing(
         )
 
     # Instantiate an empty ColumnTransformer
-    preprocessor = ColumnTransformer(transformers=[], remainder="passthrough")
+    preprocessor = ColumnTransformer(
+        transformers=[],
+        remainder="passthrough",
+        sparse_threshold=0.0,
+    )
 
     # Add pipelines of NUMERICAL and CATEGORICAL data to the ColumnTransformer
     preprocessor.transformers.append(("prep_num", transformer_num, cols_num))
@@ -250,6 +254,7 @@ class miceForestImputer(TransformerMixin):
 
     def transform(self, X):
         data_mice_forest_t = X.copy(deep=True)
+        self.columns = X.columns
         # Convert all 'object' to 'category' (mice_forest & miss_forest)
         data_mice_forest_t = _convert_from_dtype_to_dtype(
             data_mice_forest_t, from_dtype="object", to_dtype="category"
@@ -269,6 +274,9 @@ class miceForestImputer(TransformerMixin):
         )
 
         return data_mice_forest_t_completed
+
+    def get_feature_names_out(self, feature_names):
+        return self.columns
 
 
 class missForestClassifierImputer(TransformerMixin):
@@ -334,6 +342,7 @@ class missForestClassifierImputer(TransformerMixin):
         return self
 
     def transform(self, X):
+        self.columns = X.columns
         # Transform X with the already fitted encoder
         data_encoded = self.ordinal_encoder.transform(X)
         # Imput missings with the already fitted imputer
@@ -341,6 +350,9 @@ class missForestClassifierImputer(TransformerMixin):
         data_decoded = self.ordinal_encoder.inverse_transform(data_imputed)
 
         return data_decoded
+
+    def get_feature_names_out(self, feature_names):
+        return self.columns
 
 
 ######################################
