@@ -853,6 +853,14 @@ def main():
         # Tab 4: 'Associations'
         if 1 < len(cols_cat_and_num):
             with tab_4:
+                st.warning(
+                    "Calculate the strength-of-association of features in data-set with both, categorical"
+                    " and continuous features using: Spearman's R for continuous-continuous cases - Correlation Ratio"
+                    " for categorical-continuous cases - bias corrected Cramer's V for categorical-categorical cases."
+                    " For more information of the bias corrected Cramer's V, see:  \nBergsma, W. (2013)."
+                    " A bias-correction for Cramér's and Tschuprow's. Journal of the Korean Statistical Society, 42(3),"
+                    " 323-328. https://doi.org/10.1016/j.jkss.2012.10.002"
+                )
                 tab_4_1, tab_4_2 = st.tabs(["Heatmap", "Association matrix"])
                 # Heatmap
                 with tab_4_1:
