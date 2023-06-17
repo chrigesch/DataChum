@@ -362,7 +362,7 @@ class missForestClassifierImputer(TransformerMixin):
 
 @st.cache_data(ttl=3600, max_entries=10)
 def clean_strings_and_feature_names(data: pd.DataFrame):
-    # Get
+    # Get all categorical variables
     cols_cat = data.select_dtypes(
         include=["object", "category", "bool"]
     ).columns.to_list()
@@ -373,6 +373,8 @@ def clean_strings_and_feature_names(data: pd.DataFrame):
             cells_all.append(cell_only_alnum)
         data[column] = cells_all
     # Rename feature names (LightGBMError: Do not support special JSON characters)
+    # Replace whitespace with underscore
+    data = data.rename(columns=lambda x: "_".join(x.split()))
     data = data.rename(columns=lambda x: _strip_accents_and_extract_alnum(x))
     return data
 
