@@ -439,6 +439,9 @@ def main():
                         tune_imp_categorical=selectbox_tune_imp_categorical,
                     )
             st.success("Done!")
+            # Rerun app (tab hack: prevent jumping back to first tab)
+            # https://github.com/streamlit/streamlit/issues/4996#issuecomment-1261464494
+            st.experimental_rerun()
 
         if st.session_state.cv_instance is not None:
             st.subheader("**Model Evaluation**")

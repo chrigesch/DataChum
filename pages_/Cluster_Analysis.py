@@ -317,6 +317,9 @@ def main():
                         monitor_metric=selectbox_monitor_metric,
                     )
             st.success("Done!")
+            # Rerun app (tab hack: prevent jumping back to first tab)
+            # https://github.com/streamlit/streamlit/issues/4996#issuecomment-1261464494
+            st.experimental_rerun()
 
         if st.session_state.cluster_instance is not None:
             st.subheader("**Model Evaluation**")
