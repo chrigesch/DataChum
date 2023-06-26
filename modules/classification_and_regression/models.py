@@ -380,7 +380,6 @@ def classification_models_to_tune(
                         "depth": IntDistribution(1, 10),
                         "l2_leaf_reg": IntDistribution(2, 10),
                         "random_strength": IntDistribution(0, 10),
-                        "subsample": FloatDistribution(0.5, 1.0),
                     },
                     CatBoostClassifier(
                         random_state=123, allow_writing_files=False, verbose=0
@@ -397,7 +396,6 @@ def classification_models_to_tune(
                         "CatBoost__depth": IntDistribution(1, 10),
                         "CatBoost__l2_leaf_reg": IntDistribution(2, 10),
                         "CatBoost__random_strength": IntDistribution(0, 10),
-                        "CatBoost__subsample": FloatDistribution(0.5, 1.0),
                     },
                     CatBoostClassifier(
                         random_state=123, allow_writing_files=False, verbose=0
@@ -801,7 +799,6 @@ def regression_models_to_tune(
                         "l2_leaf_reg": IntDistribution(2, 10),
                         "random_strength": IntDistribution(0, 10),
                         "n_estimators": IntDistribution(50, 250),
-                        "subsample": FloatDistribution(0.5, 1.0),
                     },
                     CatBoostRegressor(
                         random_state=123, allow_writing_files=False, verbose=0
@@ -818,7 +815,6 @@ def regression_models_to_tune(
                         "CatBoost__l2_leaf_reg": IntDistribution(2, 10),
                         "CatBoost__random_strength": IntDistribution(0, 10),
                         "CatBoost__n_estimators": IntDistribution(50, 250),
-                        "CatBoost__subsample": FloatDistribution(0.5, 1.0),
                     },
                     CatBoostRegressor(
                         random_state=123, allow_writing_files=False, verbose=0
