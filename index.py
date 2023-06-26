@@ -18,7 +18,15 @@ import streamlit as st
 def main():
     # Page setup
     st.set_page_config(
-        page_title="DataChum", page_icon="assets/logo_01.png", layout="wide"
+        page_title="DataChum",
+        page_icon="assets/logo_01.png",
+        layout="wide",
+        menu_items={
+            "Get Help": "mailto:christianschetsche@psi.uba.ar",
+            "About": "This application runs on an external server with 1 GB of RAM. In case you prefer to use the"
+            " application in a local environment, please drop me a line to send you the application in an .exe file."
+            " christianschetsche@psi.uba.ar",
+        },
     )
 
     # Display the sidebar with a menu of apps
