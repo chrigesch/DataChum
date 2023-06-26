@@ -372,8 +372,6 @@ tensorflow==2.12.0
     # via -r requirements.in
 tensorflow-estimator==2.12.0
     # via tensorflow-intel
-tensorflow-intel==2.12.0
-    # via tensorflow
 tensorflow-io-gcs-filesystem==0.31.0
     # via
     #   scikeras
