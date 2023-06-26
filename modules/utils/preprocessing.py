@@ -369,8 +369,11 @@ def clean_strings_and_feature_names(data: pd.DataFrame):
     for column in cols_cat:
         cells_all = []
         for cell in data[column]:
-            cell_only_alnum = _strip_accents_and_extract_alnum(cell)
-            cells_all.append(cell_only_alnum)
+            if pd.isna(cell) is True:
+                cells_all.append(cell)
+            else:
+                cell_only_alnum = _strip_accents_and_extract_alnum(cell)
+                cells_all.append(cell_only_alnum)
         data[column] = cells_all
     # Rename feature names (LightGBMError: Do not support special JSON characters)
     # Replace whitespace with underscore
