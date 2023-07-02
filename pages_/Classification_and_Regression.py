@@ -1433,16 +1433,25 @@ def main():
                             # Create two columns: One to select the plot type, another for the plotting options
                             col_ip_2_2_1, col_ip_2_2_2 = st.columns([1, 1])
                             with col_ip_2_2_1:
-                                select_plot = st.radio(
-                                    "**Select the plot**",
-                                    options=[
-                                        "Feature Importance",
-                                        "Feature Clustering",
-                                        "Beeswarm",
-                                        "Scatter",
-                                        "Local Explanation",
-                                    ],
-                                )
+                                if len(available_features) < 2:
+                                    select_plot = st.radio(
+                                        "**Select the plot**",
+                                        options=[
+                                            "Beeswarm",
+                                            "Scatter",
+                                        ],
+                                    )
+                                else:
+                                    select_plot = st.radio(
+                                        "**Select the plot**",
+                                        options=[
+                                            "Feature Importance",
+                                            "Feature Clustering",
+                                            "Beeswarm",
+                                            "Scatter",
+                                            "Local Explanation",
+                                        ],
+                                    )
                             with col_ip_2_2_2:
                                 # Create a DataFrame with Shapley Values to be plotted (multiclass, binary, regression)
                                 if (
