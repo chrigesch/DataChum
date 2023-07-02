@@ -1571,11 +1571,22 @@ def main():
                             )
                             # Alternative: string_to_be_displayed = str(models_trained_list[selectbox_model_to_be_plotted_int][-1]) + ' using the ' + str(selectbox_data_to_be_plotted) + ' data'  # noqa: E501
                             if "fig_shap" not in st.session_state:
-                                st.session_state.fig_shap = (
-                                    plot_shap_feature_importance(
-                                        sv_to_be_plotted, color=selectbox_color
+                                if len(available_features) < 2:
+                                    X_prep_bee = pd.DataFrame(
+                                        st.session_state.shap_values_instance.data,
+                                        columns=st.session_state.shap_values_instance.feature_names,
                                     )
-                                )
+                                    st.session_state.fig_shap = plot_shap_beeswarm(
+                                        sv_to_be_plotted,
+                                        X=X_prep_bee,
+                                        color=selectbox_color,
+                                    )
+                                else:
+                                    st.session_state.fig_shap = (
+                                        plot_shap_feature_importance(
+                                            sv_to_be_plotted, color=selectbox_color
+                                        )
+                                    )
                                 st.session_state.fig_shap.update_layout(
                                     title=string_to_be_displayed
                                 )
