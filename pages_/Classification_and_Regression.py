@@ -1659,65 +1659,79 @@ def main():
                             )
                     # Tab ip 3: Double/Debiased ML
                     with tab_ip_3:
-                        # Instantiate placeholders | Session state variables
-                        if "ate_df" not in st.session_state:
-                            st.session_state.ate_df = None
-                        button_d_d_ml = st.button(
-                            label="**Compute ATE**",
-                            type="secondary",
-                            use_container_width=True,
-                            help="**For more information of Double/Debiased ML, see:** Chernozhukov, V., Chetverikov,"
-                            " D., Demirer, M., Duflo, E., Hansen, C., Newey, W., & Robins, J. (2018). Double/debiased"
-                            " machine learning for treatment and structural parameters. The Econometrics Journal,"
-                            " 21(1), C1-C68. https://doi.org/10.1111/ectj.12097",
-                        )
-                        with st.spinner("Computing ATE..."):
-                            if button_d_d_ml:
-                                st.session_state.ate_df = compute_average_treatment_effect(
-                                    pipeline=models_trained_list[
-                                        selectbox_model_to_be_plotted
-                                    ],
-                                    data=data,
-                                    target_variable=st.session_state.cv_instance.target_variable,
-                                    estimation_method="custom",
-                                    operation=st.session_state.cv_instance.operation,
-                                    label_encoder=st.session_state.cv_instance.label_encoder,
+                        if len(available_features) < 2:
+                            st.warning(
+                                "Double/Debiased ML is only available if the number of predictors is greater than"
+                                " one.  \n"
+                                " **For more information of Double/Debiased ML, see:** Chernozhukov, V., Chetverikov,"
+                                " D., Demirer, M., Duflo, E., Hansen, C., Newey, W., & Robins, J. (2018)."
+                                " Double/debiased machine learning for treatment and structural parameters."
+                                " The Econometrics Journal, 21(1), C1-C68. https://doi.org/10.1111/ectj.12097"
+                            )
+                        else:
+                            # Instantiate placeholders | Session state variables
+                            if "ate_df" not in st.session_state:
+                                st.session_state.ate_df = None
+                            button_d_d_ml = st.button(
+                                label="**Compute ATE**",
+                                type="secondary",
+                                use_container_width=True,
+                                help="**For more information of Double/Debiased ML, see:** Chernozhukov,"
+                                " V., Chetverikov, D., Demirer, M., Duflo, E., Hansen, C., Newey, W., &"
+                                " Robins, J. (2018). Double/debiased machine learning for treatment and"
+                                " structural parameters. The Econometrics Journal, 21(1), C1-C68."
+                                " https://doi.org/10.1111/ectj.12097",
+                            )
+                            with st.spinner("Computing ATE..."):
+                                if button_d_d_ml:
+                                    st.session_state.ate_df = compute_average_treatment_effect(
+                                        pipeline=models_trained_list[
+                                            selectbox_model_to_be_plotted
+                                        ],
+                                        data=data,
+                                        target_variable=st.session_state.cv_instance.target_variable,
+                                        estimation_method="custom",
+                                        operation=st.session_state.cv_instance.operation,
+                                        label_encoder=st.session_state.cv_instance.label_encoder,
+                                    )
+                                    st.success("Done!")
+                            if st.session_state.ate_df is not None:
+                                # Create two columns for download buttons
+                                col_ip_3_1, col_ip_3_2 = st.columns([1, 2])
+                                with col_ip_3_1:
+                                    st.download_button(
+                                        label="Download ATE values as CSV",
+                                        data=convert_dataframe_to_csv(
+                                            st.session_state.ate_df
+                                        ),
+                                        file_name="ATE_values.csv",
+                                        mime="text/csv'",
+                                    )
+                                with col_ip_3_2:
+                                    st.download_button(
+                                        label="Download ATE values as XLSX",
+                                        data=convert_dataframe_to_xlsx(
+                                            st.session_state.ate_df
+                                        ),
+                                        file_name="ATE_values.xlsx",
+                                        mime="application/vnd.ms-excel",
+                                    )
+                                st.session_state.fig_ate = plot_ate(
+                                    st.session_state.ate_df
                                 )
-                                st.success("Done!")
-                        if st.session_state.ate_df is not None:
-                            # Create two columns for download buttons
-                            col_ip_3_1, col_ip_3_2 = st.columns([1, 2])
-                            with col_ip_3_1:
-                                st.download_button(
-                                    label="Download ATE values as CSV",
-                                    data=convert_dataframe_to_csv(
-                                        st.session_state.ate_df
-                                    ),
-                                    file_name="ATE_values.csv",
-                                    mime="text/csv'",
-                                )
-                            with col_ip_3_2:
-                                st.download_button(
-                                    label="Download ATE values as XLSX",
-                                    data=convert_dataframe_to_xlsx(
-                                        st.session_state.ate_df
-                                    ),
-                                    file_name="ATE_values.xlsx",
-                                    mime="application/vnd.ms-excel",
-                                )
-                            st.session_state.fig_ate = plot_ate(st.session_state.ate_df)
-                            # Create two columns: to display the DataFrame and the Plot
-                            col_ip_3_1, col_ip_3_2 = st.columns([1, 1])
-                            with col_ip_3_1:
-                                st.dataframe(
-                                    st.session_state.ate_df, use_container_width=True
-                                )
-                            with col_ip_3_2:
-                                st.plotly_chart(
-                                    st.session_state.fig_ate,
-                                    theme="streamlit",
-                                    use_container_width=True,
-                                )
+                                # Create two columns: to display the DataFrame and the Plot
+                                col_ip_3_1, col_ip_3_2 = st.columns([1, 1])
+                                with col_ip_3_1:
+                                    st.dataframe(
+                                        st.session_state.ate_df,
+                                        use_container_width=True,
+                                    )
+                                with col_ip_3_2:
+                                    st.plotly_chart(
+                                        st.session_state.fig_ate,
+                                        theme="streamlit",
+                                        use_container_width=True,
+                                    )
 
 
 #    streamlit_profiler.stop()
