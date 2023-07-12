@@ -502,7 +502,7 @@ def main():
                 else:
                     tab_e1_2_1, tab_e1_2_2, tab_e1_2_3 = st.tabs(
                         [
-                            "**Bar Plots**",
+                            "**Box Plots**",
                             "**Silhouette Plots**",
                             "**Line Plots**",
                         ]
