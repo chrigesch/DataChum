@@ -507,7 +507,7 @@ def main():
                             "**Line Plots**",
                         ]
                     )
-                # Bar Plots
+                # Box Plots
                 with tab_e1_2_1:
                     if len(scores_df_grouped) < 2:
                         var_cat = None
