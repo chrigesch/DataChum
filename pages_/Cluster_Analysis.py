@@ -502,12 +502,12 @@ def main():
                 else:
                     tab_e1_2_1, tab_e1_2_2, tab_e1_2_3 = st.tabs(
                         [
-                            "**Bar Plots**",
+                            "**Box Plots**",
                             "**Silhouette Plots**",
                             "**Line Plots**",
                         ]
                     )
-                # Bar Plots
+                # Box Plots
                 with tab_e1_2_1:
                     if len(scores_df_grouped) < 2:
                         var_cat = None
