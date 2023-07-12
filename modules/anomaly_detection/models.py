@@ -15,9 +15,8 @@ AVAILABLE_MODELS_ANOMALY_DETECTION = (
     "CBLOF",
     "COPOD",
     "ECOD",
-    "DeepSVDD",
-    "Iforest",
     "HBOS",
+    "Iforest",
     "KNN",
     "LODA",
     "LOF",
@@ -50,10 +49,10 @@ def anomaly_detection_models_to_evaluate(models: list):
             models_to_evaluate.append(("Iforest", IForest(n_jobs=-1, random_state=123)))
         if model == "KNN":
             models_to_evaluate.append(("KNN", KNN(n_jobs=-1)))
-        if model == "LOF":
-            models_to_evaluate.append(("LOF", LOF(n_jobs=-1)))
         if model == "LODA":
             models_to_evaluate.append(("LODA", LODA()))
+        if model == "LOF":
+            models_to_evaluate.append(("LOF", LOF(n_jobs=-1)))
         if model == "MCD":
             models_to_evaluate.append(("MCD", MCD(random_state=123)))
         if model == "PCA":
