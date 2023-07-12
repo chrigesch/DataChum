@@ -1,4 +1,5 @@
 # Import moduls from local directories
+from modules.anomaly_detection.models import anomaly_detection_models_to_evaluate
 from modules.classification_and_regression.metrics import (
     _compute_dictionary_with_scores_to_compute_in_cv,
 )
