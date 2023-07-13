@@ -7,6 +7,7 @@ from modules.utils.preprocessing import (
 )
 
 # Import the required Libraries
+import numpy as np
 import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
@@ -103,3 +104,16 @@ def get_anomaly_scores_and_data_prep(
         anomaly_detection_model_list[0][1].fit(data_prep).predict_proba(data_prep)[:, 1]
     )
     return anomaly_scores_min_max, data_prep
+
+
+def select_cases_for_line_plot(
+    data_prep: pd.DataFrame,
+    anomaly_scores: np.array,
+    threshold: float,
+):
+    data_prep["anomaly_score"] = anomaly_scores
+    selected_cases = data_prep[data_prep["anomaly_score"] >= threshold]
+    selected_cases.loc["median_all"] = data_prep.median()
+    selected_cases.loc["mean_all"] = data_prep.mean()
+
+    return selected_cases.reset_index().melt(id_vars="index")
