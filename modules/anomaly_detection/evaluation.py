@@ -1,7 +1,10 @@
 # Import moduls from local directories
 from assets.colors import get_color
 from modules.anomaly_detection.models import anomaly_detection_models_to_evaluate
-from modules.utils.preprocessing import data_preprocessing
+from modules.utils.preprocessing import (
+    data_preprocessing,
+    _get_feature_names_after_preprocessing,
+)
 
 # Import the required Libraries
 import pandas as pd
@@ -84,6 +87,13 @@ def get_anomaly_scores_and_data_prep(
     )
     # Data preparation
     data_prep = pipeline.fit_transform(data)
+    # Get labels of all features
+    labels = _get_feature_names_after_preprocessing(
+        pipeline,
+        includes_model=False,
+    )
+    # Convert output to Dataframe and add columns names
+    data_prep = pd.DataFrame(data_prep, columns=labels, index=data.index)
 
     # Get list of model
     anomaly_detection_model_list = anomaly_detection_models_to_evaluate(
