@@ -62,7 +62,7 @@ def plot_anomalies_evaluation(
 ######################################
 
 
-def get_anomaly_scores(
+def get_anomaly_scores_and_data_prep(
     data: pd.DataFrame,
     imputation_numerical: str,
     imputation_categorical: str,
@@ -92,4 +92,4 @@ def get_anomaly_scores(
     anomaly_scores_min_max = (
         anomaly_detection_model_list[0][1].fit(data_prep).predict_proba(data_prep)[:, 1]
     )
-    return anomaly_scores_min_max
+    return anomaly_scores_min_max, data_prep
