@@ -1,9 +1,13 @@
 # Import moduls from local directories
 from assets.colors import get_color
 from modules.anomaly_detection.models import anomaly_detection_models_to_evaluate
-from modules.utils.preprocessing import data_preprocessing
+from modules.utils.preprocessing import (
+    data_preprocessing,
+    _get_feature_names_after_preprocessing,
+)
 
 # Import the required Libraries
+import numpy as np
 import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
@@ -46,6 +50,7 @@ def plot_anomalies_evaluation(
     )
     # Set y-axes titles
     fig.update_xaxes(showticklabels=False, row=1, col=1)
+    fig.update_xaxes(title="MinMax-scaled Anomaly Scores", row=2, col=1)
     fig.update_yaxes(
         title_text="ECDF - probability", row=2, col=1, secondary_y=False, range=[0, 1.1]
     )
@@ -61,7 +66,7 @@ def plot_anomalies_evaluation(
 ######################################
 
 
-def get_anomaly_scores(
+def get_anomaly_scores_and_data_prep(
     data: pd.DataFrame,
     imputation_numerical: str,
     imputation_categorical: str,
@@ -83,6 +88,13 @@ def get_anomaly_scores(
     )
     # Data preparation
     data_prep = pipeline.fit_transform(data)
+    # Get labels of all features
+    labels = _get_feature_names_after_preprocessing(
+        pipeline,
+        includes_model=False,
+    )
+    # Convert output to Dataframe and add columns names
+    data_prep = pd.DataFrame(data_prep, columns=labels, index=data.index)
 
     # Get list of model
     anomaly_detection_model_list = anomaly_detection_models_to_evaluate(
@@ -91,4 +103,17 @@ def get_anomaly_scores(
     anomaly_scores_min_max = (
         anomaly_detection_model_list[0][1].fit(data_prep).predict_proba(data_prep)[:, 1]
     )
-    return anomaly_scores_min_max
+    return anomaly_scores_min_max, data_prep
+
+
+def select_cases_for_line_plot(
+    data_prep: pd.DataFrame,
+    anomaly_scores: np.array,
+    threshold: float,
+):
+    data_prep["anomaly_score"] = anomaly_scores
+    selected_cases = data_prep[data_prep["anomaly_score"] >= threshold]
+    selected_cases.loc["median_all"] = data_prep.median()
+    selected_cases.loc["mean_all"] = data_prep.mean()
+
+    return selected_cases.reset_index().melt(id_vars="index")

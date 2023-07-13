@@ -120,6 +120,22 @@ class anomaly_detection_cross_validation:
             print("Finished", name_anomaly_detection_model)
 
 
+class anomaly_detection_standart:
+    def __init__(
+        self,
+        data: iter,
+        imputation_numerical: str,
+        imputation_categorical: str,
+        scaler: str,
+        anomaly_detection_models: list,
+    ):
+        self.method = "standart"
+        self.imputation_numerical = imputation_numerical
+        self.imputation_categorical = imputation_categorical
+        self.scaler = scaler
+        self.anomaly_detection_models = anomaly_detection_models
+
+
 ######################################
 # Private Methods / Helper functions #
 ######################################
