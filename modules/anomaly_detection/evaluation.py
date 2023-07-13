@@ -46,6 +46,7 @@ def plot_anomalies_evaluation(
     )
     # Set y-axes titles
     fig.update_xaxes(showticklabels=False, row=1, col=1)
+    fig.update_xaxes(title="MinMax-scaled Anomaly Scores", row=2, col=1)
     fig.update_yaxes(
         title_text="ECDF - probability", row=2, col=1, secondary_y=False, range=[0, 1.1]
     )
