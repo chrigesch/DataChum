@@ -80,6 +80,9 @@ class anomaly_detection_cross_validation:
                 X_train_prep = self.pipeline.fit_transform(X_train)
                 X_val_prep = self.pipeline.transform(X_val)
                 # Fit a anomaly detection model on the train data and make predictions for it
+                # Use: Kriegel, H.-P., Kroger, P., Schubert, E., & Zimek, A. (2011). Interpreting and Unifying Outlier
+                # Scores. Proceedings of the 2011 SIAM International Conference on Data Mining, 13-24.
+                # https://doi.org/10.1137/1.9781611972818.2
                 y_train = anomaly_detection_model.fit(X_train_prep).predict_proba(
                     X_train_prep,
                     method="unify",
