@@ -353,7 +353,9 @@ def compute_average_treatment_effect(
     )
     # Apply preprocessing to data (everything but the model)
     observations = pd.DataFrame(
-        pipeline[:-1].transform(X), columns=col_names_without_prefix
+        pipeline[:-1].transform(X),
+        columns=col_names_without_prefix,
+        index=X.index,
     )
     # Initiate variables to collect results
     feature_name = []
