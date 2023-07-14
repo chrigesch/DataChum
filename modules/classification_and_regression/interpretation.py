@@ -23,7 +23,11 @@ def partial_dependence_plot(feature, pipeline, X, frac_ice: float):
         pipeline, includes_model=True
     )
     # Apply preprocessing to data (everything but the model)
-    X_prep = pd.DataFrame(pipeline[:-1].transform(X), columns=col_names_without_prefix)
+    X_prep = pd.DataFrame(
+        pipeline[:-1].transform(X),
+        columns=col_names_without_prefix,
+        index=X.index,
+    )
     # Define maximum number of columns, instantiate subplots and set titles
     if len(feature) < 2:
         max_columns = 1
@@ -91,7 +95,11 @@ def compute_shap_values_agnostic(pipeline, X, n_samples: int, operation: bool):
         pipeline, includes_model=True
     )
     # Apply preprocessing to data (everything but the model)
-    X_prep = pd.DataFrame(pipeline[:-1].transform(X), columns=col_names_without_prefix)
+    X_prep = pd.DataFrame(
+        pipeline[:-1].transform(X),
+        columns=col_names_without_prefix,
+        index=X.index,
+    )
     # Set the explainer (model is the last element of the pipeline)
     if operation == "regression":
         explainer = shap.explainers.Permutation(pipeline[-1].predict, X_prep)
@@ -110,7 +118,11 @@ def compute_shap_values_tree(pipeline, X: iter):
         pipeline, includes_model=True
     )
     # Apply preprocessing to data (everything but the model)
-    X_prep = pd.DataFrame(pipeline[:-1].transform(X), columns=col_names_without_prefix)
+    X_prep = pd.DataFrame(
+        pipeline[:-1].transform(X),
+        columns=col_names_without_prefix,
+        index=X.index,
+    )
     # Set the model: the last element of the pipeline
     explainer = fasttreeshap.TreeExplainer(
         pipeline[-1], n_jobs=-1
@@ -341,7 +353,9 @@ def compute_average_treatment_effect(
     )
     # Apply preprocessing to data (everything but the model)
     observations = pd.DataFrame(
-        pipeline[:-1].transform(X), columns=col_names_without_prefix
+        pipeline[:-1].transform(X),
+        columns=col_names_without_prefix,
+        index=X.index,
     )
     # Initiate variables to collect results
     feature_name = []

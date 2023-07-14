@@ -11,8 +11,32 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
+import streamlit as st
 
 
+@st.cache_data(ttl=3600, max_entries=10)
+def line_plot(
+    data: pd.DataFrame,
+    x: str,
+    y: str,
+    traces: str,
+    color: str,
+):
+    list_colors = get_color(color, len(data[traces].unique()))
+
+    fig_variable = px.line(
+        data,
+        x=x,
+        y=y,
+        color=traces,
+        color_discrete_sequence=list_colors,
+    )
+
+    fig_variable.update_layout(xaxis_type="category", showlegend=True)
+    return fig_variable
+
+
+@st.cache_data(ttl=3600, max_entries=10)
 def plot_anomalies_evaluation(
     outlier_scores,
     name_model: str,
@@ -66,6 +90,7 @@ def plot_anomalies_evaluation(
 ######################################
 
 
+@st.cache_data(ttl=3600, max_entries=10)
 def get_anomaly_scores_and_data_prep(
     data: pd.DataFrame,
     imputation_numerical: str,
@@ -101,11 +126,17 @@ def get_anomaly_scores_and_data_prep(
         models=[anomaly_detection_model]
     )
     anomaly_scores_min_max = (
-        anomaly_detection_model_list[0][1].fit(data_prep).predict_proba(data_prep)[:, 1]
+        anomaly_detection_model_list[0][1]
+        .fit(data_prep)
+        .predict_proba(
+            data_prep,
+            method="linear",
+        )[:, 1]
     )
     return anomaly_scores_min_max, data_prep
 
 
+@st.cache_data(ttl=3600, max_entries=10)
 def select_cases_for_line_plot(
     data_prep: pd.DataFrame,
     anomaly_scores: np.array,
