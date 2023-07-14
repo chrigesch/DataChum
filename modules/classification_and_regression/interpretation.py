@@ -118,7 +118,11 @@ def compute_shap_values_tree(pipeline, X: iter):
         pipeline, includes_model=True
     )
     # Apply preprocessing to data (everything but the model)
-    X_prep = pd.DataFrame(pipeline[:-1].transform(X), columns=col_names_without_prefix)
+    X_prep = pd.DataFrame(
+        pipeline[:-1].transform(X),
+        columns=col_names_without_prefix,
+        index=X.index,
+    )
     # Set the model: the last element of the pipeline
     explainer = fasttreeshap.TreeExplainer(
         pipeline[-1], n_jobs=-1
