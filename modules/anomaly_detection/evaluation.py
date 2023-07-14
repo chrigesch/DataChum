@@ -11,8 +11,10 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
+import streamlit as st
 
 
+@st.cache_data(ttl=3600, max_entries=10)
 def line_plot(
     data: pd.DataFrame,
     x: str,
@@ -34,6 +36,7 @@ def line_plot(
     return fig_variable
 
 
+@st.cache_data(ttl=3600, max_entries=10)
 def plot_anomalies_evaluation(
     outlier_scores,
     name_model: str,
@@ -87,6 +90,7 @@ def plot_anomalies_evaluation(
 ######################################
 
 
+@st.cache_data(ttl=3600, max_entries=10)
 def get_anomaly_scores_and_data_prep(
     data: pd.DataFrame,
     imputation_numerical: str,
@@ -132,6 +136,7 @@ def get_anomaly_scores_and_data_prep(
     return anomaly_scores_min_max, data_prep
 
 
+@st.cache_data(ttl=3600, max_entries=10)
 def select_cases_for_line_plot(
     data_prep: pd.DataFrame,
     anomaly_scores: np.array,
