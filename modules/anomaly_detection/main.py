@@ -81,11 +81,13 @@ class anomaly_detection_cross_validation:
                 X_val_prep = self.pipeline.transform(X_val)
                 # Fit a anomaly detection model on the train data and make predictions for it
                 y_train = anomaly_detection_model.fit(X_train_prep).predict_proba(
-                    X_train_prep
+                    X_train_prep,
+                    method="unify",
                 )[:, 1]
                 # Fit a anomay detection model on the validation data and make predictions for it
                 y_val = anomaly_detection_model.fit(X_val_prep).predict_proba(
-                    X_val_prep
+                    X_val_prep,
+                    method="unify",
                 )[:, 1]
                 # Fit the prediction model on the "complete" train data
                 prediction_model = regression_models_to_tune(
