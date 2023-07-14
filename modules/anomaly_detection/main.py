@@ -85,12 +85,12 @@ class anomaly_detection_cross_validation:
                 # https://doi.org/10.1137/1.9781611972818.2
                 y_train = anomaly_detection_model.fit(X_train_prep).predict_proba(
                     X_train_prep,
-                    method="unify",
+                    method="linear",
                 )[:, 1]
                 # Fit a anomay detection model on the validation data and make predictions for it
                 y_val = anomaly_detection_model.fit(X_val_prep).predict_proba(
                     X_val_prep,
-                    method="unify",
+                    method="linear",
                 )[:, 1]
                 # Fit the prediction model on the "complete" train data
                 prediction_model = regression_models_to_tune(

@@ -105,7 +105,7 @@ def get_anomaly_scores_and_data_prep(
         .fit(data_prep)
         .predict_proba(
             data_prep,
-            method="unify",
+            method="linear",
         )[:, 1]
     )
     return anomaly_scores_min_max, data_prep
