@@ -101,7 +101,12 @@ def get_anomaly_scores_and_data_prep(
         models=[anomaly_detection_model]
     )
     anomaly_scores_min_max = (
-        anomaly_detection_model_list[0][1].fit(data_prep).predict_proba(data_prep)[:, 1]
+        anomaly_detection_model_list[0][1]
+        .fit(data_prep)
+        .predict_proba(
+            data_prep,
+            method="unify",
+        )[:, 1]
     )
     return anomaly_scores_min_max, data_prep
 
