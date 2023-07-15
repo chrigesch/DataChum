@@ -691,7 +691,24 @@ def main():
             # Tab 3: Plot Scores
             with tab_e1_3:
                 # Create two columns: to select a model and to display it)
-                col_ep_1_1, col_ep_1_2 = st.columns([1, 3])
+                col_ps_1_1, col_ps_1_2 = st.columns([1, 3])
+                with col_ps_1_1:
+                    selectbox_scores = st.selectbox(
+                        label="**Select which scores to plot**",
+                        options=["Cross-validation", "Test"],
+                        index=0,
+                        key="col_ps_1_1_selectbox_1",
+                    )
+                    selectbox_evaluation_metric = st.selectbox(
+                        label="**Select the evaluation metric to be plotted**",
+                        options=[
+                            value
+                            for value in scores_cv_df.columns.to_list()
+                            if value not in ["model", "time"]
+                        ],
+                        index=0,
+                        key="col_ps_1_1_selectbox_2",
+                    )
 
             # Tab 4: Evaluation
             with tab_e1_4:
