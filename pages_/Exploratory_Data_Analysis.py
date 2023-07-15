@@ -914,18 +914,18 @@ def main():
                         associations_df, height=((len(associations_df) + 1) * 35 + 3)
                     )
 
-        # Tab 5: 'Bivariate Analysis'
+        # Tab 6: 'Bivariate Analysis'
         if 1 < len(cols_cat_and_num):
-            with tab_5:
+            with tab_6:
                 # Create two columns
-                col_5_1, col_5_2 = st.columns([1, 1])
-                with col_5_1:
+                col_6_1, col_6_2 = st.columns([1, 1])
+                with col_6_1:
                     selectbox_target = st.selectbox(
                         label="Select the target variable",
                         options=cols_cat_and_num,
                         index=0,
                     )
-                with col_5_2:
+                with col_6_2:
                     available_features = [
                         value for value in cols_cat_and_num if value != selectbox_target
                     ]
@@ -933,8 +933,8 @@ def main():
                         label="Select a feature", options=available_features, index=0
                     )
                 # Create two columns
-                col_5_1, col_5_2 = st.columns([1, 4])
-                with col_5_1:
+                col_6_1, col_6_2 = st.columns([1, 4])
+                with col_6_1:
                     st.markdown("**Plotting Options**")
                     selectbox_variable_color = st.selectbox(
                         label="**Select a color scale**",
@@ -958,18 +958,18 @@ def main():
                             index=0,
                         )
                 # Plots
-                with col_5_2:
+                with col_6_2:
                     # CAT & CAT
                     if (selectbox_target in cols_cat) & (selectbox_feature in cols_cat):
                         # Create tabs for plots
-                        tab_5_1, tab_5_2, tab_5_3 = st.tabs(
+                        tab_6_1, tab_6_2, tab_6_3 = st.tabs(
                             [
                                 "Grouped Bar Plot",
                                 "Stacked Bar Plot",
                                 "100% Stacked Bar Plot",
                             ]
                         )
-                        with tab_5_1:
+                        with tab_6_1:
                             # Create plot
                             fig_variable = plot_cat_cat(
                                 data=data,
@@ -984,7 +984,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_2:
+                        with tab_6_2:
                             # Create plot
                             fig_variable = plot_cat_cat(
                                 data=data,
@@ -999,7 +999,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_3:
+                        with tab_6_3:
                             # Create plot
                             fig_variable = plot_cat_cat(
                                 data=data,
@@ -1019,10 +1019,10 @@ def main():
                         selectbox_feature in cols_num
                     ):
                         # Create tabs for plots
-                        tab_5_1, tab_5_2, tab_5_3 = st.tabs(
+                        tab_6_1, tab_6_2, tab_6_3 = st.tabs(
                             ["OLS trendline", "LOWESS trendline", "None"]
                         )
-                        with tab_5_1:
+                        with tab_6_1:
                             fig_variable = plot_num_num(
                                 data=data,
                                 target=selectbox_target,
@@ -1039,7 +1039,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_2:
+                        with tab_6_2:
                             fig_variable = plot_num_num(
                                 data=data,
                                 target=selectbox_target,
@@ -1056,7 +1056,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_3:
+                        with tab_6_3:
                             fig_variable = plot_num_num(
                                 data=data,
                                 target=selectbox_target,
@@ -1094,14 +1094,14 @@ def main():
                         # Create tabs for plots
                         if distinct_values > 3:
                             (
-                                tab_5_1,
-                                tab_5_2,
-                                tab_5_3,
-                                tab_5_4,
-                                tab_5_5,
-                                tab_5_6,
-                                tab_5_7,
-                                tab_5_8,
+                                tab_6_1,
+                                tab_6_2,
+                                tab_6_3,
+                                tab_6_4,
+                                tab_6_5,
+                                tab_6_6,
+                                tab_6_7,
+                                tab_6_8,
                             ) = st.tabs(
                                 [
                                     "Bar Plot",
@@ -1115,7 +1115,13 @@ def main():
                                 ]
                             )
                         else:
-                            tab_5_1, tab_5_2, tab_5_3, tab_5_4, tab_5_5 = st.tabs(
+                            (
+                                tab_6_1,
+                                tab_6_2,
+                                tab_6_3,
+                                tab_6_4,
+                                tab_6_5,
+                            ) = st.tabs(
                                 [
                                     "Bar Plot",
                                     "Box-Plot",
@@ -1124,7 +1130,7 @@ def main():
                                     "Histogram + KDE",
                                 ]
                             )
-                        with tab_5_1:
+                        with tab_6_1:
                             fig_variable = plot_cat(
                                 data=data_for_cat_plots,
                                 var_cat=var_cat,
@@ -1138,7 +1144,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_2:
+                        with tab_6_2:
                             fig_variable = plot_num(
                                 data=data,
                                 var_num=var_num,
@@ -1152,7 +1158,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_3:
+                        with tab_6_3:
                             fig_variable = plot_num(
                                 data=data,
                                 var_num=var_num,
@@ -1166,7 +1172,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_4:
+                        with tab_6_4:
                             fig_variable = plot_num(
                                 data=data,
                                 var_num=var_num,
@@ -1180,7 +1186,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_5:
+                        with tab_6_5:
                             fig_variable = plot_num(
                                 data=data,
                                 var_num=var_num,
@@ -1195,7 +1201,7 @@ def main():
                                 use_container_width=True,
                             )
                         if distinct_values > 3:
-                            with tab_5_6:
+                            with tab_6_6:
                                 fig_variable = plot_cat(
                                     data=data_for_cat_plots,
                                     var_cat=var_cat,
@@ -1209,7 +1215,7 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                            with tab_5_7:
+                            with tab_6_7:
                                 fig_variable = plot_cat(
                                     data=data_for_cat_plots,
                                     var_cat=var_cat,
@@ -1223,7 +1229,7 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                            with tab_5_8:
+                            with tab_6_8:
                                 fig_variable = plot_cat(
                                     data=data_for_cat_plots,
                                     var_cat=var_cat,
