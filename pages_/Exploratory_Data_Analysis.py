@@ -858,9 +858,9 @@ def main():
                 # Create two columns: to select a model and to display it)
                 col_ad_1, col_ad_2 = st.columns([1, 3])
 
-        # Tab 4: 'Associations'
+        # Tab 5: 'Associations'
         if 1 < len(cols_cat_and_num):
-            with tab_4:
+            with tab_5:
                 st.warning(
                     "Calculate the strength-of-association of features in data-set with both, categorical"
                     " and continuous features using: Spearman's R for continuous-continuous cases - Correlation Ratio"
@@ -869,15 +869,15 @@ def main():
                     " A bias-correction for Cramér's and Tschuprow's. Journal of the Korean Statistical Society, 42(3),"
                     " 323-328. https://doi.org/10.1016/j.jkss.2012.10.002"
                 )
-                tab_4_1, tab_4_2 = st.tabs(["Heatmap", "Association matrix"])
+                tab_5_1, tab_5_2 = st.tabs(["Heatmap", "Association matrix"])
                 # Heatmap
-                with tab_4_1:
+                with tab_5_1:
                     # Create two columns
                     selectbox_associations_color = st.selectbox(
                         label="Select a color scale",
                         options=list(AVAILABLE_COLORS_DIVERGING.keys()),
                         index=0,
-                        key="tab_4",
+                        key="tab_5",
                     )
                     # Create a mask for the association matrix and plot the Heatmap
                     mask = np.triu(np.ones_like(associations_df, dtype=bool))
@@ -892,17 +892,17 @@ def main():
                         fig_correlation, theme="streamlit", use_container_width=True
                     )
                 # Association matrix
-                with tab_4_2:
+                with tab_5_2:
                     # Create two columns
-                    col_4_2_1, col_4_2_2 = st.columns([1, 3])
-                    with col_4_2_1:
+                    col_5_2_1, col_5_2_2 = st.columns([1, 3])
+                    with col_5_2_1:
                         st.download_button(
                             label="Download associations as CSV",
                             data=convert_dataframe_to_csv(associations_df),
                             file_name="associations.csv",
                             mime="text/csv'",
                         )
-                    with col_4_2_2:
+                    with col_5_2_2:
                         st.download_button(
                             label="Download associations as XLSX",
                             data=convert_dataframe_to_xlsx(associations_df),
