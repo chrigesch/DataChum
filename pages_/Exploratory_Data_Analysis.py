@@ -86,8 +86,8 @@ def main():
                 [
                     "Overview",
                     "Univariate Analysis",
-                    "Anomaly Detection",
                     "Missings",
+                    "Anomaly Detection",
                     "Associations",
                     "Bivariate Analysis",
                 ]
