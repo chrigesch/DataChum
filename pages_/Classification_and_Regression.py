@@ -709,6 +709,12 @@ def main():
                         index=0,
                         key="col_ps_1_1_selectbox_2",
                     )
+                    selectbox_color = st.selectbox(
+                        label="**Select a color scale**",
+                        options=AVAILABLE_COLORS_SEQUENTIAL,
+                        index=0,
+                        key="col_ps_1_1_selectbox_3",
+                    )
 
             # Tab 4: Evaluation
             with tab_e1_4:
