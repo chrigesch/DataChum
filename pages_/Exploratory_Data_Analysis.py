@@ -1,5 +1,9 @@
 # Import moduls from local directories
 from assets.colors import AVAILABLE_COLORS_DIVERGING, AVAILABLE_COLORS_SEQUENTIAL
+from modules.anomaly_detection.evaluation import (
+    get_anomaly_scores_and_data_prep,
+    plot_anomalies_evaluation,
+)
 from modules.anomaly_detection.models import AVAILABLE_MODELS_ANOMALY_DETECTION
 from modules.classification_and_regression.cv_workflow import (
     AVAILABLE_SCORES_CLASSIFICATION,
@@ -928,6 +932,27 @@ def main():
                             options=AVAILABLE_COLORS_SEQUENTIAL,
                             index=0,
                             key="tab_4_color",
+                        )
+                with col_ad_2:
+                    if selectradio_procedure == "Standart Anomaly Detection":
+                        (
+                            anomaly_scores_min_max,
+                            data_prep,
+                        ) = get_anomaly_scores_and_data_prep(
+                            data=data,
+                            imputation_numerical=selectbox_imput_num,
+                            imputation_categorical=selectbox_imput_cat,
+                            scaler=selectbox_scaler,
+                            anomaly_detection_model=selectbox_anomaly_detection_model,
+                        )
+
+                        fig_anomaly = plot_anomalies_evaluation(
+                            anomaly_scores_min_max,
+                            name_model=selectbox_anomaly_detection_model,
+                            color=selectbox_color,
+                        )
+                        st.plotly_chart(
+                            fig_anomaly, theme="streamlit", use_container_width=True
                         )
 
         # Tab 5: 'Associations'
