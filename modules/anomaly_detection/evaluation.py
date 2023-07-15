@@ -133,7 +133,7 @@ def get_anomaly_scores_and_data_prep(
             method="linear",
         )[:, 1]
     )
-    return anomaly_scores_min_max, data_prep
+    return pd.Series(anomaly_scores_min_max, name="anomaly_score"), data_prep
 
 
 @st.cache_data(ttl=3600, max_entries=10)
