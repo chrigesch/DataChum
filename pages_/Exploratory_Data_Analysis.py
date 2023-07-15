@@ -1243,11 +1243,11 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-        # Tab 6: 'Multivariate Analysis'
+        # Tab 7: 'Multivariate Analysis'
         if 2 < len(cols_num):
-            with tab_6:
+            with tab_7:
                 # Create several tabs:
-                tab_6_1, tab_6_2, tab_6_3, tab_6_4, tab_6_5 = st.tabs(
+                tab_7_1, tab_7_2, tab_7_3, tab_7_4, tab_7_5 = st.tabs(
                     [
                         "Mean Based Plots",
                         "Bubble Chart",
@@ -1256,40 +1256,40 @@ def main():
                         "Manifold Visualization",
                     ]
                 )
-                # Tab 6_1: Mean Based Plots
-                with tab_6_1:
+                # Tab 7_1: Mean Based Plots
+                with tab_7_1:
                     # Create two columns
-                    col_6_1, col_6_2 = st.columns([1, 1])
-                    with col_6_1:
+                    col_7_1, col_7_2 = st.columns([1, 1])
+                    with col_7_1:
                         selectbox_variables = st.multiselect(
                             label="Select the variables",
                             options=cols_num,
                             default=[cols_num[0], cols_num[1]],
                         )
-                    with col_6_2:
+                    with col_7_2:
                         selectbox_grouping_variable = st.selectbox(
                             label="Select a grouping variable",
                             options=[None] + cols_cat,
                             index=1,
                         )
                     # Create two columns
-                    col_6_1, col_6_2 = st.columns([1, 4])
-                    with col_6_1:
+                    col_7_1, col_7_2 = st.columns([1, 4])
+                    with col_7_1:
                         st.markdown("**Plotting Options**")
                         selectbox_variable_color = st.selectbox(
                             label="**Select a color scale**",
                             options=AVAILABLE_COLORS_SEQUENTIAL,
                             index=0,
-                            key="tab_6_1_color",
+                            key="tab_7_1_color",
                         )
                         selectbox_variable_template = st.selectbox(
                             label="**Select a template**",
                             options=AVAILABLE_TEMPLATES,
                             index=0,
-                            key="tab_6_1_template",
+                            key="tab_7_1_template",
                         )
                     # Plots
-                    with col_6_2:
+                    with col_7_2:
                         # Without grouping variable
                         if selectbox_grouping_variable is None:
                             # Create a Dataframe for plots based on NUMERICAL variables
@@ -1298,10 +1298,10 @@ def main():
                             ).reset_index()
                             data_to_be_plotted.columns = ["Variables", "Mean"]
                             # Create tabs for plots
-                            tab_6_1_1, tab_6_1_2, tab_6_1_3 = st.tabs(
+                            tab_7_1_1, tab_7_1_2, tab_7_1_3 = st.tabs(
                                 ["Bar Plot", "Polar Plot", "Treemap"]
                             )
-                            with tab_6_1_1:
+                            with tab_7_1_1:
                                 fig_variable = plot_cat(
                                     data=data_to_be_plotted.sort_values(
                                         by="Mean", ascending=False
@@ -1317,7 +1317,7 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                            with tab_6_1_2:
+                            with tab_7_1_2:
                                 fig_variable = plot_cat(
                                     data=data_to_be_plotted.sort_values(
                                         by="Mean", ascending=False
@@ -1333,7 +1333,7 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                            with tab_6_1_3:
+                            with tab_7_1_3:
                                 fig_variable = plot_cat(
                                     data=data_to_be_plotted.sort_values(
                                         by="Mean", ascending=False
@@ -1351,14 +1351,14 @@ def main():
                                 )
                         else:
                             # Create tabs for plots
-                            tab_6_1_1, tab_6_1_2, tab_6_1_3 = st.tabs(
+                            tab_7_1_1, tab_7_1_2, tab_7_1_3 = st.tabs(
                                 [
                                     "Grouped Bar Plot",
                                     "Stacked Bar Plot",
                                     "100% Stacked Bar Plot",
                                 ]
                             )
-                            with tab_6_1_1:
+                            with tab_7_1_1:
                                 # Create plot
                                 fig_variable = plot_num_with_grouping_variable(
                                     data=data,
@@ -1373,7 +1373,7 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                            with tab_6_1_2:
+                            with tab_7_1_2:
                                 # Create plot
                                 fig_variable = plot_num_with_grouping_variable(
                                     data=data,
@@ -1388,7 +1388,7 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                            with tab_6_1_3:
+                            with tab_7_1_3:
                                 # Create plot
                                 fig_variable = plot_num_with_grouping_variable(
                                     data=data,
@@ -1403,16 +1403,16 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                # Tab 6_2: Bubble Chart
-                with tab_6_2:
+                # Tab 7_2: Bubble Chart
+                with tab_7_2:
                     # Create two columns
-                    col_6_1, col_6_2 = st.columns([1, 1])
-                    with col_6_1:
+                    col_7_1, col_7_2 = st.columns([1, 1])
+                    with col_7_1:
                         selectbox_x_axis = st.selectbox(
                             label="Select the variable to be plotted on the x-axis",
                             options=cols_num,
                         )
-                    with col_6_2:
+                    with col_7_2:
                         available_for_y_axis = [
                             value for value in cols_num if value != selectbox_x_axis
                         ]
@@ -1422,8 +1422,8 @@ def main():
                             index=0,
                         )
                     # Create two columns
-                    col_6_1, col_6_2 = st.columns([1, 4])
-                    with col_6_1:
+                    col_7_1, col_7_2 = st.columns([1, 4])
+                    with col_7_1:
                         available_for_size = [
                             value
                             for value in available_for_y_axis
@@ -1455,16 +1455,16 @@ def main():
                             label="**Select a color scale**",
                             options=AVAILABLE_COLORS_SEQUENTIAL,
                             index=0,
-                            key="tab_6_2_color",
+                            key="tab_7_2_color",
                         )
                         selectbox_variable_template = st.selectbox(
                             label="**Select a template**",
                             options=AVAILABLE_TEMPLATES,
                             index=0,
-                            key="tab_6_2_template",
+                            key="tab_7_2_template",
                         )
                     # Plots
-                    with col_6_2:
+                    with col_7_2:
                         fig_variable = plot_bubble_chart(
                             data,
                             x=selectbox_x_axis,
@@ -1478,15 +1478,15 @@ def main():
                         st.plotly_chart(
                             fig_variable, theme="streamlit", use_container_width=True
                         )
-                # Tab 6_3: Random Feature Dropping
-                with tab_6_3:
+                # Tab 7_3: Random Feature Dropping
+                with tab_7_3:
                     # Create two columns
-                    col_6_1, col_6_2 = st.columns([1, 4])
-                    with col_6_1:
+                    col_7_1, col_7_2 = st.columns([1, 4])
+                    with col_7_1:
                         selectbox_target = st.selectbox(
                             label="Select the target variable",
                             options=cols_cat_and_num,
-                            key="tab_6_3_rfd",
+                            key="tab_7_3_rfd",
                         )
                         # Initiate 'operation' and 'evaluation_score_options'
                         if selectbox_target in cols_cat:
@@ -1537,26 +1537,26 @@ def main():
                                     cv_folds=selectbox_n_cv_folds,
                                 )
                             )
-                    with col_6_2:
+                    with col_7_2:
                         if st.session_state.fig_rfdc is not None:
                             components.html(
                                 st.session_state.fig_rfdc,
                                 height=600,
                             )
 
-                # Tab 6_4: PCA Proyection
-                with tab_6_4:
+                # Tab 7_4: PCA Proyection
+                with tab_7_4:
                     # Create a PCA instance
                     selectbox_target = st.selectbox(
                         label="**Select the target variable**",
                         options=cols_cat_and_num,
-                        key="tab_6_4_pca",
+                        key="tab_7_4_pca",
                     )
                     pca_instance = principal_component_analysis(
                         data=data, target_variable=selectbox_target
                     )
                     # Create tabs for plots
-                    tab_6_4_1, tab_6_4_2, tab_6_4_3, tab_6_4_4, tab_6_4_5 = st.tabs(
+                    tab_7_4_1, tab_7_4_2, tab_7_4_3, tab_7_4_4, tab_7_4_5 = st.tabs(
                         [
                             "PCA plot - 2D",
                             "PCA plot - 3D",
@@ -1566,24 +1566,24 @@ def main():
                         ]
                     )
                     # PCA plot - 2D
-                    with tab_6_4_1:
+                    with tab_7_4_1:
                         # Create two columns
-                        col_6_1, col_6_2 = st.columns([1, 4])
-                        with col_6_1:
+                        col_7_1, col_7_2 = st.columns([1, 4])
+                        with col_7_1:
                             st.markdown("**Plotting Options**")
                             selectbox_variable_color = st.selectbox(
                                 label="**Select a color scale**",
                                 options=AVAILABLE_COLORS_SEQUENTIAL,
                                 index=0,
-                                key="tab_6_4_1_color",
+                                key="tab_7_4_1_color",
                             )
                             selectbox_variable_template = st.selectbox(
                                 label="**Select a template**",
                                 options=AVAILABLE_TEMPLATES,
                                 index=0,
-                                key="tab_6_4_1_template",
+                                key="tab_7_4_1_template",
                             )
-                        with col_6_2:
+                        with col_7_2:
                             exp_var_pc_1 = (
                                 pca_instance.data_explained_variances["explained"][0]
                                 * 100
@@ -1607,24 +1607,24 @@ def main():
                                 use_container_width=True,
                             )
                     # PCA plot - 3D
-                    with tab_6_4_2:
+                    with tab_7_4_2:
                         # Create two columns
-                        col_6_1, col_6_2 = st.columns([1, 4])
-                        with col_6_1:
+                        col_7_1, col_7_2 = st.columns([1, 4])
+                        with col_7_1:
                             st.markdown("**Plotting Options**")
                             selectbox_variable_color = st.selectbox(
                                 label="**Select a color scale**",
                                 options=AVAILABLE_COLORS_SEQUENTIAL,
                                 index=0,
-                                key="tab_6_4_2_color",
+                                key="tab_7_4_2_color",
                             )
                             selectbox_variable_template = st.selectbox(
                                 label="**Select a template**",
                                 options=AVAILABLE_TEMPLATES,
                                 index=0,
-                                key="tab_6_4_2_template",
+                                key="tab_7_4_2_template",
                             )
-                        with col_6_2:
+                        with col_7_2:
                             exp_var_pc_1 = (
                                 pca_instance.data_explained_variances["explained"][0]
                                 * 100
@@ -1653,24 +1653,24 @@ def main():
                                 use_container_width=True,
                             )
                     # Explained Variance Plot
-                    with tab_6_4_3:
+                    with tab_7_4_3:
                         # Create two columns
-                        col_6_1, col_6_2 = st.columns([1, 4])
-                        with col_6_1:
+                        col_7_1, col_7_2 = st.columns([1, 4])
+                        with col_7_1:
                             st.markdown("**Plotting Options**")
                             selectbox_variable_color = st.selectbox(
                                 label="**Select a color scale**",
                                 options=AVAILABLE_COLORS_SEQUENTIAL,
                                 index=0,
-                                key="tab_6_4_3_color",
+                                key="tab_7_4_3_color",
                             )
                             selectbox_variable_template = st.selectbox(
                                 label="**Select a template**",
                                 options=AVAILABLE_TEMPLATES,
                                 index=0,
-                                key="tab_6_4_3_template",
+                                key="tab_7_4_3_template",
                             )
-                        with col_6_2:
+                        with col_7_2:
                             # Compute a DataFrame for the 'Explained Variance Plot'
                             data_for_explained_variance_plot = pd.melt(
                                 pca_instance.data_explained_variances,
@@ -1698,21 +1698,21 @@ def main():
                             ),
                         )
                     # Loadings Matrix
-                    with tab_6_4_4:
+                    with tab_7_4_4:
                         # Create two tabs:
-                        tab_6_4_4_1, tab_6_4_4_2 = st.tabs(["Heatmap", "DataFrame"])
-                        with tab_6_4_4_1:
+                        tab_7_4_4_1, tab_7_4_4_2 = st.tabs(["Heatmap", "DataFrame"])
+                        with tab_7_4_4_1:
                             # Create two columns
-                            col_6_1, col_6_2 = st.columns([1, 4])
-                            with col_6_1:
+                            col_7_1, col_7_2 = st.columns([1, 4])
+                            with col_7_1:
                                 st.markdown("**Plotting Options**")
                                 selectbox_associations_color = st.selectbox(
                                     label="Select a color scale",
                                     options=list(AVAILABLE_COLORS_DIVERGING.keys()),
                                     index=0,
-                                    key="tab_6_4_4",
+                                    key="tab_7_4_4",
                                 )
-                            with col_6_2:
+                            with col_7_2:
                                 fig_correlation = plot_heatmap(
                                     associations=pca_instance.data_weights,
                                     color=selectbox_associations_color,
@@ -1724,16 +1724,16 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                        with tab_6_4_4_2:
+                        with tab_7_4_4_2:
                             st.dataframe(
                                 pca_instance.data_weights,
                                 height=((len(pca_instance.data_weights) + 1) * 35 + 3),
                             )
                     # Transformed Data
-                    with tab_6_4_5:
+                    with tab_7_4_5:
                         # Create two columns
-                        col_6_1_1, col_6_1_2 = st.columns([1, 3])
-                        with col_6_1_1:
+                        col_7_1_1, col_7_1_2 = st.columns([1, 3])
+                        with col_7_1_1:
                             data_pca_csv = convert_dataframe_to_csv(
                                 pca_instance.data_pca
                             )
@@ -1743,7 +1743,7 @@ def main():
                                 file_name="data_pca.csv",
                                 mime="text/csv'",
                             )
-                        with col_6_1_2:
+                        with col_7_1_2:
                             data_pca_xlsx = convert_dataframe_to_xlsx(
                                 pca_instance.data_pca
                             )
@@ -1758,15 +1758,15 @@ def main():
                             height=((len(pca_instance.data_pca) + 1) * 35 + 3),
                         )
 
-                # Tab 6_5: Manifold
-                with tab_6_5:
+                # Tab 7_5: Manifold
+                with tab_7_5:
                     # Create two columns
-                    col_6_1, col_6_2 = st.columns([1, 4])
-                    with col_6_1:
+                    col_7_1, col_7_2 = st.columns([1, 4])
+                    with col_7_1:
                         selectbox_target = st.selectbox(
                             label="Select the target variable",
                             options=cols_cat_and_num,
-                            key="tab_6_5_mani",
+                            key="tab_7_5_mani",
                         )
                         selectbox_manifold = st.selectbox(
                             label="Select the manifold implementation",
@@ -1801,7 +1801,7 @@ def main():
                                 manifold=selectbox_manifold,
                                 n_neighbors=selectbox_n_neighbors,
                             )
-                    with col_6_2:
+                    with col_7_2:
                         if st.session_state.fig_manifold is not None:
                             components.html(st.session_state.fig_manifold, height=600)
 
