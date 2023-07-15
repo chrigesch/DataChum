@@ -216,7 +216,7 @@ def eda_overview_detailed(
                 + "{0:.0f}".format(number_of_outliers)
                 + " observations that are more than "
                 + "{0:.1f}".format(treshold_univariate_outliers)
-                + " Median Absolute Deviations (MAD) away from the mean"
+                + " Median Absolute Deviations (MAD) away from the median"
             )
 
     # Alerts that are only valid for DATETIME variables
