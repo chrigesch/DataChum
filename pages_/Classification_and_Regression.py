@@ -446,10 +446,11 @@ def main():
         if st.session_state.cv_instance is not None:
             st.subheader("**Model Evaluation**")
             # Create three tabs
-            tab_e1_1, tab_e1_2, tab_e1_3, tab_e1_4 = st.tabs(
+            tab_e1_1, tab_e1_2, tab_e1_3, tab_e1_4, tab_e1_5 = st.tabs(
                 [
                     "**Cross-validation Scores**",
                     "**Test Scores**",
+                    "**Plot Scores**",
                     "**Evaluation**",
                     "**Interpretation**",
                 ]
