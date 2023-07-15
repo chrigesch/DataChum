@@ -45,6 +45,7 @@ from modules.classification_and_regression.main import (
     k_fold_cross_validation,
     nested_k_fold_cross_validation,
 )
+from modules.exploratory_data_analysis.univariate_and_bivariate import plot_num
 from modules.utils.load_and_save_data import (
     convert_dataframe_to_csv,
     convert_dataframe_to_xlsx,
@@ -715,6 +716,21 @@ def main():
                         index=0,
                         key="col_ps_1_1_selectbox_3",
                     )
+                with col_ps_1_2:
+                    if selectbox_scores == "Cross-validation":
+                        fig_variable = plot_num(
+                            data=scores_cv_df,
+                            var_num=selectbox_evaluation_metric,
+                            var_cat="model",
+                            plot_type="Box-Plot",
+                            color=selectbox_color,
+                            template="plotly_white",
+                        )
+                        st.plotly_chart(
+                            fig_variable,
+                            theme="streamlit",
+                            use_container_width=True,
+                        )
 
             # Tab 4: Evaluation
             with tab_e1_4:
