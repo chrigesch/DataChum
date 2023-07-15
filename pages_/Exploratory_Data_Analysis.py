@@ -2,7 +2,9 @@
 from assets.colors import AVAILABLE_COLORS_DIVERGING, AVAILABLE_COLORS_SEQUENTIAL
 from modules.anomaly_detection.evaluation import (
     get_anomaly_scores_and_data_prep,
+    line_plot,
     plot_anomalies_evaluation,
+    select_cases_for_line_plot,
 )
 from modules.anomaly_detection.models import AVAILABLE_MODELS_ANOMALY_DETECTION
 from modules.classification_and_regression.cv_workflow import (
@@ -953,6 +955,27 @@ def main():
                         )
                         st.plotly_chart(
                             fig_anomaly, theme="streamlit", use_container_width=True
+                        )
+                        # Find the three highest anomaly scores to be plotted and select cases
+                        three_highest = np.sort(anomaly_scores_min_max)[-3]
+                        threshold_to_be_plotted = st.slider(
+                            "**Select the cutoff value to be plotted",
+                            0,
+                            1,
+                            three_highest,
+                        )
+                        selected_cases = select_cases_for_line_plot(
+                            data_prep=data_prep,
+                            anomaly_scores=anomaly_scores_min_max,
+                            threshold=threshold_to_be_plotted,
+                        )
+
+                        line_plot(
+                            data=selected_cases,
+                            x="variable",
+                            y="value",
+                            traces="index",
+                            color=selectbox_color,
                         )
 
         # Tab 5: 'Associations'
