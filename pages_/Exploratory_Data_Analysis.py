@@ -852,6 +852,12 @@ def main():
                                         theme="streamlit",
                                         use_container_width=True,
                                     )
+        # Tab 4: 'Anomaly Detection'
+        if 1 < len(cols_cat_and_num):
+            with tab_4:
+                # Create two columns: to select a model and to display it)
+                col_ad_1, col_ad_2 = st.columns([1, 3])
+
         # Tab 4: 'Associations'
         if 1 < len(cols_cat_and_num):
             with tab_4:
