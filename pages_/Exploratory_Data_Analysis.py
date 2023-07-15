@@ -1,9 +1,11 @@
 # Import moduls from local directories
 from assets.colors import AVAILABLE_COLORS_DIVERGING, AVAILABLE_COLORS_SEQUENTIAL
+from modules.anomaly_detection.models import AVAILABLE_MODELS_ANOMALY_DETECTION
 from modules.classification_and_regression.cv_workflow import (
     AVAILABLE_SCORES_CLASSIFICATION,
     AVAILABLE_SCORES_REGRESSION,
 )
+from modules.classification_and_regression.models import AVAILABLE_MODELS_REGRESSION
 from modules.exploratory_data_analysis.associations import (
     associations_for_categorical_and_numerical_variables,
     plot_heatmap,
@@ -35,6 +37,11 @@ from modules.utils.load_and_save_data import (
     convert_dataframe_to_csv,
     read_csv,
     read_xlsx,
+)
+from modules.utils.preprocessing import (
+    AVAILABLE_IMPUTATION_CATEGORICAL,
+    AVAILABLE_IMPUTATION_NUMERICAL,
+    AVAILABLE_SCALER,
 )
 
 # Import the required libraries
@@ -857,6 +864,71 @@ def main():
             with tab_4:
                 # Create two columns: to select a model and to display it)
                 col_ad_1, col_ad_2 = st.columns([1, 3])
+                with col_ad_1:
+                    selectradio_procedure = st.radio(
+                        label="**Select the procedure**",
+                        options=[
+                            "Standart Anomaly Detection",
+                            "Anomaly Detection using prediction-based k-fold cross-validation method",
+                        ],
+                        index=0,
+                        help="**ATTENTION:** This is an adaption of the prediction-based resampling method"
+                        " used for **Cluster Analysis**. Unlike this method, MinMax-scaled anomaly scores are used,"
+                        " and due to the quantitative nature of these, a regression model is used"
+                        " to make predictions.  \n"
+                        " **For more information of the prediction-based resampling method, see:** Dudoit, S.,"
+                        " & Fridlyand, J. (2002). A prediction-based resampling method for estimating the number"
+                        " of clusters in a dataset. Genome Biology, 3(7), 1-21.",
+                    )
+                    if selectradio_procedure == "Standart Anomaly Detection":
+                        selectbox_anomaly_detection_model = st.selectbox(
+                            label="**Select the anomaly detector**",
+                            options=AVAILABLE_MODELS_ANOMALY_DETECTION,
+                            index=4,
+                        )
+                    else:
+                        selectbox_anomaly_detection_models = st.multiselect(
+                            label="**Select the anomaly detector(s)**",
+                            options=AVAILABLE_MODELS_ANOMALY_DETECTION,
+                            default=["ECOD", "Iforest"],
+                        )
+                        selectbox_n_inner_cv_reps = st.selectbox(
+                            label="**Select the number of times cross-validator needs to be repeated**",
+                            options=range(1, 11, 1),
+                            index=4,
+                        )
+                        selectbox_n_inner_cv_folds = st.selectbox(
+                            label="**Select the number of folds**",
+                            options=range(5, 11, 1),
+                            index=5,
+                        )
+                        selectbox_regression_model = st.selectbox(
+                            label="**Select the regression model to use for predictions**",
+                            options=AVAILABLE_MODELS_REGRESSION,
+                            index=0,
+                        )
+                    selectbox_imput_cat = st.selectbox(
+                        label="**Select the imputation strategy to use for categorical variables**",
+                        options=AVAILABLE_IMPUTATION_CATEGORICAL,
+                        index=0,
+                    )
+                    selectbox_imput_num = st.selectbox(
+                        label="**Select the imputation strategy to use for numerical variables**",
+                        options=AVAILABLE_IMPUTATION_NUMERICAL,
+                        index=0,
+                    )
+                    selectbox_scaler = st.selectbox(
+                        label="**Select the scaling strategy to use for numerical variables**",
+                        options=AVAILABLE_SCALER,
+                        index=4,
+                    )
+                    if selectradio_procedure == "Standart Anomaly Detection":
+                        selectbox_color = st.selectbox(
+                            label="**Select a color scale**",
+                            options=AVAILABLE_COLORS_SEQUENTIAL,
+                            index=0,
+                            key="tab_4_color",
+                        )
 
         # Tab 5: 'Associations'
         if 1 < len(cols_cat_and_num):
