@@ -82,21 +82,23 @@ def main():
                 ["Overview", "Univariate Analysis", "Missings"]
             )
         elif len(cols_cat_and_num) == 2:
-            tab_1, tab_2, tab_3, tab_4, tab_5 = st.tabs(
+            tab_1, tab_2, tab_3, tab_4, tab_5, tab_6 = st.tabs(
                 [
                     "Overview",
                     "Univariate Analysis",
+                    "Anomaly Detection",
                     "Missings",
                     "Associations",
                     "Bivariate Analysis",
                 ]
             )
         else:
-            tab_1, tab_2, tab_3, tab_4, tab_5, tab_6 = st.tabs(
+            tab_1, tab_2, tab_3, tab_4, tab_5, tab_6, tab_7 = st.tabs(
                 [
                     "Overview",
                     "Univariate Analysis",
                     "Missings",
+                    "Anomaly Detection",
                     "Associations",
                     "Bivariate Analysis",
                     "Multivariate Analysis",
