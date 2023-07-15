@@ -45,6 +45,10 @@ from modules.classification_and_regression.main import (
     k_fold_cross_validation,
     nested_k_fold_cross_validation,
 )
+from modules.exploratory_data_analysis.univariate_and_bivariate import (
+    plot_cat,
+    plot_num,
+)
 from modules.utils.load_and_save_data import (
     convert_dataframe_to_csv,
     convert_dataframe_to_xlsx,
@@ -446,10 +450,11 @@ def main():
         if st.session_state.cv_instance is not None:
             st.subheader("**Model Evaluation**")
             # Create three tabs
-            tab_e1_1, tab_e1_2, tab_e1_3, tab_e1_4 = st.tabs(
+            tab_e1_1, tab_e1_2, tab_e1_3, tab_e1_4, tab_e1_5 = st.tabs(
                 [
                     "**Cross-validation Scores**",
                     "**Test Scores**",
+                    "**Plot Scores**",
                     "**Evaluation**",
                     "**Interpretation**",
                 ]
@@ -485,7 +490,7 @@ def main():
                 col_cv_score_2_1, col_cv_score_2_2 = st.columns([2.0, 1.0])
                 # Display cross-validation results
                 with col_cv_score_2_1:
-                    st.markdown("**Grouped by model**")
+                    st.markdown("**Grouped by model - means**")
                     st.dataframe(
                         scores_cv_df.groupby(by="model").mean().style.format("{:.3f}"),
                         height=(
@@ -593,7 +598,7 @@ def main():
                 col_test_score_2_1, col_test_score_2_2 = st.columns([2.0, 1.0])
                 # Display cross-validation results
                 with col_test_score_2_1:
-                    st.markdown("**Grouped by model**")
+                    st.markdown("**Grouped by model - means**")
                     st.dataframe(
                         scores_test_df.groupby(by="model")
                         .mean()
@@ -686,8 +691,80 @@ def main():
                                 ).style.format("{:.3f}"),
                                 use_container_width=False,
                             )
-            # Tab 3: Evaluation
+
+            # Tab 3: Plot Scores
             with tab_e1_3:
+                # Create two columns: to select a model and to display it)
+                col_ps_1_1, col_ps_1_2 = st.columns([1, 3])
+                with col_ps_1_1:
+                    selectbox_scores = st.selectbox(
+                        label="**Select which scores to plot**",
+                        options=["Cross-validation", "Test"],
+                        index=0,
+                        key="col_ps_1_1_selectbox_1",
+                    )
+                    selectbox_evaluation_metric = st.selectbox(
+                        label="**Select the evaluation metric to be plotted**",
+                        options=[
+                            value
+                            for value in scores_cv_df.columns.to_list()
+                            if value not in ["model", "time"]
+                        ],
+                        index=0,
+                        key="col_ps_1_1_selectbox_2",
+                    )
+                    selectbox_color = st.selectbox(
+                        label="**Select a color scale**",
+                        options=AVAILABLE_COLORS_SEQUENTIAL,
+                        index=0,
+                        key="col_ps_1_1_selectbox_3",
+                    )
+                with col_ps_1_2:
+                    if selectbox_scores == "Cross-validation":
+                        fig_variable = plot_num(
+                            data=scores_cv_df,
+                            var_num=selectbox_evaluation_metric,
+                            var_cat="model",
+                            plot_type="Box-Plot",
+                            color=selectbox_color,
+                            template="plotly_white",
+                        )
+                        st.plotly_chart(
+                            fig_variable,
+                            theme="streamlit",
+                            use_container_width=True,
+                        )
+                    elif (selectbox_scores == "Test") & (
+                        st.session_state.cv_instance.procedure == "nested"
+                    ):
+                        fig_variable = plot_num(
+                            data=scores_test_df,
+                            var_num=selectbox_evaluation_metric,
+                            var_cat="model",
+                            plot_type="Box-Plot",
+                            color=selectbox_color,
+                            template="plotly_white",
+                        )
+                        st.plotly_chart(
+                            fig_variable,
+                            theme="streamlit",
+                            use_container_width=True,
+                        )
+                    else:
+                        fig_variable = plot_cat(
+                            data=scores_test_df,
+                            var_cat="model",
+                            var_num=selectbox_evaluation_metric,
+                            plot_type="Bar",
+                            color=selectbox_color,
+                            template="plotly_white",
+                        )
+                        st.plotly_chart(
+                            fig_variable, theme="streamlit", use_container_width=True
+                        )
+
+            # Tab 4: Evaluation
+            with tab_e1_4:
                 # Create two columns: to select a model and to display it)
                 col_ep_1_1, col_ep_1_2 = st.columns([1, 3])
                 # Column 1: Display the available models and select the model to be plotted
@@ -1170,8 +1247,8 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-            # Tab 4: Interpretation
-            with tab_e1_4:
+            # Tab 5: Interpretation
+            with tab_e1_5:
                 # Create two columns: to select a model and to display it)
                 col_ip_1_1, col_ip_1_2 = st.columns([1, 3])
                 # Column 1: Display the available models and select the model to be plotted
