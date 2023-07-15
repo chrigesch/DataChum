@@ -687,8 +687,14 @@ def main():
                                 ).style.format("{:.3f}"),
                                 use_container_width=False,
                             )
-            # Tab 3: Evaluation
+
+            # Tab 3: Plot Scores
             with tab_e1_3:
+                # Create two columns: to select a model and to display it)
+                col_ep_1_1, col_ep_1_2 = st.columns([1, 3])
+
+            # Tab 4: Evaluation
+            with tab_e1_4:
                 # Create two columns: to select a model and to display it)
                 col_ep_1_1, col_ep_1_2 = st.columns([1, 3])
                 # Column 1: Display the available models and select the model to be plotted
@@ -1171,8 +1177,8 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-            # Tab 4: Interpretation
-            with tab_e1_4:
+            # Tab 5: Interpretation
+            with tab_e1_5:
                 # Create two columns: to select a model and to display it)
                 col_ip_1_1, col_ip_1_2 = st.columns([1, 3])
                 # Column 1: Display the available models and select the model to be plotted
