@@ -487,7 +487,7 @@ def main():
                 col_cv_score_2_1, col_cv_score_2_2 = st.columns([2.0, 1.0])
                 # Display cross-validation results
                 with col_cv_score_2_1:
-                    st.markdown("**Grouped by model**")
+                    st.markdown("**Grouped by model - means**")
                     st.dataframe(
                         scores_cv_df.groupby(by="model").mean().style.format("{:.3f}"),
                         height=(
