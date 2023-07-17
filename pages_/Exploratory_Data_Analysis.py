@@ -1039,7 +1039,15 @@ def main():
                             st.plotly_chart(
                                 fig_line, theme="streamlit", use_container_width=True
                             )
-
+                    if (
+                        selectradio_procedure
+                        == "Anomaly Detection using prediction-based k-fold cross-validation method"
+                    ) & (st.session_state.anomaly_detection_instance is not None):
+                        tab_4_1, tab_4_2 = st.tabs(
+                            ["Cross-validation Scores", "Plot Scores"]
+                        )
+                        with tab_4_1:
+                            
         # Tab 5: 'Associations'
         if 1 < len(cols_cat_and_num):
             with tab_5:
