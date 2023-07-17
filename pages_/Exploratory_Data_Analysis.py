@@ -6,6 +6,7 @@ from modules.anomaly_detection.evaluation import (
     plot_anomalies_evaluation,
     select_cases_for_line_plot,
 )
+from modules.anomaly_detection.main import anomaly_detection_cross_validation
 from modules.anomaly_detection.models import AVAILABLE_MODELS_ANOMALY_DETECTION
 from modules.classification_and_regression.cv_workflow import (
     AVAILABLE_SCORES_CLASSIFICATION,
@@ -935,6 +936,59 @@ def main():
                             index=0,
                             key="tab_4_color",
                         )
+                    else:
+                        # Initiate a placeholder for the figure
+                        if "anomaly_detection_instance" not in st.session_state:
+                            st.session_state.anomaly_detection_instance = None
+                        if "fig_anomaly_detection_cv" not in st.session_state:
+                            st.session_state.fig_anomaly_detection_cv = None
+                        if st.button(
+                            "Run cross-validation",
+                            type="primary",
+                            use_container_width=True,
+                            key="button_plot_anomaly_pred_based",
+                        ):
+                            st.session_state.anomaly_detection_instance = anomaly_detection_cross_validation(
+                                data=data,
+                                imputation_numerical=selectbox_imput_num,
+                                scaler=selectbox_scaler,
+                                imputation_categorical=selectbox_imput_cat,
+                                anomaly_detection_models=selectbox_anomaly_detection_models,
+                                regression_model=[selectbox_regression_model],
+                                inner_cv_folds=selectbox_n_inner_cv_folds,
+                                inner_cv_rep=selectbox_n_inner_cv_reps,
+                            )
+                            # Create DataFrame with cross-validation scores
+                            scores_ad_df = (
+                                st.session_state.anomaly_detection_instance.all_results
+                            )
+
+                            st.markdown("**Grouped by model - means**")
+                            st.dataframe(
+                                scores_ad_df.groupby(by="model")
+                                .mean()
+                                .style.format("{:.3f}"),
+                                height=(
+                                    (len(scores_ad_df.groupby(by="model").mean()) + 1)
+                                    * 35
+                                    + 3
+                                ),
+                                use_container_width=False,
+                            )
+                            st.markdown("**Complete**")
+                            st.dataframe(
+                                scores_ad_df.set_index("model").style.format("{:.3f}"),
+                                use_container_width=False,
+                            )
+
+                            st.session_state.fig_anomaly_detection_cv = plot_manifold(
+                                data=data,
+                                target_variable=selectbox_target,
+                                operation=operation,
+                                manifold=selectbox_manifold,
+                                n_neighbors=selectbox_n_neighbors,
+                            )
+
                 with col_ad_2:
                     if selectradio_procedure == "Standart Anomaly Detection":
                         tab_4_1, tab_4_2 = st.tabs(["Evaluation", "Interpretation"])
