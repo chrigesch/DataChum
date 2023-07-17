@@ -970,7 +970,11 @@ def main():
                                 anomaly_scores=anomaly_scores_min_max,
                                 threshold=threshold_to_be_plotted,
                             )
-
+                            st.warning(
+                                "Using this cutoff value, "
+                                + str(len(selected_cases["index"].unique()) - 2)
+                                + " instanced will be considered anomalies"
+                            )
                             fig_line = line_plot(
                                 data=selected_cases,
                                 x="variable",
