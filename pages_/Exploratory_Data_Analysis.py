@@ -887,6 +887,12 @@ def main():
                         " and due to the quantitative nature of these, a regression model is used"
                         " to make predictions.",
                     )
+                    # Initiate a placeholder for the figure
+                    if "anomaly_detection_instance" not in st.session_state:
+                        st.session_state.anomaly_detection_instance = None
+                    if "fig_anomaly_detection_cv" not in st.session_state:
+                        st.session_state.fig_anomaly_detection_cv = None
+
                     if selectradio_procedure == "Standart Anomaly Detection":
                         selectbox_anomaly_detection_model = st.selectbox(
                             label="**Select the anomaly detector**",
@@ -937,11 +943,6 @@ def main():
                             key="tab_4_color",
                         )
                     else:
-                        # Initiate a placeholder for the figure
-                        if "anomaly_detection_instance" not in st.session_state:
-                            st.session_state.anomaly_detection_instance = None
-                        if "fig_anomaly_detection_cv" not in st.session_state:
-                            st.session_state.fig_anomaly_detection_cv = None
                         if st.button(
                             "Run cross-validation",
                             type="primary",
