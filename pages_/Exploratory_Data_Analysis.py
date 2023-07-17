@@ -1009,6 +1009,67 @@ def main():
                             st.plotly_chart(
                                 fig_line, theme="streamlit", use_container_width=True
                             )
+                            # Create a DataFrame to be downloaded (with original data & anomaly_score)
+                            data_with_anomaly_scores = data.copy(deep=True)
+                            data_with_anomaly_scores[
+                                "anomaly_score"
+                            ] = anomaly_scores_min_max
+                            # Create anomaly labels
+                            anomaly_labels = np.select(
+                                condlist=[
+                                    anomaly_scores_min_max >= threshold_to_be_plotted,
+                                    anomaly_scores_min_max < threshold_to_be_plotted,
+                                ],
+                                choicelist=[True, False],
+                            )
+                            # Create a DataFrame to be downloaded (with original data & anomaly_label)
+                            data_with_anomaly_labels = data.copy(deep=True)
+                            data_with_anomaly_labels["anomaly_label"] = anomaly_labels
+                            # Create four columns for download buttons (scores - labels in CSB & XLSX)
+                            (
+                                col_ad_4_2_1,
+                                col_ad_4_2_2,
+                                col_ad_4_2_3,
+                                col_ad_4_2_4,
+                            ) = st.columns(4)
+                            with col_ad_4_2_1:
+                                st.download_button(
+                                    label="Assign anomaly SCORES to database and download as CSV",
+                                    data=convert_dataframe_to_csv(
+                                        data_with_anomaly_scores
+                                    ),
+                                    file_name="data_with_anomaly_scores.csv",
+                                    mime="text/csv'",
+                                )
+                            with col_ad_4_2_2:
+                                st.download_button(
+                                    label="Assign anomaly SCORES to database and download as XLSX",
+                                    data=convert_dataframe_to_xlsx(
+                                        data_with_anomaly_scores.astype("object")
+                                    ),
+                                    file_name="data_with_anomaly_scores.xlsx",
+                                    mime="application/vnd.ms-excel",
+                                )
+                            with col_ad_4_2_3:
+                                st.download_button(
+                                    label="Assign anomaly LABELS to database and download as CSV",
+                                    data=convert_dataframe_to_csv(
+                                        data_with_anomaly_labels
+                                    ),
+                                    file_name="data_with_anomaly_labels.csv",
+                                    mime="text/csv'",
+                                )
+                            with col_ad_4_2_4:
+                                st.download_button(
+                                    label="Assign anomaly LABELS to database and download as XLSX",
+                                    data=convert_dataframe_to_xlsx(
+                                        data_with_anomaly_labels.astype("object")
+                                    ),
+                                    file_name="data_with_anomaly_labels.xlsx",
+                                    mime="application/vnd.ms-excel",
+                                )
+
+                    # Results for prediction-based k-fold cross-validation method
                     if (
                         selectradio_procedure
                         == "Anomaly Detection using prediction-based k-fold cross-validation method"
