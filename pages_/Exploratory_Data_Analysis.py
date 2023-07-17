@@ -1,9 +1,18 @@
 # Import moduls from local directories
 from assets.colors import AVAILABLE_COLORS_DIVERGING, AVAILABLE_COLORS_SEQUENTIAL
+from modules.anomaly_detection.evaluation import (
+    get_anomaly_scores_and_data_prep,
+    line_plot,
+    plot_anomalies_evaluation,
+    select_cases_for_line_plot,
+)
+from modules.anomaly_detection.main import anomaly_detection_cross_validation
+from modules.anomaly_detection.models import AVAILABLE_MODELS_ANOMALY_DETECTION
 from modules.classification_and_regression.cv_workflow import (
     AVAILABLE_SCORES_CLASSIFICATION,
     AVAILABLE_SCORES_REGRESSION,
 )
+from modules.classification_and_regression.models import AVAILABLE_MODELS_REGRESSION
 from modules.exploratory_data_analysis.associations import (
     associations_for_categorical_and_numerical_variables,
     plot_heatmap,
@@ -35,6 +44,11 @@ from modules.utils.load_and_save_data import (
     convert_dataframe_to_csv,
     read_csv,
     read_xlsx,
+)
+from modules.utils.preprocessing import (
+    AVAILABLE_IMPUTATION_CATEGORICAL,
+    AVAILABLE_IMPUTATION_NUMERICAL,
+    AVAILABLE_SCALER,
 )
 
 # Import the required libraries
@@ -82,21 +96,23 @@ def main():
                 ["Overview", "Univariate Analysis", "Missings"]
             )
         elif len(cols_cat_and_num) == 2:
-            tab_1, tab_2, tab_3, tab_4, tab_5 = st.tabs(
-                [
-                    "Overview",
-                    "Univariate Analysis",
-                    "Missings",
-                    "Associations",
-                    "Bivariate Analysis",
-                ]
-            )
-        else:
             tab_1, tab_2, tab_3, tab_4, tab_5, tab_6 = st.tabs(
                 [
                     "Overview",
                     "Univariate Analysis",
                     "Missings",
+                    "Anomaly Detection",
+                    "Associations",
+                    "Bivariate Analysis",
+                ]
+            )
+        else:
+            tab_1, tab_2, tab_3, tab_4, tab_5, tab_6, tab_7 = st.tabs(
+                [
+                    "Overview",
+                    "Univariate Analysis",
+                    "Missings",
+                    "Anomaly Detection",
                     "Associations",
                     "Bivariate Analysis",
                     "Multivariate Analysis",
@@ -850,9 +866,278 @@ def main():
                                         theme="streamlit",
                                         use_container_width=True,
                                     )
-        # Tab 4: 'Associations'
+        # Tab 4: 'Anomaly Detection'
         if 1 < len(cols_cat_and_num):
             with tab_4:
+                # Create two columns: to select a model and to display it)
+                col_ad_1, col_ad_2 = st.columns([1, 3])
+                with col_ad_1:
+                    selectradio_procedure = st.radio(
+                        label="**Select the procedure**",
+                        options=[
+                            "Standart Anomaly Detection",
+                            "Anomaly Detection using prediction-based k-fold cross-validation method",
+                        ],
+                        index=0,
+                        help=" **For more information of the prediction-based resampling method, see:** Dudoit, S.,"
+                        " & Fridlyand, J. (2002). A prediction-based resampling method for estimating the number"
+                        " of clusters in a dataset. Genome Biology, 3(7), 1-21.  \n"
+                        "**ATTENTION:** This is an adaption of the prediction-based resampling method"
+                        " used for **Cluster Analysis**. Unlike this method, MinMax-scaled anomaly scores are used,"
+                        " and due to the quantitative nature of these, a regression model is used"
+                        " to make predictions.",
+                    )
+                    if selectradio_procedure == "Standart Anomaly Detection":
+                        selectbox_anomaly_detection_model = st.selectbox(
+                            label="**Select the anomaly detector**",
+                            options=AVAILABLE_MODELS_ANOMALY_DETECTION,
+                            index=4,
+                        )
+                    else:
+                        selectbox_anomaly_detection_models = st.multiselect(
+                            label="**Select the anomaly detector(s)**",
+                            options=AVAILABLE_MODELS_ANOMALY_DETECTION,
+                            default=["ECOD", "Iforest"],
+                        )
+                        selectbox_n_inner_cv_reps = st.selectbox(
+                            label="**Select the number of times cross-validator needs to be repeated**",
+                            options=range(1, 11, 1),
+                            index=4,
+                        )
+                        selectbox_n_inner_cv_folds = st.selectbox(
+                            label="**Select the number of folds**",
+                            options=range(5, 11, 1),
+                            index=5,
+                        )
+                        selectbox_regression_model = st.selectbox(
+                            label="**Select the regression model to use for predictions**",
+                            options=AVAILABLE_MODELS_REGRESSION,
+                            index=0,
+                        )
+                    selectbox_imput_cat = st.selectbox(
+                        label="**Select the imputation strategy to use for categorical variables**",
+                        options=AVAILABLE_IMPUTATION_CATEGORICAL,
+                        index=0,
+                    )
+                    selectbox_imput_num = st.selectbox(
+                        label="**Select the imputation strategy to use for numerical variables**",
+                        options=AVAILABLE_IMPUTATION_NUMERICAL,
+                        index=0,
+                    )
+                    selectbox_scaler = st.selectbox(
+                        label="**Select the scaling strategy to use for numerical variables**",
+                        options=AVAILABLE_SCALER,
+                        index=4,
+                    )
+                    if selectradio_procedure == "Standart Anomaly Detection":
+                        selectbox_color = st.selectbox(
+                            label="**Select a color scale**",
+                            options=AVAILABLE_COLORS_SEQUENTIAL,
+                            index=0,
+                            key="tab_4_color",
+                        )
+                    else:
+                        # Initiate a placeholder for the figure
+                        if "anomaly_detection_instance" not in st.session_state:
+                            st.session_state.anomaly_detection_instance = None
+                        if "fig_anomaly_detection_cv" not in st.session_state:
+                            st.session_state.fig_anomaly_detection_cv = None
+                        if st.button(
+                            "Run cross-validation",
+                            type="primary",
+                            use_container_width=True,
+                            key="button_plot_anomaly_pred_based",
+                        ):
+                            st.session_state.anomaly_detection_instance = anomaly_detection_cross_validation(
+                                data=data,
+                                imputation_numerical=selectbox_imput_num,
+                                scaler=selectbox_scaler,
+                                imputation_categorical=selectbox_imput_cat,
+                                anomaly_detection_models=selectbox_anomaly_detection_models,
+                                regression_model=[selectbox_regression_model],
+                                inner_cv_folds=selectbox_n_inner_cv_folds,
+                                inner_cv_rep=selectbox_n_inner_cv_reps,
+                            )
+
+                with col_ad_2:
+                    if selectradio_procedure == "Standart Anomaly Detection":
+                        tab_4_1, tab_4_2 = st.tabs(["Evaluation", "Interpretation"])
+                        with tab_4_1:
+                            (
+                                anomaly_scores_min_max,
+                                data_prep,
+                            ) = get_anomaly_scores_and_data_prep(
+                                data=data,
+                                imputation_numerical=selectbox_imput_num,
+                                imputation_categorical=selectbox_imput_cat,
+                                scaler=selectbox_scaler,
+                                anomaly_detection_model=selectbox_anomaly_detection_model,
+                            )
+
+                            fig_anomaly = plot_anomalies_evaluation(
+                                anomaly_scores_min_max,
+                                name_model=selectbox_anomaly_detection_model,
+                                color=selectbox_color,
+                            )
+                            st.plotly_chart(
+                                fig_anomaly, theme="streamlit", use_container_width=True
+                            )
+                        with tab_4_2:
+                            threshold_to_be_plotted = st.slider(
+                                "**Select the cutoff value of the instances to be plotted**",
+                                0.0,
+                                1.0,
+                                value=0.95,
+                            )
+                            selected_cases = select_cases_for_line_plot(
+                                data_prep=data_prep,
+                                anomaly_scores=anomaly_scores_min_max,
+                                threshold=threshold_to_be_plotted,
+                            )
+                            st.warning(
+                                "Using this cutoff value, "
+                                + str(len(selected_cases["index"].unique()) - 2)
+                                + " instanced will be considered anomalies"
+                            )
+                            fig_line = line_plot(
+                                data=selected_cases,
+                                x="variable",
+                                y="value",
+                                traces="index",
+                                color=selectbox_color,
+                            )
+                            st.plotly_chart(
+                                fig_line, theme="streamlit", use_container_width=True
+                            )
+                            # Create a DataFrame to be downloaded (with original data & anomaly_score)
+                            data_with_anomaly_scores = data.copy(deep=True)
+                            data_with_anomaly_scores[
+                                "anomaly_score"
+                            ] = anomaly_scores_min_max
+                            # Create anomaly labels
+                            anomaly_labels = np.select(
+                                condlist=[
+                                    anomaly_scores_min_max >= threshold_to_be_plotted,
+                                    anomaly_scores_min_max < threshold_to_be_plotted,
+                                ],
+                                choicelist=[True, False],
+                            )
+                            # Create a DataFrame to be downloaded (with original data & anomaly_label)
+                            data_with_anomaly_labels = data.copy(deep=True)
+                            data_with_anomaly_labels["anomaly_label"] = anomaly_labels
+                            # Create four columns for download buttons (scores - labels in CSB & XLSX)
+                            (
+                                col_ad_4_2_1,
+                                col_ad_4_2_2,
+                                col_ad_4_2_3,
+                                col_ad_4_2_4,
+                            ) = st.columns(4)
+                            with col_ad_4_2_1:
+                                st.download_button(
+                                    label="Assign anomaly SCORES to database and download as CSV",
+                                    data=convert_dataframe_to_csv(
+                                        data_with_anomaly_scores
+                                    ),
+                                    file_name="data_with_anomaly_scores.csv",
+                                    mime="text/csv'",
+                                )
+                            with col_ad_4_2_2:
+                                st.download_button(
+                                    label="Assign anomaly SCORES to database and download as XLSX",
+                                    data=convert_dataframe_to_xlsx(
+                                        data_with_anomaly_scores.astype("object")
+                                    ),
+                                    file_name="data_with_anomaly_scores.xlsx",
+                                    mime="application/vnd.ms-excel",
+                                )
+                            with col_ad_4_2_3:
+                                st.download_button(
+                                    label="Assign anomaly LABELS to database and download as CSV",
+                                    data=convert_dataframe_to_csv(
+                                        data_with_anomaly_labels
+                                    ),
+                                    file_name="data_with_anomaly_labels.csv",
+                                    mime="text/csv'",
+                                )
+                            with col_ad_4_2_4:
+                                st.download_button(
+                                    label="Assign anomaly LABELS to database and download as XLSX",
+                                    data=convert_dataframe_to_xlsx(
+                                        data_with_anomaly_labels.astype("object")
+                                    ),
+                                    file_name="data_with_anomaly_labels.xlsx",
+                                    mime="application/vnd.ms-excel",
+                                )
+
+                    # Results for prediction-based k-fold cross-validation method
+                    if (
+                        selectradio_procedure
+                        == "Anomaly Detection using prediction-based k-fold cross-validation method"
+                    ) & (st.session_state.anomaly_detection_instance is not None):
+                        tab_4_1, tab_4_2 = st.tabs(
+                            ["Cross-validation Scores", "Plot Scores"]
+                        )
+                        with tab_4_1:
+                            # Create DataFrame with cross-validation scores
+                            scores_ad_df = (
+                                st.session_state.anomaly_detection_instance.all_results
+                            )
+
+                            st.markdown("**Grouped by model - means**")
+                            st.dataframe(
+                                scores_ad_df.groupby(by="model")
+                                .mean()
+                                .style.format("{:.3f}"),
+                                height=(
+                                    (len(scores_ad_df.groupby(by="model").mean()) + 1)
+                                    * 35
+                                    + 3
+                                ),
+                                use_container_width=False,
+                            )
+                            st.markdown("**Complete**")
+                            st.dataframe(
+                                scores_ad_df.set_index("model").style.format("{:.3f}"),
+                                use_container_width=False,
+                            )
+                        with tab_4_2:
+                            st.markdown("**Plotting options**")
+                            col_ad_2_1, col_ad_2_2 = st.columns(2)
+                            with col_ad_2_1:
+                                selectbox_evaluation_metric = st.selectbox(
+                                    label="**Select the evaluation metric to be plotted**",
+                                    options=[
+                                        value
+                                        for value in scores_ad_df.columns.to_list()
+                                        if value not in ["model", "time"]
+                                    ],
+                                    index=2,
+                                    key="tab_4_2_evaluation_metric",
+                                )
+                            with col_ad_2_2:
+                                selectbox_color = st.selectbox(
+                                    label="**Select a color scale**",
+                                    options=AVAILABLE_COLORS_SEQUENTIAL,
+                                    index=0,
+                                    key="tab_4_2_color",
+                                )
+                            st.session_state.fig_anomaly_detection_cv = plot_num(
+                                data=scores_ad_df,
+                                var_num=selectbox_evaluation_metric,
+                                var_cat="model",
+                                plot_type="Box-Plot",
+                                color=selectbox_color,
+                                template="plotly_white",
+                            )
+                            st.plotly_chart(
+                                st.session_state.fig_anomaly_detection_cv,
+                                theme="streamlit",
+                                use_container_width=True,
+                            )
+
+        # Tab 5: 'Associations'
+        if 1 < len(cols_cat_and_num):
+            with tab_5:
                 st.warning(
                     "Calculate the strength-of-association of features in data-set with both, categorical"
                     " and continuous features using: Spearman's R for continuous-continuous cases - Correlation Ratio"
@@ -861,15 +1146,15 @@ def main():
                     " A bias-correction for Cramér's and Tschuprow's. Journal of the Korean Statistical Society, 42(3),"
                     " 323-328. https://doi.org/10.1016/j.jkss.2012.10.002"
                 )
-                tab_4_1, tab_4_2 = st.tabs(["Heatmap", "Association matrix"])
+                tab_5_1, tab_5_2 = st.tabs(["Heatmap", "Association matrix"])
                 # Heatmap
-                with tab_4_1:
+                with tab_5_1:
                     # Create two columns
                     selectbox_associations_color = st.selectbox(
                         label="Select a color scale",
                         options=list(AVAILABLE_COLORS_DIVERGING.keys()),
                         index=0,
-                        key="tab_4",
+                        key="tab_5",
                     )
                     # Create a mask for the association matrix and plot the Heatmap
                     mask = np.triu(np.ones_like(associations_df, dtype=bool))
@@ -884,17 +1169,17 @@ def main():
                         fig_correlation, theme="streamlit", use_container_width=True
                     )
                 # Association matrix
-                with tab_4_2:
+                with tab_5_2:
                     # Create two columns
-                    col_4_2_1, col_4_2_2 = st.columns([1, 3])
-                    with col_4_2_1:
+                    col_5_2_1, col_5_2_2 = st.columns([1, 3])
+                    with col_5_2_1:
                         st.download_button(
                             label="Download associations as CSV",
                             data=convert_dataframe_to_csv(associations_df),
                             file_name="associations.csv",
                             mime="text/csv'",
                         )
-                    with col_4_2_2:
+                    with col_5_2_2:
                         st.download_button(
                             label="Download associations as XLSX",
                             data=convert_dataframe_to_xlsx(associations_df),
@@ -906,18 +1191,18 @@ def main():
                         associations_df, height=((len(associations_df) + 1) * 35 + 3)
                     )
 
-        # Tab 5: 'Bivariate Analysis'
+        # Tab 6: 'Bivariate Analysis'
         if 1 < len(cols_cat_and_num):
-            with tab_5:
+            with tab_6:
                 # Create two columns
-                col_5_1, col_5_2 = st.columns([1, 1])
-                with col_5_1:
+                col_6_1, col_6_2 = st.columns([1, 1])
+                with col_6_1:
                     selectbox_target = st.selectbox(
                         label="Select the target variable",
                         options=cols_cat_and_num,
                         index=0,
                     )
-                with col_5_2:
+                with col_6_2:
                     available_features = [
                         value for value in cols_cat_and_num if value != selectbox_target
                     ]
@@ -925,8 +1210,8 @@ def main():
                         label="Select a feature", options=available_features, index=0
                     )
                 # Create two columns
-                col_5_1, col_5_2 = st.columns([1, 4])
-                with col_5_1:
+                col_6_1, col_6_2 = st.columns([1, 4])
+                with col_6_1:
                     st.markdown("**Plotting Options**")
                     selectbox_variable_color = st.selectbox(
                         label="**Select a color scale**",
@@ -950,18 +1235,18 @@ def main():
                             index=0,
                         )
                 # Plots
-                with col_5_2:
+                with col_6_2:
                     # CAT & CAT
                     if (selectbox_target in cols_cat) & (selectbox_feature in cols_cat):
                         # Create tabs for plots
-                        tab_5_1, tab_5_2, tab_5_3 = st.tabs(
+                        tab_6_1, tab_6_2, tab_6_3 = st.tabs(
                             [
                                 "Grouped Bar Plot",
                                 "Stacked Bar Plot",
                                 "100% Stacked Bar Plot",
                             ]
                         )
-                        with tab_5_1:
+                        with tab_6_1:
                             # Create plot
                             fig_variable = plot_cat_cat(
                                 data=data,
@@ -976,7 +1261,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_2:
+                        with tab_6_2:
                             # Create plot
                             fig_variable = plot_cat_cat(
                                 data=data,
@@ -991,7 +1276,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_3:
+                        with tab_6_3:
                             # Create plot
                             fig_variable = plot_cat_cat(
                                 data=data,
@@ -1011,10 +1296,10 @@ def main():
                         selectbox_feature in cols_num
                     ):
                         # Create tabs for plots
-                        tab_5_1, tab_5_2, tab_5_3 = st.tabs(
+                        tab_6_1, tab_6_2, tab_6_3 = st.tabs(
                             ["OLS trendline", "LOWESS trendline", "None"]
                         )
-                        with tab_5_1:
+                        with tab_6_1:
                             fig_variable = plot_num_num(
                                 data=data,
                                 target=selectbox_target,
@@ -1031,7 +1316,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_2:
+                        with tab_6_2:
                             fig_variable = plot_num_num(
                                 data=data,
                                 target=selectbox_target,
@@ -1048,7 +1333,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_3:
+                        with tab_6_3:
                             fig_variable = plot_num_num(
                                 data=data,
                                 target=selectbox_target,
@@ -1086,14 +1371,14 @@ def main():
                         # Create tabs for plots
                         if distinct_values > 3:
                             (
-                                tab_5_1,
-                                tab_5_2,
-                                tab_5_3,
-                                tab_5_4,
-                                tab_5_5,
-                                tab_5_6,
-                                tab_5_7,
-                                tab_5_8,
+                                tab_6_1,
+                                tab_6_2,
+                                tab_6_3,
+                                tab_6_4,
+                                tab_6_5,
+                                tab_6_6,
+                                tab_6_7,
+                                tab_6_8,
                             ) = st.tabs(
                                 [
                                     "Bar Plot",
@@ -1107,7 +1392,13 @@ def main():
                                 ]
                             )
                         else:
-                            tab_5_1, tab_5_2, tab_5_3, tab_5_4, tab_5_5 = st.tabs(
+                            (
+                                tab_6_1,
+                                tab_6_2,
+                                tab_6_3,
+                                tab_6_4,
+                                tab_6_5,
+                            ) = st.tabs(
                                 [
                                     "Bar Plot",
                                     "Box-Plot",
@@ -1116,7 +1407,7 @@ def main():
                                     "Histogram + KDE",
                                 ]
                             )
-                        with tab_5_1:
+                        with tab_6_1:
                             fig_variable = plot_cat(
                                 data=data_for_cat_plots,
                                 var_cat=var_cat,
@@ -1130,7 +1421,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_2:
+                        with tab_6_2:
                             fig_variable = plot_num(
                                 data=data,
                                 var_num=var_num,
@@ -1144,7 +1435,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_3:
+                        with tab_6_3:
                             fig_variable = plot_num(
                                 data=data,
                                 var_num=var_num,
@@ -1158,7 +1449,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_4:
+                        with tab_6_4:
                             fig_variable = plot_num(
                                 data=data,
                                 var_num=var_num,
@@ -1172,7 +1463,7 @@ def main():
                                 theme="streamlit",
                                 use_container_width=True,
                             )
-                        with tab_5_5:
+                        with tab_6_5:
                             fig_variable = plot_num(
                                 data=data,
                                 var_num=var_num,
@@ -1187,7 +1478,7 @@ def main():
                                 use_container_width=True,
                             )
                         if distinct_values > 3:
-                            with tab_5_6:
+                            with tab_6_6:
                                 fig_variable = plot_cat(
                                     data=data_for_cat_plots,
                                     var_cat=var_cat,
@@ -1201,7 +1492,7 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                            with tab_5_7:
+                            with tab_6_7:
                                 fig_variable = plot_cat(
                                     data=data_for_cat_plots,
                                     var_cat=var_cat,
@@ -1215,7 +1506,7 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                            with tab_5_8:
+                            with tab_6_8:
                                 fig_variable = plot_cat(
                                     data=data_for_cat_plots,
                                     var_cat=var_cat,
@@ -1229,11 +1520,11 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-        # Tab 6: 'Multivariate Analysis'
+        # Tab 7: 'Multivariate Analysis'
         if 2 < len(cols_num):
-            with tab_6:
+            with tab_7:
                 # Create several tabs:
-                tab_6_1, tab_6_2, tab_6_3, tab_6_4, tab_6_5 = st.tabs(
+                tab_7_1, tab_7_2, tab_7_3, tab_7_4, tab_7_5 = st.tabs(
                     [
                         "Mean Based Plots",
                         "Bubble Chart",
@@ -1242,40 +1533,40 @@ def main():
                         "Manifold Visualization",
                     ]
                 )
-                # Tab 6_1: Mean Based Plots
-                with tab_6_1:
+                # Tab 7_1: Mean Based Plots
+                with tab_7_1:
                     # Create two columns
-                    col_6_1, col_6_2 = st.columns([1, 1])
-                    with col_6_1:
+                    col_7_1, col_7_2 = st.columns([1, 1])
+                    with col_7_1:
                         selectbox_variables = st.multiselect(
                             label="Select the variables",
                             options=cols_num,
                             default=[cols_num[0], cols_num[1]],
                         )
-                    with col_6_2:
+                    with col_7_2:
                         selectbox_grouping_variable = st.selectbox(
                             label="Select a grouping variable",
                             options=[None] + cols_cat,
                             index=1,
                         )
                     # Create two columns
-                    col_6_1, col_6_2 = st.columns([1, 4])
-                    with col_6_1:
+                    col_7_1, col_7_2 = st.columns([1, 4])
+                    with col_7_1:
                         st.markdown("**Plotting Options**")
                         selectbox_variable_color = st.selectbox(
                             label="**Select a color scale**",
                             options=AVAILABLE_COLORS_SEQUENTIAL,
                             index=0,
-                            key="tab_6_1_color",
+                            key="tab_7_1_color",
                         )
                         selectbox_variable_template = st.selectbox(
                             label="**Select a template**",
                             options=AVAILABLE_TEMPLATES,
                             index=0,
-                            key="tab_6_1_template",
+                            key="tab_7_1_template",
                         )
                     # Plots
-                    with col_6_2:
+                    with col_7_2:
                         # Without grouping variable
                         if selectbox_grouping_variable is None:
                             # Create a Dataframe for plots based on NUMERICAL variables
@@ -1284,10 +1575,10 @@ def main():
                             ).reset_index()
                             data_to_be_plotted.columns = ["Variables", "Mean"]
                             # Create tabs for plots
-                            tab_6_1_1, tab_6_1_2, tab_6_1_3 = st.tabs(
+                            tab_7_1_1, tab_7_1_2, tab_7_1_3 = st.tabs(
                                 ["Bar Plot", "Polar Plot", "Treemap"]
                             )
-                            with tab_6_1_1:
+                            with tab_7_1_1:
                                 fig_variable = plot_cat(
                                     data=data_to_be_plotted.sort_values(
                                         by="Mean", ascending=False
@@ -1303,7 +1594,7 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                            with tab_6_1_2:
+                            with tab_7_1_2:
                                 fig_variable = plot_cat(
                                     data=data_to_be_plotted.sort_values(
                                         by="Mean", ascending=False
@@ -1319,7 +1610,7 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                            with tab_6_1_3:
+                            with tab_7_1_3:
                                 fig_variable = plot_cat(
                                     data=data_to_be_plotted.sort_values(
                                         by="Mean", ascending=False
@@ -1337,14 +1628,14 @@ def main():
                                 )
                         else:
                             # Create tabs for plots
-                            tab_6_1_1, tab_6_1_2, tab_6_1_3 = st.tabs(
+                            tab_7_1_1, tab_7_1_2, tab_7_1_3 = st.tabs(
                                 [
                                     "Grouped Bar Plot",
                                     "Stacked Bar Plot",
                                     "100% Stacked Bar Plot",
                                 ]
                             )
-                            with tab_6_1_1:
+                            with tab_7_1_1:
                                 # Create plot
                                 fig_variable = plot_num_with_grouping_variable(
                                     data=data,
@@ -1359,7 +1650,7 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                            with tab_6_1_2:
+                            with tab_7_1_2:
                                 # Create plot
                                 fig_variable = plot_num_with_grouping_variable(
                                     data=data,
@@ -1374,7 +1665,7 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                            with tab_6_1_3:
+                            with tab_7_1_3:
                                 # Create plot
                                 fig_variable = plot_num_with_grouping_variable(
                                     data=data,
@@ -1389,16 +1680,16 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                # Tab 6_2: Bubble Chart
-                with tab_6_2:
+                # Tab 7_2: Bubble Chart
+                with tab_7_2:
                     # Create two columns
-                    col_6_1, col_6_2 = st.columns([1, 1])
-                    with col_6_1:
+                    col_7_1, col_7_2 = st.columns([1, 1])
+                    with col_7_1:
                         selectbox_x_axis = st.selectbox(
                             label="Select the variable to be plotted on the x-axis",
                             options=cols_num,
                         )
-                    with col_6_2:
+                    with col_7_2:
                         available_for_y_axis = [
                             value for value in cols_num if value != selectbox_x_axis
                         ]
@@ -1408,8 +1699,8 @@ def main():
                             index=0,
                         )
                     # Create two columns
-                    col_6_1, col_6_2 = st.columns([1, 4])
-                    with col_6_1:
+                    col_7_1, col_7_2 = st.columns([1, 4])
+                    with col_7_1:
                         available_for_size = [
                             value
                             for value in available_for_y_axis
@@ -1441,16 +1732,16 @@ def main():
                             label="**Select a color scale**",
                             options=AVAILABLE_COLORS_SEQUENTIAL,
                             index=0,
-                            key="tab_6_2_color",
+                            key="tab_7_2_color",
                         )
                         selectbox_variable_template = st.selectbox(
                             label="**Select a template**",
                             options=AVAILABLE_TEMPLATES,
                             index=0,
-                            key="tab_6_2_template",
+                            key="tab_7_2_template",
                         )
                     # Plots
-                    with col_6_2:
+                    with col_7_2:
                         fig_variable = plot_bubble_chart(
                             data,
                             x=selectbox_x_axis,
@@ -1464,15 +1755,15 @@ def main():
                         st.plotly_chart(
                             fig_variable, theme="streamlit", use_container_width=True
                         )
-                # Tab 6_3: Random Feature Dropping
-                with tab_6_3:
+                # Tab 7_3: Random Feature Dropping
+                with tab_7_3:
                     # Create two columns
-                    col_6_1, col_6_2 = st.columns([1, 4])
-                    with col_6_1:
+                    col_7_1, col_7_2 = st.columns([1, 4])
+                    with col_7_1:
                         selectbox_target = st.selectbox(
                             label="Select the target variable",
                             options=cols_cat_and_num,
-                            key="tab_6_3_rfd",
+                            key="tab_7_3_rfd",
                         )
                         # Initiate 'operation' and 'evaluation_score_options'
                         if selectbox_target in cols_cat:
@@ -1523,26 +1814,26 @@ def main():
                                     cv_folds=selectbox_n_cv_folds,
                                 )
                             )
-                    with col_6_2:
+                    with col_7_2:
                         if st.session_state.fig_rfdc is not None:
                             components.html(
                                 st.session_state.fig_rfdc,
                                 height=600,
                             )
 
-                # Tab 6_4: PCA Proyection
-                with tab_6_4:
+                # Tab 7_4: PCA Proyection
+                with tab_7_4:
                     # Create a PCA instance
                     selectbox_target = st.selectbox(
                         label="**Select the target variable**",
                         options=cols_cat_and_num,
-                        key="tab_6_4_pca",
+                        key="tab_7_4_pca",
                     )
                     pca_instance = principal_component_analysis(
                         data=data, target_variable=selectbox_target
                     )
                     # Create tabs for plots
-                    tab_6_4_1, tab_6_4_2, tab_6_4_3, tab_6_4_4, tab_6_4_5 = st.tabs(
+                    tab_7_4_1, tab_7_4_2, tab_7_4_3, tab_7_4_4, tab_7_4_5 = st.tabs(
                         [
                             "PCA plot - 2D",
                             "PCA plot - 3D",
@@ -1552,24 +1843,24 @@ def main():
                         ]
                     )
                     # PCA plot - 2D
-                    with tab_6_4_1:
+                    with tab_7_4_1:
                         # Create two columns
-                        col_6_1, col_6_2 = st.columns([1, 4])
-                        with col_6_1:
+                        col_7_1, col_7_2 = st.columns([1, 4])
+                        with col_7_1:
                             st.markdown("**Plotting Options**")
                             selectbox_variable_color = st.selectbox(
                                 label="**Select a color scale**",
                                 options=AVAILABLE_COLORS_SEQUENTIAL,
                                 index=0,
-                                key="tab_6_4_1_color",
+                                key="tab_7_4_1_color",
                             )
                             selectbox_variable_template = st.selectbox(
                                 label="**Select a template**",
                                 options=AVAILABLE_TEMPLATES,
                                 index=0,
-                                key="tab_6_4_1_template",
+                                key="tab_7_4_1_template",
                             )
-                        with col_6_2:
+                        with col_7_2:
                             exp_var_pc_1 = (
                                 pca_instance.data_explained_variances["explained"][0]
                                 * 100
@@ -1593,24 +1884,24 @@ def main():
                                 use_container_width=True,
                             )
                     # PCA plot - 3D
-                    with tab_6_4_2:
+                    with tab_7_4_2:
                         # Create two columns
-                        col_6_1, col_6_2 = st.columns([1, 4])
-                        with col_6_1:
+                        col_7_1, col_7_2 = st.columns([1, 4])
+                        with col_7_1:
                             st.markdown("**Plotting Options**")
                             selectbox_variable_color = st.selectbox(
                                 label="**Select a color scale**",
                                 options=AVAILABLE_COLORS_SEQUENTIAL,
                                 index=0,
-                                key="tab_6_4_2_color",
+                                key="tab_7_4_2_color",
                             )
                             selectbox_variable_template = st.selectbox(
                                 label="**Select a template**",
                                 options=AVAILABLE_TEMPLATES,
                                 index=0,
-                                key="tab_6_4_2_template",
+                                key="tab_7_4_2_template",
                             )
-                        with col_6_2:
+                        with col_7_2:
                             exp_var_pc_1 = (
                                 pca_instance.data_explained_variances["explained"][0]
                                 * 100
@@ -1639,24 +1930,24 @@ def main():
                                 use_container_width=True,
                             )
                     # Explained Variance Plot
-                    with tab_6_4_3:
+                    with tab_7_4_3:
                         # Create two columns
-                        col_6_1, col_6_2 = st.columns([1, 4])
-                        with col_6_1:
+                        col_7_1, col_7_2 = st.columns([1, 4])
+                        with col_7_1:
                             st.markdown("**Plotting Options**")
                             selectbox_variable_color = st.selectbox(
                                 label="**Select a color scale**",
                                 options=AVAILABLE_COLORS_SEQUENTIAL,
                                 index=0,
-                                key="tab_6_4_3_color",
+                                key="tab_7_4_3_color",
                             )
                             selectbox_variable_template = st.selectbox(
                                 label="**Select a template**",
                                 options=AVAILABLE_TEMPLATES,
                                 index=0,
-                                key="tab_6_4_3_template",
+                                key="tab_7_4_3_template",
                             )
-                        with col_6_2:
+                        with col_7_2:
                             # Compute a DataFrame for the 'Explained Variance Plot'
                             data_for_explained_variance_plot = pd.melt(
                                 pca_instance.data_explained_variances,
@@ -1684,21 +1975,21 @@ def main():
                             ),
                         )
                     # Loadings Matrix
-                    with tab_6_4_4:
+                    with tab_7_4_4:
                         # Create two tabs:
-                        tab_6_4_4_1, tab_6_4_4_2 = st.tabs(["Heatmap", "DataFrame"])
-                        with tab_6_4_4_1:
+                        tab_7_4_4_1, tab_7_4_4_2 = st.tabs(["Heatmap", "DataFrame"])
+                        with tab_7_4_4_1:
                             # Create two columns
-                            col_6_1, col_6_2 = st.columns([1, 4])
-                            with col_6_1:
+                            col_7_1, col_7_2 = st.columns([1, 4])
+                            with col_7_1:
                                 st.markdown("**Plotting Options**")
                                 selectbox_associations_color = st.selectbox(
                                     label="Select a color scale",
                                     options=list(AVAILABLE_COLORS_DIVERGING.keys()),
                                     index=0,
-                                    key="tab_6_4_4",
+                                    key="tab_7_4_4",
                                 )
-                            with col_6_2:
+                            with col_7_2:
                                 fig_correlation = plot_heatmap(
                                     associations=pca_instance.data_weights,
                                     color=selectbox_associations_color,
@@ -1710,16 +2001,16 @@ def main():
                                     theme="streamlit",
                                     use_container_width=True,
                                 )
-                        with tab_6_4_4_2:
+                        with tab_7_4_4_2:
                             st.dataframe(
                                 pca_instance.data_weights,
                                 height=((len(pca_instance.data_weights) + 1) * 35 + 3),
                             )
                     # Transformed Data
-                    with tab_6_4_5:
+                    with tab_7_4_5:
                         # Create two columns
-                        col_6_1_1, col_6_1_2 = st.columns([1, 3])
-                        with col_6_1_1:
+                        col_7_1_1, col_7_1_2 = st.columns([1, 3])
+                        with col_7_1_1:
                             data_pca_csv = convert_dataframe_to_csv(
                                 pca_instance.data_pca
                             )
@@ -1729,7 +2020,7 @@ def main():
                                 file_name="data_pca.csv",
                                 mime="text/csv'",
                             )
-                        with col_6_1_2:
+                        with col_7_1_2:
                             data_pca_xlsx = convert_dataframe_to_xlsx(
                                 pca_instance.data_pca
                             )
@@ -1744,15 +2035,15 @@ def main():
                             height=((len(pca_instance.data_pca) + 1) * 35 + 3),
                         )
 
-                # Tab 6_5: Manifold
-                with tab_6_5:
+                # Tab 7_5: Manifold
+                with tab_7_5:
                     # Create two columns
-                    col_6_1, col_6_2 = st.columns([1, 4])
-                    with col_6_1:
+                    col_7_1, col_7_2 = st.columns([1, 4])
+                    with col_7_1:
                         selectbox_target = st.selectbox(
                             label="Select the target variable",
                             options=cols_cat_and_num,
-                            key="tab_6_5_mani",
+                            key="tab_7_5_mani",
                         )
                         selectbox_manifold = st.selectbox(
                             label="Select the manifold implementation",
@@ -1787,7 +2078,7 @@ def main():
                                 manifold=selectbox_manifold,
                                 n_neighbors=selectbox_n_neighbors,
                             )
-                    with col_6_2:
+                    with col_7_2:
                         if st.session_state.fig_manifold is not None:
                             components.html(st.session_state.fig_manifold, height=600)
 
