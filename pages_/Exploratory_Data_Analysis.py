@@ -937,48 +937,50 @@ def main():
                         )
                 with col_ad_2:
                     if selectradio_procedure == "Standart Anomaly Detection":
-                        (
-                            anomaly_scores_min_max,
-                            data_prep,
-                        ) = get_anomaly_scores_and_data_prep(
-                            data=data,
-                            imputation_numerical=selectbox_imput_num,
-                            imputation_categorical=selectbox_imput_cat,
-                            scaler=selectbox_scaler,
-                            anomaly_detection_model=selectbox_anomaly_detection_model,
-                        )
+                        tab_4_1, tab_4_2 = st.tabs(["Evaluation", "Interpretation"])
+                        with tab_4_1:
+                            (
+                                anomaly_scores_min_max,
+                                data_prep,
+                            ) = get_anomaly_scores_and_data_prep(
+                                data=data,
+                                imputation_numerical=selectbox_imput_num,
+                                imputation_categorical=selectbox_imput_cat,
+                                scaler=selectbox_scaler,
+                                anomaly_detection_model=selectbox_anomaly_detection_model,
+                            )
 
-                        fig_anomaly = plot_anomalies_evaluation(
-                            anomaly_scores_min_max,
-                            name_model=selectbox_anomaly_detection_model,
-                            color=selectbox_color,
-                        )
-                        st.plotly_chart(
-                            fig_anomaly, theme="streamlit", use_container_width=True
-                        )
-                        # Find the three highest anomaly scores to be plotted and select cases
-                        threshold_to_be_plotted = st.slider(
-                            "**Select the cutoff value of the instances to be plotted**",
-                            0.0,
-                            1.0,
-                            value=0.95,
-                        )
-                        selected_cases = select_cases_for_line_plot(
-                            data_prep=data_prep,
-                            anomaly_scores=anomaly_scores_min_max,
-                            threshold=threshold_to_be_plotted,
-                        )
+                            fig_anomaly = plot_anomalies_evaluation(
+                                anomaly_scores_min_max,
+                                name_model=selectbox_anomaly_detection_model,
+                                color=selectbox_color,
+                            )
+                            st.plotly_chart(
+                                fig_anomaly, theme="streamlit", use_container_width=True
+                            )
+                        with tab_4_2:
+                            threshold_to_be_plotted = st.slider(
+                                "**Select the cutoff value of the instances to be plotted**",
+                                0.0,
+                                1.0,
+                                value=0.95,
+                            )
+                            selected_cases = select_cases_for_line_plot(
+                                data_prep=data_prep,
+                                anomaly_scores=anomaly_scores_min_max,
+                                threshold=threshold_to_be_plotted,
+                            )
 
-                        fig_line = line_plot(
-                            data=selected_cases,
-                            x="variable",
-                            y="value",
-                            traces="index",
-                            color=selectbox_color,
-                        )
-                        st.plotly_chart(
-                            fig_line, theme="streamlit", use_container_width=True
-                        )
+                            fig_line = line_plot(
+                                data=selected_cases,
+                                x="variable",
+                                y="value",
+                                traces="index",
+                                color=selectbox_color,
+                            )
+                            st.plotly_chart(
+                                fig_line, theme="streamlit", use_container_width=True
+                            )
 
         # Tab 5: 'Associations'
         if 1 < len(cols_cat_and_num):
