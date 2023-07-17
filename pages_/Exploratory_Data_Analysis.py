@@ -958,36 +958,6 @@ def main():
                                 inner_cv_folds=selectbox_n_inner_cv_folds,
                                 inner_cv_rep=selectbox_n_inner_cv_reps,
                             )
-                            # Create DataFrame with cross-validation scores
-                            scores_ad_df = (
-                                st.session_state.anomaly_detection_instance.all_results
-                            )
-
-                            st.markdown("**Grouped by model - means**")
-                            st.dataframe(
-                                scores_ad_df.groupby(by="model")
-                                .mean()
-                                .style.format("{:.3f}"),
-                                height=(
-                                    (len(scores_ad_df.groupby(by="model").mean()) + 1)
-                                    * 35
-                                    + 3
-                                ),
-                                use_container_width=False,
-                            )
-                            st.markdown("**Complete**")
-                            st.dataframe(
-                                scores_ad_df.set_index("model").style.format("{:.3f}"),
-                                use_container_width=False,
-                            )
-
-                            st.session_state.fig_anomaly_detection_cv = plot_manifold(
-                                data=data,
-                                target_variable=selectbox_target,
-                                operation=operation,
-                                manifold=selectbox_manifold,
-                                n_neighbors=selectbox_n_neighbors,
-                            )
 
                 with col_ad_2:
                     if selectradio_procedure == "Standart Anomaly Detection":
@@ -1047,7 +1017,37 @@ def main():
                             ["Cross-validation Scores", "Plot Scores"]
                         )
                         with tab_4_1:
-                            
+                            # Create DataFrame with cross-validation scores
+                            scores_ad_df = (
+                                st.session_state.anomaly_detection_instance.all_results
+                            )
+
+                            st.markdown("**Grouped by model - means**")
+                            st.dataframe(
+                                scores_ad_df.groupby(by="model")
+                                .mean()
+                                .style.format("{:.3f}"),
+                                height=(
+                                    (len(scores_ad_df.groupby(by="model").mean()) + 1)
+                                    * 35
+                                    + 3
+                                ),
+                                use_container_width=False,
+                            )
+                            st.markdown("**Complete**")
+                            st.dataframe(
+                                scores_ad_df.set_index("model").style.format("{:.3f}"),
+                                use_container_width=False,
+                            )
+
+                            st.session_state.fig_anomaly_detection_cv = plot_manifold(
+                                data=data,
+                                target_variable=selectbox_target,
+                                operation=operation,
+                                manifold=selectbox_manifold,
+                                n_neighbors=selectbox_n_neighbors,
+                            )
+
         # Tab 5: 'Associations'
         if 1 < len(cols_cat_and_num):
             with tab_5:
