@@ -1039,13 +1039,39 @@ def main():
                                 scores_ad_df.set_index("model").style.format("{:.3f}"),
                                 use_container_width=False,
                             )
-
-                            st.session_state.fig_anomaly_detection_cv = plot_manifold(
-                                data=data,
-                                target_variable=selectbox_target,
-                                operation=operation,
-                                manifold=selectbox_manifold,
-                                n_neighbors=selectbox_n_neighbors,
+                        with tab_4_2:
+                            st.markdown("**Plotting options**")
+                            col_ad_2_1, col_ad_2_2 = st.columns(2)
+                            with col_ad_2_1:
+                                selectbox_evaluation_metric = st.selectbox(
+                                    label="**Select the evaluation metric to be plotted**",
+                                    options=[
+                                        value
+                                        for value in scores_ad_df.columns.to_list()
+                                        if value not in ["model", "time"]
+                                    ],
+                                    index=2,
+                                    key="tab_4_2_evaluation_metric",
+                                )
+                            with col_ad_2_2:
+                                selectbox_color = st.selectbox(
+                                    label="**Select a color scale**",
+                                    options=AVAILABLE_COLORS_SEQUENTIAL,
+                                    index=0,
+                                    key="tab_4_2_color",
+                                )
+                            st.session_state.fig_anomaly_detection_cv = plot_num(
+                                data=scores_ad_df,
+                                var_num=selectbox_evaluation_metric,
+                                var_cat="model",
+                                plot_type="Box-Plot",
+                                color=selectbox_color,
+                                template="plotly_white",
+                            )
+                            st.plotly_chart(
+                                st.session_state.fig_anomaly_detection_cv,
+                                theme="streamlit",
+                                use_container_width=True,
                             )
 
         # Tab 5: 'Associations'
