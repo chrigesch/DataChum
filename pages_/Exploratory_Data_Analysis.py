@@ -957,12 +957,11 @@ def main():
                             fig_anomaly, theme="streamlit", use_container_width=True
                         )
                         # Find the three highest anomaly scores to be plotted and select cases
-                        three_highest = np.sort(anomaly_scores_min_max)[-3]
                         threshold_to_be_plotted = st.slider(
-                            "**Select the cutoff value to be plotted",
-                            0,
-                            1,
-                            three_highest,
+                            "**Select the cutoff value of the instances to be plotted**",
+                            0.0,
+                            1.0,
+                            value=0.95,
                         )
                         selected_cases = select_cases_for_line_plot(
                             data_prep=data_prep,
@@ -970,12 +969,15 @@ def main():
                             threshold=threshold_to_be_plotted,
                         )
 
-                        line_plot(
+                        fig_line = line_plot(
                             data=selected_cases,
                             x="variable",
                             y="value",
                             traces="index",
                             color=selectbox_color,
+                        )
+                        st.plotly_chart(
+                            fig_line, theme="streamlit", use_container_width=True
                         )
 
         # Tab 5: 'Associations'
