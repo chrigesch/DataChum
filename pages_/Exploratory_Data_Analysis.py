@@ -879,13 +879,13 @@ def main():
                             "Anomaly Detection using prediction-based k-fold cross-validation method",
                         ],
                         index=0,
-                        help="**ATTENTION:** This is an adaption of the prediction-based resampling method"
+                        help=" **For more information of the prediction-based resampling method, see:** Dudoit, S.,"
+                        " & Fridlyand, J. (2002). A prediction-based resampling method for estimating the number"
+                        " of clusters in a dataset. Genome Biology, 3(7), 1-21.  \n"
+                        "**ATTENTION:** This is an adaption of the prediction-based resampling method"
                         " used for **Cluster Analysis**. Unlike this method, MinMax-scaled anomaly scores are used,"
                         " and due to the quantitative nature of these, a regression model is used"
-                        " to make predictions.  \n"
-                        " **For more information of the prediction-based resampling method, see:** Dudoit, S.,"
-                        " & Fridlyand, J. (2002). A prediction-based resampling method for estimating the number"
-                        " of clusters in a dataset. Genome Biology, 3(7), 1-21.",
+                        " to make predictions.",
                     )
                     if selectradio_procedure == "Standart Anomaly Detection":
                         selectbox_anomaly_detection_model = st.selectbox(
