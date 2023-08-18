@@ -851,7 +851,11 @@ def regression_models_to_tune(
                         "num_leaves": IntDistribution(20, 300),
                     },
                     LGBMRegressor(
-                        boosting_type="gbdt", n_jobs=-1, random_state=123, verbose=-1
+                        boosting_type="gbdt",
+                        n_jobs=-1,
+                        random_state=123,
+                        verbose=-1,
+                        num_threads=1,
                     ),
                 )
             )
@@ -866,7 +870,11 @@ def regression_models_to_tune(
                         "LightGBM__num_leaves": IntDistribution(20, 300),
                     },
                     LGBMRegressor(
-                        boosting_type="gbdt", n_jobs=-1, random_state=123, verbose=-1
+                        boosting_type="gbdt",
+                        n_jobs=-1,
+                        random_state=123,
+                        verbose=-1,
+                        num_threads=1,
                     ),
                 )
             )
