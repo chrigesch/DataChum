@@ -459,7 +459,7 @@ def classification_models_to_tune(
                         random_state=123,
                         n_jobs=-1,
                         verbosity=0,
-                        num_threads=1,
+                        nthreads=1,
                     ),
                 )
             )
@@ -480,7 +480,7 @@ def classification_models_to_tune(
                         random_state=123,
                         n_jobs=-1,
                         verbosity=0,
-                        num_threads=1,
+                        nthreads=1,
                     ),
                 )
             )
