@@ -455,7 +455,12 @@ def classification_models_to_tune(
                         "n_estimators": IntDistribution(50, 250),
                         "subsample": FloatDistribution(0.5, 1.0),
                     },
-                    XGBClassifier(random_state=123, n_jobs=-1, verbosity=0),
+                    XGBClassifier(
+                        random_state=123,
+                        n_jobs=-1,
+                        verbosity=0,
+                        num_threads=1,
+                    ),
                 )
             )
         elif (model == "XGB") & (cv_with_pipeline is True):
@@ -471,7 +476,12 @@ def classification_models_to_tune(
                         "XGB__n_estimators": IntDistribution(50, 250),
                         "XGB__subsample": FloatDistribution(0.5, 1.0),
                     },
-                    XGBClassifier(random_state=123, n_jobs=-1, verbosity=0),
+                    XGBClassifier(
+                        random_state=123,
+                        n_jobs=-1,
+                        verbosity=0,
+                        num_threads=1,
+                    ),
                 )
             )
 
