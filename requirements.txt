@@ -11,6 +11,7 @@ econml==0.14.1
 fasttreeshap==0.1.6
 lightgbm==3.3.5
 miceforest==5.6.3
+nomkl # LightGBM crashes and XGB workaround (removing MKL optimizations)
 openpyxl==3.0.10 # Do not upgrade (in later releases, save_virtual_workbook() does not work)
 optuna==3.2.0
 plotly==5.15.0
