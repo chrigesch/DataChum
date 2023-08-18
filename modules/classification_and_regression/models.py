@@ -414,7 +414,11 @@ def classification_models_to_tune(
                         "num_leaves": IntDistribution(20, 300),
                     },
                     LGBMClassifier(
-                        boosting_type="gbdt", n_jobs=-1, random_state=123, verbose=-1
+                        boosting_type="gbdt",
+                        n_jobs=-1,
+                        random_state=123,
+                        verbose=-1,
+                        nthreads=1,
                     ),
                 )
             )
@@ -429,7 +433,11 @@ def classification_models_to_tune(
                         "LightGBM__num_leaves": IntDistribution(2, 300),
                     },
                     LGBMClassifier(
-                        boosting_type="gbdt", n_jobs=-1, random_state=123, verbose=-1
+                        boosting_type="gbdt",
+                        n_jobs=-1,
+                        random_state=123,
+                        verbose=-1,
+                        nthreads=1,
                     ),
                 )
             )
