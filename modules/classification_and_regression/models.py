@@ -892,7 +892,11 @@ def regression_models_to_tune(
                         "n_estimators": IntDistribution(50, 250),
                         "subsample": FloatDistribution(0.5, 1.0),
                     },
-                    XGBRegressor(random_state=123, n_jobs=-1),
+                    XGBRegressor(
+                        random_state=123,
+                        n_jobs=-1,
+                        nthread=1,
+                    ),
                 )
             )
         elif (model == "XGB") & (cv_with_pipeline is True):
@@ -908,7 +912,11 @@ def regression_models_to_tune(
                         "XGB__n_estimators": IntDistribution(50, 250),
                         "XGB__subsample": FloatDistribution(0.5, 1.0),
                     },
-                    XGBRegressor(random_state=123, n_jobs=-1),
+                    XGBRegressor(
+                        random_state=123,
+                        n_jobs=-1,
+                        nthread=1,
+                    ),
                 )
             )
 
