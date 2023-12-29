@@ -48,11 +48,16 @@ def main():
         data = st.session_state.data
         # Clean strings and feature names
         data = clean_strings_and_feature_names(data=data)
-        # Drop ID columns (or similar): Analyze whether all values of the column are unique
-        # (count of unique values equals column's length)
+        # Get column names (also NUMERICAL and CATEGORICAL)
         cols_all = data.columns.to_list()
+        cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
+        cols_cat = data.select_dtypes(
+            include=["object", "category", "bool"]
+        ).columns.to_list()
+        # Drop ID columns (or similar): Analyze whether all values of the categorical columns are unique
+        # (count of unique values equals column's length)
         list_of_dropped_columns = []
-        for column in cols_all:
+        for column in cols_cat:
             if len(data[column]) == len(data[column].unique()):
                 data = data.drop(column, axis=1)
                 list_of_dropped_columns.append(column)
@@ -62,6 +67,11 @@ def main():
                 "Following columns have been removed as all values of the column are unique: "
                 + ", ".join(list_of_dropped_columns)
             )
+            # Update cols_cat & cols_all
+            cols_cat = data.select_dtypes(
+                include=["object", "category", "bool"]
+            ).columns.to_list()
+            cols_all = data.columns.to_list()
         # Get column names (also NUMERICAL and CATEGORICAL)
         cols_num = data.select_dtypes(include=["float", "int"]).columns.to_list()
         cols_cat = data.select_dtypes(
