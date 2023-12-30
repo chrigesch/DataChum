@@ -44,9 +44,20 @@ def _compute_scores(
     results_dict = {}
     results_dict["model"] = model_name
     results_dict["n_clusters"] = n_cluster
-    results_dict["Calinski-Harabasz"] = calinski_harabasz_score(data, cluster_labels)
-    results_dict["Davies-Bouldin"] = davies_bouldin_score(data, cluster_labels)
-    results_dict["Silhouette"] = silhouette_score(data, cluster_labels)
+    try:
+        results_dict["Calinski-Harabasz"] = calinski_harabasz_score(
+            data, cluster_labels
+        )
+    except ValueError:
+        results_dict["Calinski-Harabasz"] = np.nan
+    try:
+        results_dict["Davies-Bouldin"] = davies_bouldin_score(data, cluster_labels)
+    except ValueError:
+        results_dict["Davies-Bouldin"] = np.nan
+    try:
+        results_dict["Silhouette"] = silhouette_score(data, cluster_labels)
+    except ValueError:
+        results_dict["Silhouette"] = np.nan
     return results_dict
 
 
