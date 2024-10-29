@@ -140,7 +140,14 @@ def data_preprocessing(
     # Add one hot encoder
     if one_hot_encoding is True:
         transformer_cat.steps.append(
-            ("one_hot", OneHotEncoder(handle_unknown="ignore", drop="if_binary"))
+            (
+                "one_hot",
+                OneHotEncoder(
+                    handle_unknown="ignore",
+                    drop="if_binary",
+                    min_frequency=0.05,
+                ),
+            )
         )
 
     # Instantiate an empty ColumnTransformer
