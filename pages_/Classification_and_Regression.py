@@ -268,18 +268,21 @@ def main():
             if operation == "classification":
                 col_1, col_2, col_3, col_4 = st.columns(4)
                 with col_1:
-                    checkbox_1 = st.checkbox("LDA")
-                    if checkbox_1:
+                    checkbox_1_1 = st.checkbox("LDA")
+                    if checkbox_1_1:
                         models_to_evaluate.append("LDA")
-                    checkbox_2 = st.checkbox("LogisticRegression")
-                    if checkbox_2:
+                    checkbox_1_2 = st.checkbox("LogisticRegression")
+                    if checkbox_1_2:
                         models_to_evaluate.append("LogisticRegression")
-                    checkbox_3 = st.checkbox("Lasso")
-                    if checkbox_3:
+                    checkbox_1_3 = st.checkbox("Lasso")
+                    if checkbox_1_3:
                         models_to_evaluate.append("Lasso")
-                    checkbox_4 = st.checkbox("Ridge", value=True)
-                    if checkbox_4:
+                    checkbox_1_4 = st.checkbox("Ridge", value=True)
+                    if checkbox_1_4:
                         models_to_evaluate.append("Ridge")
+                    checkbox_1_5 = st.checkbox("ElasticNet")
+                    if checkbox_1_5:
+                        models_to_evaluate.append("ElasticNet")
                 with col_2:
                     checkbox_5 = st.checkbox("GaussianNaiveBayes")
                     if checkbox_5:
