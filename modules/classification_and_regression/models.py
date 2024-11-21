@@ -126,38 +126,12 @@ def classification_models_to_tune(
                 )
             )
 
-        if (model == "LogisticRegression") & (cv_with_pipeline is False):
+        if model == "LogisticRegression":
             models_to_tune.append(
                 (
                     "LogisticRegression",
-                    {
-                        "C": FloatDistribution(0.01, 100),
-                        "solver": CategoricalDistribution(
-                            choices=("lbfgs", "newton-cg")
-                        ),
-                        "penalty": CategoricalDistribution(choices=("l2", "none")),
-                    },
-                    LogisticRegression(
-                        random_state=123, n_jobs=-1, verbose=0, max_iter=3000
-                    ),
-                )
-            )
-        elif (model == "LogisticRegression") & (cv_with_pipeline is True):
-            models_to_tune.append(
-                (
-                    "LogisticRegression",
-                    {
-                        "LogisticRegression__C": FloatDistribution(0.01, 100),
-                        "LogisticRegression__solver": CategoricalDistribution(
-                            choices=("lbfgs", "newton-cg")
-                        ),
-                        "LogisticRegression__penalty": CategoricalDistribution(
-                            choices=("l2", "none")
-                        ),
-                    },
-                    LogisticRegression(
-                        random_state=123, n_jobs=-1, verbose=0, max_iter=3000
-                    ),
+                    {},
+                    RidgeClassifier_(random_state=123, alpha=0.0),
                 )
             )
 
@@ -200,7 +174,7 @@ def classification_models_to_tune(
             models_to_tune.append(
                 (
                     "Ridge",
-                    {"alpha": FloatDistribution(0.001, 1)},
+                    {"alpha": FloatDistribution(0.001, 1000)},
                     RidgeClassifier_(random_state=123),
                 )
             )
@@ -208,7 +182,7 @@ def classification_models_to_tune(
             models_to_tune.append(
                 (
                     "Ridge",
-                    {"Ridge__alpha": FloatDistribution(0.001, 1)},
+                    {"Ridge__alpha": FloatDistribution(0.001, 1000)},
                     RidgeClassifier_(random_state=123),
                 )
             )
