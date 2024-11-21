@@ -17,7 +17,13 @@ from lightgbm import LGBMClassifier
 from xgboost import XGBClassifier
 
 # Import the required libraries - regression models
-from sklearn.linear_model import BayesianRidge, LinearRegression
+from sklearn.linear_model import (
+    BayesianRidge,
+    ElasticNet,
+    Lasso,
+    LinearRegression,
+    Ridge,
+)
 from sklearn.svm import LinearSVR
 
 from sklearn.svm import SVR
@@ -77,8 +83,11 @@ AVAILABLE_MODELS_CLASSIFICATION = (
     "TensorFlow",
 )
 AVAILABLE_MODELS_REGRESSION = (
-    "Bayesian_Ridge",
     "Linear_Regression",
+    "Ridge",
+    "Lasso",
+    "ElasticNet",
+    "Bayesian_Ridge",
     "SVM_L",
     "SVM_R",
     "KNN",
@@ -672,6 +681,98 @@ def regression_models_to_tune(
     models_to_tune = []
     # Loop through imput and add selected models
     for model in models:
+        if model == "Linear_Regression":
+            models_to_tune.append(("Linear_Regression", {}, LinearRegression()))
+
+        if (model == "Ridge") & (cv_with_pipeline is False):
+            models_to_tune.append(
+                (
+                    "Ridge",
+                    {
+                        "alpha": FloatDistribution(0.001, 1000),
+                    },
+                    Ridge(
+                        random_state=123,
+                        max_iter=3000,
+                    ),
+                )
+            )
+        elif (model == "Ridge") & (cv_with_pipeline is True):
+            models_to_tune.append(
+                (
+                    "Ridge",
+                    {
+                        "Ridge__alpha": FloatDistribution(0.001, 1000),
+                    },
+                    Ridge(
+                        random_state=123,
+                        max_iter=3000,
+                    ),
+                )
+            )
+
+        if (model == "Lasso") & (cv_with_pipeline is False):
+            models_to_tune.append(
+                (
+                    "Lasso",
+                    {
+                        "alpha": FloatDistribution(0.001, 10),
+                    },
+                    Lasso(
+                        random_state=123,
+                        max_iter=3000,
+                    ),
+                )
+            )
+        elif (model == "Lasso") & (cv_with_pipeline is True):
+            models_to_tune.append(
+                (
+                    "Lasso",
+                    {
+                        "Lasso__alpha": FloatDistribution(0.001, 10),
+                    },
+                    Lasso(
+                        random_state=123,
+                        max_iter=3000,
+                    ),
+                )
+            )
+
+        if (model == "ElasticNet") & (cv_with_pipeline is False):
+            models_to_tune.append(
+                (
+                    "ElasticNet",
+                    {
+                        "alpha": FloatDistribution(0.001, 10),
+                        "l1_ratio": FloatDistribution(
+                            0.015, 1.0
+                        ),  # l1_ratio <= 0.01 is not reliable
+                    },
+                    ElasticNet(
+                        l1_ratio=0.5,
+                        random_state=123,
+                        max_iter=3000,
+                    ),
+                )
+            )
+        elif (model == "ElasticNet") & (cv_with_pipeline is True):
+            models_to_tune.append(
+                (
+                    "ElasticNet",
+                    {
+                        "ElasticNet__alpha": FloatDistribution(0.001, 10),
+                        "l1_ratio": FloatDistribution(
+                            0.015, 1.0
+                        ),  # l1_ratio <= 0.01 is not reliable
+                    },
+                    ElasticNet(
+                        l1_ratio=0.5,
+                        random_state=123,
+                        max_iter=3000,
+                    ),
+                )
+            )
+
         if (model == "Bayesian_Ridge") & (cv_with_pipeline is False):
             models_to_tune.append(
                 (
@@ -698,9 +799,6 @@ def regression_models_to_tune(
                     BayesianRidge(),
                 )
             )
-
-        if model == "Linear_Regression":
-            models_to_tune.append(("Linear_Regression", {}, LinearRegression()))
 
         if (model == "KNN") & (cv_with_pipeline is False):
             models_to_tune.append(
