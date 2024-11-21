@@ -322,44 +322,53 @@ def main():
             else:
                 col_1, col_2, col_3, col_4 = st.columns(4)
                 with col_1:
-                    checkbox_1 = st.checkbox("Bayesian_Ridge")
-                    if checkbox_1:
-                        models_to_evaluate.append("Bayesian_Ridge")
-                    checkbox_2 = st.checkbox("Linear_Regression", value=True)
-                    if checkbox_2:
+                    checkbox_1_1 = st.checkbox("Linear_Regression", value=True)
+                    if checkbox_1_1:
                         models_to_evaluate.append("Linear_Regression")
-                    checkbox_3 = st.checkbox("KNN")
-                    if checkbox_3:
-                        models_to_evaluate.append("KNN")
+                    checkbox_1_2 = st.checkbox("Ridge")
+                    if checkbox_1_2:
+                        models_to_evaluate.append("Ridge")
+                    checkbox_1_3 = st.checkbox("Lasso")
+                    if checkbox_1_3:
+                        models_to_evaluate.append("Lasso")
+                    checkbox_1_4 = st.checkbox("ElasticNet")
+                    if checkbox_1_4:
+                        models_to_evaluate.append("ElasticNet")
                 with col_2:
-                    checkbox_4 = st.checkbox("SVM_L")
-                    if checkbox_4:
+                    checkbox_2_1 = st.checkbox("Bayesian_Ridge")
+                    if checkbox_2_1:
+                        models_to_evaluate.append("Bayesian_Ridge")
+                    checkbox_2_2 = st.checkbox("KNN")
+                    if checkbox_2_2:
+                        models_to_evaluate.append("KNN")
+                    checkbox_2_3 = st.checkbox("SVM_L")
+                    if checkbox_2_3:
                         models_to_evaluate.append("SVM_L")
-                    checkbox_5 = st.checkbox("SVM_R")
-                    if checkbox_5:
+                    checkbox_2_4 = st.checkbox("SVM_R")
+                    if checkbox_2_4:
                         models_to_evaluate.append("SVM_R")
                 with col_3:
-                    checkbox_6 = st.checkbox("DecisionTree")
-                    if checkbox_6:
+                    checkbox_3_6 = st.checkbox("DecisionTree")
+                    if checkbox_3_6:
                         models_to_evaluate.append("DecisionTree")
-                    checkbox_7 = st.checkbox("RandomForest")
-                    if checkbox_7:
+                    checkbox_3_7 = st.checkbox("RandomForest")
+                    if checkbox_3_7:
                         models_to_evaluate.append("RandomForest")
-                    checkbox_8 = st.checkbox("ExtraTrees")
-                    if checkbox_8:
+                    checkbox_3_8 = st.checkbox("ExtraTrees")
+                    if checkbox_3_8:
                         models_to_evaluate.append("ExtraTrees")
                 with col_4:
-                    checkbox_9 = st.checkbox("CatBoost")
-                    if checkbox_9:
+                    checkbox_4_9 = st.checkbox("CatBoost")
+                    if checkbox_4_9:
                         models_to_evaluate.append("CatBoost")
-                    checkbox_10 = st.checkbox("LightGBM", value=True)
-                    if checkbox_10:
+                    checkbox_4_10 = st.checkbox("LightGBM", value=True)
+                    if checkbox_4_10:
                         models_to_evaluate.append("LightGBM")
-                    checkbox_11 = st.checkbox("XGB")
-                    if checkbox_11:
+                    checkbox_4_11 = st.checkbox("XGB")
+                    if checkbox_4_11:
                         models_to_evaluate.append("XGB")
-                    checkbox_12 = st.checkbox("TensorFlow")
-                    if checkbox_12:
+                    checkbox_4_12 = st.checkbox("TensorFlow")
+                    if checkbox_4_12:
                         models_to_evaluate.append("TensorFlow")
         # Tab 4: Tuning
         with tab_s4:
