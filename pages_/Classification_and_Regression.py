@@ -268,50 +268,53 @@ def main():
             if operation == "classification":
                 col_1, col_2, col_3, col_4 = st.columns(4)
                 with col_1:
-                    checkbox_1 = st.checkbox("GaussianNaiveBayes")
+                    checkbox_1 = st.checkbox("LDA")
                     if checkbox_1:
-                        models_to_evaluate.append("GaussianNaiveBayes")
-                    checkbox_2 = st.checkbox("LDA")
-                    if checkbox_2:
                         models_to_evaluate.append("LDA")
-                    checkbox_3 = st.checkbox("LogisticRegression")
-                    if checkbox_3:
+                    checkbox_2 = st.checkbox("LogisticRegression")
+                    if checkbox_2:
                         models_to_evaluate.append("LogisticRegression")
+                    checkbox_3 = st.checkbox("Lasso")
+                    if checkbox_3:
+                        models_to_evaluate.append("Lasso")
                     checkbox_4 = st.checkbox("Ridge", value=True)
                     if checkbox_4:
                         models_to_evaluate.append("Ridge")
                 with col_2:
-                    checkbox_5 = st.checkbox("KNN")
+                    checkbox_5 = st.checkbox("GaussianNaiveBayes")
                     if checkbox_5:
-                        models_to_evaluate.append("KNN")
-                    checkbox_6 = st.checkbox("SVM_L")
+                        models_to_evaluate.append("GaussianNaiveBayes")
+                    checkbox_6 = st.checkbox("KNN")
                     if checkbox_6:
-                        models_to_evaluate.append("SVM_L")
-                    checkbox_7 = st.checkbox("SVM_R")
+                        models_to_evaluate.append("KNN")
+                    checkbox_7 = st.checkbox("SVM_L")
                     if checkbox_7:
+                        models_to_evaluate.append("SVM_L")
+                    checkbox_8 = st.checkbox("SVM_R")
+                    if checkbox_8:
                         models_to_evaluate.append("SVM_R")
                 with col_3:
-                    checkbox_8 = st.checkbox("DecisionTree")
-                    if checkbox_8:
-                        models_to_evaluate.append("DecisionTree")
-                    checkbox_9 = st.checkbox("RandomForest")
+                    checkbox_9 = st.checkbox("DecisionTree")
                     if checkbox_9:
-                        models_to_evaluate.append("RandomForest")
-                    checkbox_10 = st.checkbox("ExtraTrees")
+                        models_to_evaluate.append("DecisionTree")
+                    checkbox_10 = st.checkbox("RandomForest")
                     if checkbox_10:
+                        models_to_evaluate.append("RandomForest")
+                    checkbox_11 = st.checkbox("ExtraTrees")
+                    if checkbox_11:
                         models_to_evaluate.append("ExtraTrees")
                 with col_4:
-                    checkbox_11 = st.checkbox("CatBoost")
-                    if checkbox_11:
-                        models_to_evaluate.append("CatBoost")
-                    checkbox_12 = st.checkbox("LightGBM", value=True)
+                    checkbox_12 = st.checkbox("CatBoost")
                     if checkbox_12:
-                        models_to_evaluate.append("LightGBM")
-                    checkbox_13 = st.checkbox("XGB")
+                        models_to_evaluate.append("CatBoost")
+                    checkbox_13 = st.checkbox("LightGBM", value=True)
                     if checkbox_13:
-                        models_to_evaluate.append("XGB")
-                    checkbox_14 = st.checkbox("TensorFlow")
+                        models_to_evaluate.append("LightGBM")
+                    checkbox_14 = st.checkbox("XGB")
                     if checkbox_14:
+                        models_to_evaluate.append("XGB")
+                    checkbox_15 = st.checkbox("TensorFlow")
+                    if checkbox_15:
                         models_to_evaluate.append("TensorFlow")
             else:
                 col_1, col_2, col_3, col_4 = st.columns(4)
