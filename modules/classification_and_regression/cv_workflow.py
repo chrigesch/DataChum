@@ -193,7 +193,7 @@ def _cv_workflow_with_pipeline(
         # Cross-validate a tuned model
         if tuning_trials > 0:
             if (
-                (name == "Linear_Regression")
+                (name in ["Linear_Regression", "LogisticRegression"])
                 & (tune_imp_numerical is False)
                 & (tune_scaler is False)
                 & (tune_imp_categorical is False)
@@ -371,7 +371,7 @@ def _cv_workflow_without_pipeline(
 
         # Cross-validate a tuned model
         if tuning_trials > 0:
-            if name == "Linear_Regression":
+            if name in ["Linear_Regression", "LogisticRegression"]:
                 continue
             start = time()
 
