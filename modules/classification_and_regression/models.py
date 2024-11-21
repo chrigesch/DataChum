@@ -60,9 +60,10 @@ from optuna.distributions import (  # noqa: E402
 
 AVAILABLE_MODELS_CLASSIFICATION = (
     "GaussianNaiveBayes",
-    "Lasso",
     "LogisticRegression",
+    "Lasso",
     "Ridge",
+    "ElasticNet",
     "LDA",
     "SVM_L",
     "SVM_R",
@@ -140,7 +141,7 @@ def classification_models_to_tune(
                 (
                     "Lasso",
                     {
-                        "C": FloatDistribution(0.001, 100),
+                        "C": FloatDistribution(0.001, 1.0),
                     },
                     LogisticRegression(
                         penalty="l1",
@@ -157,7 +158,7 @@ def classification_models_to_tune(
                 (
                     "Lasso",
                     {
-                        "Lasso__C": FloatDistribution(0.001, 100),
+                        "Lasso__C": FloatDistribution(0.001, 1.0),
                     },
                     LogisticRegression(
                         penalty="l1",
@@ -187,6 +188,48 @@ def classification_models_to_tune(
                 )
             )
 
+        if (model == "ElasticNet") & (cv_with_pipeline is False):
+            models_to_tune.append(
+                (
+                    "ElasticNet",
+                    {
+                        "C": FloatDistribution(0.001, 1.0),
+                        "l1_ratio": FloatDistribution(
+                            0.015, 1.0
+                        ),  # l1_ratio <= 0.01 is not reliable
+                    },
+                    LogisticRegression(
+                        penalty="elasticnet",
+                        l1_ratio=0.5,
+                        solver="saga",
+                        random_state=123,
+                        n_jobs=-1,
+                        verbose=0,
+                        max_iter=3000,
+                    ),
+                )
+            )
+        elif (model == "ElasticNet") & (cv_with_pipeline is True):
+            models_to_tune.append(
+                (
+                    "ElasticNet",
+                    {
+                        "ElasticNet__C": FloatDistribution(0.001, 1.0),
+                        "l1_ratio": FloatDistribution(
+                            0.015, 1.0
+                        ),  # l1_ratio <= 0.01 is not reliable
+                    },
+                    LogisticRegression(
+                        penalty="elasticnet",
+                        l1_ratio=0.5,
+                        solver="saga",
+                        random_state=123,
+                        n_jobs=-1,
+                        verbose=0,
+                        max_iter=3000,
+                    ),
+                )
+            )
         if (model == "LDA") & (cv_with_pipeline is False):
             models_to_tune.append(
                 (
