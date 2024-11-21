@@ -60,6 +60,7 @@ from optuna.distributions import (  # noqa: E402
 
 AVAILABLE_MODELS_CLASSIFICATION = (
     "GaussianNaiveBayes",
+    "Lasso",
     "LogisticRegression",
     "Ridge",
     "LDA",
@@ -156,6 +157,41 @@ def classification_models_to_tune(
                     },
                     LogisticRegression(
                         random_state=123, n_jobs=-1, verbose=0, max_iter=3000
+                    ),
+                )
+            )
+
+        if (model == "Lasso") & (cv_with_pipeline is False):
+            models_to_tune.append(
+                (
+                    "Lasso",
+                    {
+                        "C": FloatDistribution(0.001, 100),
+                    },
+                    LogisticRegression(
+                        penalty="l1",
+                        solver="liblinear",
+                        random_state=123,
+                        n_jobs=-1,
+                        verbose=0,
+                        max_iter=3000,
+                    ),
+                )
+            )
+        elif (model == "Lasso") & (cv_with_pipeline is True):
+            models_to_tune.append(
+                (
+                    "Lasso",
+                    {
+                        "Lasso__C": FloatDistribution(0.001, 100),
+                    },
+                    LogisticRegression(
+                        penalty="l1",
+                        solver="liblinear",
+                        random_state=123,
+                        n_jobs=-1,
+                        verbose=0,
+                        max_iter=3000,
                     ),
                 )
             )
