@@ -13,6 +13,7 @@ lightgbm==3.3.5
 miceforest==5.6.3
 openpyxl==3.0.10 # Do not upgrade (in later releases, save_virtual_workbook() does not work)
 optuna==3.2.0
+pandas==2.0.2
 plotly==5.15.0
 pyinstaller==5.13.0
 pyod==1.1.0
