@@ -58,6 +58,12 @@ def _compute_scores(
         results_dict["Silhouette"] = silhouette_score(data, cluster_labels)
     except ValueError:
         results_dict["Silhouette"] = np.nan
+    try:
+        results_dict["min_freq"] = (
+            pd.Series(cluster_labels).value_counts(normalize=True).min()
+        )
+    except ValueError:
+        results_dict["min_freq"] = np.nan
     return results_dict
 
 
